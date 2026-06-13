@@ -1,0 +1,341 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  ADMIN
+  STRATEGIST
+  CORPORATE
+  ORGANIZATION_ADMIN
+  RESEARCHER
+  MODERATOR
+  PARTNER
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  MESSAGE
+  PROJECT_INVITE
+  ORGANIZATION_INVITE
+  ACHIEVEMENT_UNLOCKED
+  PUBLICATION_APPROVED
+  SYSTEM
+}
+
+enum ActivityAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  JOIN_ORGANIZATION
+  LEAVE_ORGANIZATION
+  JOIN_PROJECT
+  LEAVE_PROJECT
+  PUBLISH
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role     @default(STRATEGIST)
+  passwordHash  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  strategistProfile StrategistProfile?
+  organizationMembers OrganizationMember[]
+  projectContributors ProjectContributor[]
+  createdProjects  Project[]          @relation("CreatedProjects")
+  sentMessages     Message[]          @relation("SentMessages")
+  receivedMessages Message[]          @relation("ReceivedMessages")
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+  achievements     Achievement[]
+  publications     Publication[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model StrategistProfile {
+  id                String  @id @default(cuid())
+  userId            String  @unique
+  bio               String?
+  title             String?
+  yearsOfExperience Int?
+  hourlyRate        Decimal? 
+  availability      Boolean @default(true)
+  linkedinUrl       String?
+  websiteUrl        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expertiseTags ExpertiseTag[]
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String? 
+  logo        String?
+  websiteUrl  String?
+  industry    String?
+  size        String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members OrganizationMember[]
+  projects Project[]
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role     @default(CORPORATE)
+  joinedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model Project {
+  id                 String        @id @default(cuid())
+  title              String
+  slug               String        @unique
+  description        String?      
+  shortDescription   String?
+  objectives         String?       @default("[]")
+  strategicRelevance String?
+  status             ProjectStatus @default(DRAFT)
+  budget             Decimal?      
+  startDate          DateTime?
+  endDate            DateTime?
+  image              String?
+  category           String?
+  isFeatured         Boolean       @default(false)
+  featuredAt         DateTime?
+  organizationId     String?
+  createdById        String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  organization  Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdBy     User                @relation("CreatedProjects", fields: [createdById], references: [id])
+  contributors  ProjectContributor[]
+  tags          Tag[]
+  media         ProjectMedia[]
+  milestones    Milestone[]
+  relations     ProjectRelation[]   @relation("ProjectRelations")
+  relatedTo     ProjectRelation[]   @relation("RelatedProjects")
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  weight      Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectMedia {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String   // "IMAGE", "VIDEO", "DOCUMENT", "YOUTUBE", "VIMEO"
+  url       String
+  title     String?
+  fileType  String?  // "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", etc.
+  fileSize  Int?
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectRelation {
+  id                String   @id @default(cuid())
+  projectId         String
+  relatedProjectId  String
+  relationType      String   @default("RELATED") // "RELATED", "PARENT", "CHILD", "DEPENDENCY", "INITIATIVE", "PORTFOLIO", "CLUSTER"
+  createdAt         DateTime @default(now())
+
+  project        Project @relation("ProjectRelations", fields: [projectId], references: [id], onDelete: Cascade)
+  relatedProject Project @relation("RelatedProjects", fields: [relatedProjectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, relatedProjectId])
+  @@index([projectId])
+  @@index([relatedProjectId])
+}
+
+model ProjectContributor {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      String   @default("CONTRIBUTOR")
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects       Project[]
+  expertiseTags  ExpertiseTag[]
+}
+
+model ExpertiseTag {
+  id        String   @id @default(cuid())
+  profileId String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  profile StrategistProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tag     Tag               @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, tagId])
+}
+
+model Publication {
+  id            String   @id @default(cuid())
+  title         String
+  abstract      String? 
+  url           String?
+  publishedDate DateTime?
+  publisher     String?
+  authorId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  title       String
+  description String? 
+  issuer      String?
+  issuedDate  DateTime?
+  certificateUrl String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String
+  title   String
+  message String          
+  type    NotificationType @default(SYSTEM)
+  read    Boolean          @default(false)
+  link    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String  
+  senderId  String
+  receiverId String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String         @id @default(cuid())
+  userId    String
+  action    ActivityAction
+  entity    String?
+  entityId  String?
+  metadata  String?
+  createdAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
