@@ -20,7 +20,7 @@ import { useTheme } from "@/components/layout/theme-provider";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Strategists", href: "/strategists" },
-  { label: "Corporates", href: "/corporates" },
+
   { label: "Projects", href: "/projects" },
   {
     label: "Resources",

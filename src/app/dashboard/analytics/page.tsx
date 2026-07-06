@@ -41,7 +41,6 @@ export default async function AdminAnalyticsPage() {
   const totalMessages = messages
   const totalActivities = activityLogs.length
   const strategistCount = users.filter((u) => u.role === "STRATEGIST" || u.role === "RESEARCHER").length
-  const corporateCount = users.filter((u) => u.role === "CORPORATE" || u.role === "ORGANIZATION_ADMIN").length
   const adminCount = users.filter((u) => u.role === "ADMIN").length
   const projectStatuses = {
     active: projects.filter((p) => p.status === "ACTIVE").length,
@@ -57,7 +56,6 @@ export default async function AdminAnalyticsPage() {
       stats={{
         totalUsers: users.length,
         strategistCount,
-        corporateCount,
         adminCount,
         totalProjects: projects.length,
         totalOrgs: orgs,

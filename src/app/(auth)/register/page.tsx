@@ -5,10 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { motion, AnimatePresence, type Variants } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { toast } from "sonner"
 import {
-  Building2,
   Eye,
   EyeOff,
   Loader2,
@@ -17,8 +16,6 @@ import {
 } from "lucide-react"
 import { z } from "zod"
 
-import { cn } from "@/lib/utils"
-import { INDUSTRY_CATEGORIES } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,9 +26,8 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 
-const individualSchema = z
+const registerSchema = z
   .object({
-    registrationType: z.literal("individual"),
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     password: z
@@ -44,59 +40,19 @@ const individualSchema = z
     role: z.enum(["STRATEGIST", "RESEARCHER", "PARTNER"]),
     inviteCode: z.string().optional(),
     acceptTerms: z.literal(true, { message: "You must accept the terms" }),
-    organizationName: z.string().optional(),
-    industry: z.string().optional(),
-    organizationSize: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   })
 
-const corporateSchema = z
-  .object({
-    registrationType: z.literal("corporate"),
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Must contain an uppercase letter")
-      .regex(/[a-z]/, "Must contain a lowercase letter")
-      .regex(/[0-9]/, "Must contain a number"),
-    confirmPassword: z.string(),
-    role: z.enum(["CORPORATE", "ORGANIZATION_ADMIN"]),
-    inviteCode: z.string().optional(),
-    acceptTerms: z.literal(true, { message: "You must accept the terms" }),
-    organizationName: z.string().min(2, "Organization name is required"),
-    industry: z.string().min(1, "Select an industry"),
-    organizationSize: z.string().min(1, "Select organization size"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  })
-
-const combinedSchema = z.discriminatedUnion("registrationType", [
-  individualSchema,
-  corporateSchema,
-])
-
-type FormData = z.infer<typeof combinedSchema>
-type RegistrationType = "individual" | "corporate"
+type FormData = z.infer<typeof registerSchema>
 
 const STRATEGIST_ROLES = [
   { value: "STRATEGIST", label: "Strategist" },
   { value: "RESEARCHER", label: "Researcher" },
   { value: "PARTNER", label: "Partner" },
 ]
-
-const CORPORATE_ROLES = [
-  { value: "CORPORATE", label: "Corporate Member" },
-  { value: "ORGANIZATION_ADMIN", label: "Organization Admin" },
-]
-
-const ORG_SIZES = ["1-10", "11-50", "51-200", "201-1000", "1000+"]
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -112,7 +68,6 @@ const itemVariants: Variants = {
 }
 
 interface FlatFormValues {
-  registrationType: RegistrationType
   name: string
   email: string
   password: string
@@ -120,13 +75,9 @@ interface FlatFormValues {
   role: string
   inviteCode: string
   acceptTerms: boolean
-  organizationName: string
-  industry: string
-  organizationSize: string
 }
 
 const defaultValues: FlatFormValues = {
-  registrationType: "individual",
   name: "",
   email: "",
   password: "",
@@ -134,19 +85,13 @@ const defaultValues: FlatFormValues = {
   role: "",
   inviteCode: "",
   acceptTerms: false,
-  organizationName: "",
-  industry: "",
-  organizationSize: "",
 }
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [regType, setRegType] = useState<RegistrationType>("individual")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
-  const isIndividual = regType === "individual"
 
   const {
     register,
@@ -155,19 +100,11 @@ export default function RegisterPage() {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(combinedSchema) as any,
+    resolver: zodResolver(registerSchema) as any,
     defaultValues,
   })
 
   const watchRole = watch("role")
-  const watchIndustry = watch("industry")
-  const watchOrgSize = watch("organizationSize")
-
-  function switchRegType(type: RegistrationType) {
-    setRegType(type)
-    setValue("registrationType", type)
-    setValue("role", "")
-  }
 
   async function onSubmit(data: any) {
     setIsLoading(true)
@@ -176,7 +113,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, registrationType: "individual" }),
       })
 
       const result = await res.json()
@@ -213,264 +150,152 @@ export default function RegisterPage() {
         variants={itemVariants}
         className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl text-white"
       >
-        <div className="mb-6 grid grid-cols-2 gap-2 rounded-lg bg-white/5 p-1">
-          <button
-            type="button"
-            onClick={() => switchRegType("individual")}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all",
-              regType === "individual"
-                ? "bg-indigo-600 text-white shadow-lg"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
+        <div className="mb-6 flex rounded-lg bg-white/5 p-1">
+          <div className="flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium bg-indigo-600 text-white shadow-lg">
             <User className="h-4 w-4" />
             Individual
-          </button>
-          <button
-            type="button"
-            onClick={() => switchRegType("corporate")}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all",
-              regType === "corporate"
-                ? "bg-indigo-600 text-white shadow-lg"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Building2 className="h-4 w-4" />
-            Corporate
-          </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={regType}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              {regType === "corporate" && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="organizationName">
-                      Organization name
-                    </Label>
-                    <Input
-                      id="organizationName"
-                      placeholder="Acme Corp"
-                      disabled={isLoading}
-                      {...register("organizationName")}
-                    />
-                    {errors.organizationName && (
-                      <p className="text-xs text-red-400">
-                        {errors.organizationName.message}
-                      </p>
-                    )}
-                  </div>
+          <div className="space-y-2">
+            <Label htmlFor="name">Full name</Label>
+            <Input
+              id="name"
+              placeholder="John Doe"
+              disabled={isLoading}
+              {...register("name")}
+            />
+            {errors.name && (
+              <p className="text-xs text-red-400">{errors.name.message}</p>
+            )}
+          </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="industry">Industry</Label>
-                      <Select
-                        value={watchIndustry || ""}
-                        onValueChange={(val) =>
-                          setValue("industry", val, { shouldValidate: true })
-                        }
-                      >
-                        <SelectTrigger
-                          id="industry"
-                          placeholder={watchIndustry || "Select industry"}
-                        />
-                        <SelectContent>
-                          {INDUSTRY_CATEGORIES.map((ind) => (
-                            <SelectItem key={ind} value={ind}>
-                              {ind}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.industry && (
-                        <p className="text-xs text-red-400">
-                          {errors.industry.message}
-                        </p>
-                      )}
-                    </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              disabled={isLoading}
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-xs text-red-400">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="organizationSize">Size</Label>
-                      <Select
-                        value={watchOrgSize || ""}
-                        onValueChange={(val) =>
-                          setValue("organizationSize", val, {
-                            shouldValidate: true,
-                          })
-                        }
-                      >
-                        <SelectTrigger
-                          id="organizationSize"
-                          placeholder={watchOrgSize || "Select size"}
-                        />
-                        <SelectContent>
-                          {ORG_SIZES.map((size) => (
-                            <SelectItem key={size} value={size}>
-                              {size} employees
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.organizationSize && (
-                        <p className="text-xs text-red-400">
-                          {errors.organizationSize.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Full name</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
                 <Input
-                  id="name"
-                  placeholder="John Doe"
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min. 8 chars"
+                  className="pr-10"
                   disabled={isLoading}
-                  {...register("name")}
+                  {...register("password")}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-400">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                  {...register("email")}
-                />
-                {errors.email && (
-                  <p className="text-xs text-red-400">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Min. 8 chars"
-                      className="pr-10"
-                      disabled={isLoading}
-                      {...register("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-xs text-red-400">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Repeat password"
-                      className="pr-10"
-                      disabled={isLoading}
-                      {...register("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      tabIndex={-1}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-xs text-red-400">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={watchRole || ""}
-                  onValueChange={(val) =>
-                    setValue("role", val, { shouldValidate: true })
-                  }
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
                 >
-                  <SelectTrigger
-                    id="role"
-                    placeholder={watchRole || "Select your role"}
-                  />
-                  <SelectContent>
-                    {(isIndividual ? STRATEGIST_ROLES : CORPORATE_ROLES).map(
-                      (r) => (
-                        <SelectItem key={r.value} value={r.value}>
-                          {r.label}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
-                {errors.role && (
-                  <p className="text-xs text-red-400">
-                    {errors.role.message}
-                  </p>
-                )}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
+              {errors.password && (
+                <p className="text-xs text-red-400">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="inviteCode">
-                  Invite code{" "}
-                  <span className="text-muted-foreground font-normal">
-                    (optional)
-                  </span>
-                </Label>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <div className="relative">
                 <Input
-                  id="inviteCode"
-                  placeholder="Enter invite code"
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Repeat password"
+                  className="pr-10"
                   disabled={isLoading}
-                  {...register("inviteCode")}
+                  {...register("confirmPassword")}
                 />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
-            </motion.div>
-          </AnimatePresence>
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-400">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              value={watchRole || ""}
+              onValueChange={(val) =>
+                setValue("role", val, { shouldValidate: true })
+              }
+            >
+              <SelectTrigger
+                id="role"
+                placeholder={watchRole || "Select your role"}
+              />
+              <SelectContent>
+                {STRATEGIST_ROLES.map(
+                  (r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+            {errors.role && (
+              <p className="text-xs text-red-400">
+                {errors.role.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="inviteCode">
+              Invite code{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
+            </Label>
+            <Input
+              id="inviteCode"
+              placeholder="Enter invite code"
+              disabled={isLoading}
+              {...register("inviteCode")}
+            />
+          </div>
 
           <div className="flex items-start gap-3 pt-2">
             <input
@@ -519,7 +344,7 @@ export default function RegisterPage() {
             )}
             {isLoading
               ? "Creating account..."
-              : `Create ${isIndividual ? "individual" : "corporate"} account`}
+              : "Create account"}
           </Button>
         </form>
 

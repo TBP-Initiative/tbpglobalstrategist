@@ -18,7 +18,7 @@ const quickLinks = {
     { label: "Contact", href: "/contact" },
   ],
   Services: [
-    { label: "Consulting", href: "/corporates" },
+    { label: "Consulting", href: "/consulting" },
     { label: "Research", href: "/research" },
     { label: "Innovation Lab", href: "/innovation" },
     { label: "Summit", href: "/summit" },

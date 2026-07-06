@@ -26,8 +26,6 @@ const ROLES = [
   { value: "ADMIN", label: "Admin" },
   { value: "STRATEGIST", label: "Strategist" },
   { value: "RESEARCHER", label: "Researcher" },
-  { value: "CORPORATE", label: "Corporate" },
-  { value: "ORGANIZATION_ADMIN", label: "Organization Admin" },
   { value: "MODERATOR", label: "Moderator" },
   { value: "PARTNER", label: "Partner" },
 ] as const

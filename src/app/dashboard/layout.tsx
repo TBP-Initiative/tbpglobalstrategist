@@ -11,18 +11,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const role =
     pathname.startsWith("/dashboard/individual")
       ? "individual"
-      : pathname.startsWith("/dashboard/corporate")
-        ? "corporate"
-        : adminPaths.some((p) => pathname.startsWith(p)) || pathname.startsWith("/dashboard/admin")
-          ? "admin"
-          : "individual"
+      : adminPaths.some((p) => pathname.startsWith(p)) || pathname.startsWith("/dashboard/admin")
+        ? "admin"
+        : "individual"
 
   const user =
-    role === "corporate"
-      ? { name: "Acme Corp", email: "admin@acmecorp.com", organization: "Acme Corporation" }
-      : role === "admin"
-        ? { name: "System Admin", email: "admin@tbpglobal.com", organization: "TBP Global" }
-        : { name: "Alex Strategist", email: "alex@example.com", organization: "TBP Global" }
+    role === "admin"
+      ? { name: "System Admin", email: "admin@tbpglobal.com", organization: "TBP Global" }
+      : { name: "Alex Strategist", email: "alex@example.com", organization: "TBP Global" }
 
   return (
     <DashboardLayout role={role} user={user}>

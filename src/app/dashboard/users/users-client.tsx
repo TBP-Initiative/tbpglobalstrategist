@@ -55,8 +55,6 @@ type UserData = {
 const roleColors: Record<string, string> = {
   ADMIN: "bg-red-500/10 text-red-500 border-red-500/20",
   STRATEGIST: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  CORPORATE: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  ORGANIZATION_ADMIN: "bg-amber-500/10 text-amber-500 border-amber-500/20",
   RESEARCHER: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
   MODERATOR: "bg-green-500/10 text-green-500 border-green-500/20",
   PARTNER: "bg-pink-500/10 text-pink-500 border-pink-500/20",
@@ -68,7 +66,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
   const [search, setSearch] = useState("")
 
   const strategistCount = users.filter((u) => u.role === "STRATEGIST" || u.role === "RESEARCHER").length
-  const orgCount = users.filter((u) => u.role === "CORPORATE" || u.role === "ORGANIZATION_ADMIN").length
+
 
   const filtered = useMemo(() => {
     return users.filter((u) => {
@@ -115,7 +113,6 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatsCard icon={<Users size={18} />} label="Total Users" value={String(total)} trend={{ value: 0, positive: true }} description="All registered users" delay={0} />
         <StatsCard icon={<UserCheck size={18} />} label="Strategists & Researchers" value={String(strategistCount)} trend={{ value: 0, positive: true }} description="Active knowledge workers" delay={0.1} />
-        <StatsCard icon={<UserX size={18} />} label="Corporate Users" value={String(orgCount)} trend={{ value: 0, positive: true }} description="Organization accounts" delay={0.2} />
       </div>
 
       <AnimatedSection delay={0.2}>
@@ -138,7 +135,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                 />
               </div>
               <div className="flex gap-1">
-                {["all", "ADMIN", "STRATEGIST", "CORPORATE", "RESEARCHER", "MODERATOR"].map((f) => (
+                {["all", "ADMIN", "STRATEGIST", "RESEARCHER", "MODERATOR"].map((f) => (
                   <Button
                     key={f}
                     type="button"

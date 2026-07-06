@@ -8,8 +8,6 @@ import { prisma } from "@/lib/prisma"
 const VALID_ROLES = [
   "ADMIN",
   "STRATEGIST",
-  "CORPORATE",
-  "ORGANIZATION_ADMIN",
   "RESEARCHER",
   "MODERATOR",
   "PARTNER",
@@ -52,44 +50,6 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12)
-
-    if (data.role === "CORPORATE" || data.role === "ORGANIZATION_ADMIN") {
-      if (!data.organizationName) {
-        return NextResponse.json(
-          { message: "Organization name is required for corporate users" },
-          { status: 422 }
-        )
-      }
-      const slug = data.organizationName
-        .toLowerCase().replace(/[^\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/^-+|-+$/g, "")
-
-      const user = await prisma.user.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          passwordHash,
-          role: data.role,
-        },
-        select: { id: true, name: true, email: true, role: true },
-      })
-
-      const org = await prisma.organization.upsert({
-        where: { slug },
-        update: {},
-        create: {
-          name: data.organizationName,
-          slug,
-          industry: data.industry ?? null,
-          size: data.organizationSize ?? null,
-        },
-      })
-
-      await prisma.organizationMember.create({
-        data: { organizationId: org.id, userId: user.id, role: data.role },
-      })
-
-      return NextResponse.json({ user, message: "Corporate user created" }, { status: 201 })
-    }
 
     const user = await prisma.user.create({
       data: { name: data.name, email: data.email, passwordHash, role: data.role },

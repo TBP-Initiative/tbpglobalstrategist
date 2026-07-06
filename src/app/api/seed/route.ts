@@ -8,7 +8,7 @@ export async function GET() {
     const users = [
       { name: "Admin User", email: "admin@tbp.global", role: "ADMIN" },
       { name: "Strategist User", email: "strategist@tbp.global", role: "STRATEGIST" },
-      { name: "Corporate User", email: "corporate@tbp.global", role: "CORPORATE" },
+
     ]
 
     const results = []

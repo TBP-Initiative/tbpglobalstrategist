@@ -20,7 +20,7 @@ import {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role?: "individual" | "corporate" | "admin";
+  role?: "individual" | "admin";
   user?: {
     name: string;
     email: string;

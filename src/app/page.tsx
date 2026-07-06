@@ -129,13 +129,6 @@ const features = [
     href: "/strategists",
   },
   {
-    title: "Corporate Ecosystem",
-    description: "Empower enterprises with strategic advisory, innovation partnership, and transformation roadmaps.",
-    icon: Building2,
-    gradient: "from-violet-500 to-purple-500",
-    href: "/corporates",
-  },
-  {
     title: "Innovation Hub",
     description: "Explore cutting-edge technologies and methodologies driving the next wave of global innovation.",
     icon: Lightbulb,

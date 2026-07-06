@@ -26,7 +26,7 @@ type NavItem = {
   children?: { label: string; href: string }[];
 };
 
-type Role = "individual" | "corporate" | "admin";
+type Role = "individual" | "admin";
 
 const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
   individual: [
@@ -43,25 +43,6 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
       title: "Settings",
       items: [
         { label: "Account", href: "/dashboard/settings", icon: Settings },
-      ],
-    },
-  ],
-  corporate: [
-    {
-      title: "Main",
-      items: [
-        { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-        { label: "Team", href: "/dashboard/team", icon: Users },
-        { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
-        { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-        { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-      ],
-    },
-    {
-      title: "Settings",
-      items: [
-        { label: "Organization", href: "/dashboard/settings", icon: Briefcase },
-        { label: "Account", href: "/dashboard/account", icon: Settings },
       ],
     },
   ],

@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 const VALID_ROLES = [
-  "ADMIN", "STRATEGIST", "CORPORATE", "ORGANIZATION_ADMIN",
+  "ADMIN", "STRATEGIST",
   "RESEARCHER", "MODERATOR", "PARTNER",
 ] as const
 

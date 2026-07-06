@@ -68,7 +68,6 @@ export function AnalyticsClient({
   stats: {
     totalUsers: number
     strategistCount: number
-    corporateCount: number
     adminCount: number
     totalProjects: number
     totalOrgs: number
@@ -83,7 +82,6 @@ export function AnalyticsClient({
 }) {
   const ecosystemData = [
     { name: "Strategists", value: stats.strategistCount, color: "#6366f1" },
-    { name: "Corporate", value: stats.corporateCount, color: "#f59e0b" },
     { name: "Admin", value: stats.adminCount, color: "#10b981" },
   ].filter((d) => d.value > 0)
 
@@ -107,7 +105,7 @@ export function AnalyticsClient({
                 exportToCSV([
                   { Metric: "Total Users", Value: String(stats.totalUsers) },
                   { Metric: "Strategists", Value: String(stats.strategistCount) },
-                  { Metric: "Corporate", Value: String(stats.corporateCount) },
+
                   { Metric: "Admin", Value: String(stats.adminCount) },
                   { Metric: "Total Projects", Value: String(stats.totalProjects) },
                   { Metric: "Active Projects", Value: String(stats.active) },

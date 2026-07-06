@@ -29,8 +29,6 @@ import {
 const ROLES = [
   { value: "STRATEGIST", label: "Strategist" },
   { value: "RESEARCHER", label: "Researcher" },
-  { value: "CORPORATE", label: "Corporate" },
-  { value: "ORGANIZATION_ADMIN", label: "Organization Admin" },
   { value: "MODERATOR", label: "Moderator" },
   { value: "PARTNER", label: "Partner" },
   { value: "ADMIN", label: "Admin" },
@@ -66,7 +64,6 @@ export function AddUserDialog() {
   })
 
   const selectedRole = watch("role")
-  const isCorporate = selectedRole === "CORPORATE" || selectedRole === "ORGANIZATION_ADMIN"
 
   async function onSubmit(data: AddUserFormData) {
     setIsLoading(true)
@@ -144,32 +141,7 @@ export function AddUserDialog() {
             {errors.role && <p className="text-xs text-red-400">{errors.role.message}</p>}
           </div>
 
-          {isCorporate && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="add-org">Organization Name</Label>
-                <Input id="add-org" placeholder="Acme Corporation" disabled={isLoading} {...register("organizationName")} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="add-industry">Industry</Label>
-                <Input id="add-industry" placeholder="Technology & Software" disabled={isLoading} {...register("industry")} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="add-org-size">Organization Size</Label>
-                <Select
-                  value={watch("organizationSize") || ""}
-                  onValueChange={(v) => setValue("organizationSize", v)}
-                >
-                  <SelectTrigger placeholder="Select size" />
-                  <SelectContent>
-                    {["1-10", "11-50", "51-200", "201-1000", "1000+"].map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
+
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" size="sm" onClick={() => { reset(); setOpen(false) }} disabled={isLoading}>
