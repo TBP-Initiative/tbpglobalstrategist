@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { execSync } from "child_process"
+import { readFileSync } from "fs"
+import { join } from "path"
 
 const userSeeds = [
   { name: "Admin User", email: "admin@tbp.global", role: "ADMIN", title: "Platform Administrator", bio: "Platform administrator overseeing all operations." },
@@ -49,9 +50,20 @@ const projectSeeds = [
   { title: "Data Platform Migration", slug: "data-platform-migration", status: "CANCELLED", budget: 0, orgSlug: "datasphere-analytics", creatorEmail: "emma.rodriguez@datasphere.ai", description: "Cloud data platform migration project (cancelled due to scope changes)." },
 ]
 
+async function pushSchema() {
+  const sql = readFileSync(join(process.cwd(), "prisma/migrations/202507060001_init/migration.sql"), "utf-8")
+  const statements = sql
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0 && !s.startsWith("--"))
+  for (const stmt of statements) {
+    try { await prisma.$executeRawUnsafe(stmt + ";") } catch { }
+  }
+}
+
 export async function GET() {
   try {
-    execSync("npx prisma db push --accept-data-loss --skip-generate", { stdio: "pipe", timeout: 120000 })
+    await pushSchema()
     const passwordHash = await bcrypt.hash("Password123!", 12)
     const createdUsers: { email: string; id: string }[] = []
 
