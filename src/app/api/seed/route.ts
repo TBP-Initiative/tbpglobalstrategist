@@ -37,6 +37,19 @@ const tagNames = [
   "Customer Experience", "Mergers & Acquisitions", "Blockchain & Web3",
 ]
 
+const projectImages: Record<string, string> = {
+  "digital-transformation-strategy": "/images/TBP-Software-Digital-Platforms-Project.jpeg",
+  "market-expansion-apac": "/images/TBP-Infrastructure-Systems-Project.jpeg",
+  "esg-framework-development": "/images/City-Regional-Development.png",
+  "ai-readiness-assessment": "/images/TBP-Software-Digital-Platforms-Project.jpeg",
+  "operational-excellence-review": "/images/Maritime-Junction.jpeg",
+  "supply-chain-optimization": "/images/TBP-Infrastructure-Systems-Project.jpeg",
+  "cx-transformation": "/images/TBP-Software-Digital-Platforms-Project.jpeg",
+  "risk-management-framework": "/images/Sovereign-Multipolar-Initiatives-1.jpeg",
+  "innovation-lab-setup": "/images/City-Regional-Development.png",
+  "data-platform-migration": "/images/TBP-Software-Digital-Platforms-Project.jpeg",
+}
+
 const projectSeeds = [
   { title: "Digital Transformation Strategy", slug: "digital-transformation-strategy", status: "ACTIVE", budget: 250000, orgSlug: "acme-corp", creatorEmail: "elena.voss@tbp.global", description: "Enterprise-wide digital transformation roadmap for Acme Corporation." },
   { title: "Market Expansion APAC", slug: "market-expansion-apac", status: "ACTIVE", budget: 180000, orgSlug: "techventures", creatorEmail: "marcus.chen@tbp.global", description: "Strategic market entry analysis for Southeast Asian markets." },
@@ -134,6 +147,7 @@ export async function GET() {
         update: {},
         create: {
           title: p.title, slug: p.slug, description: p.description,
+          image: projectImages[p.slug] ?? null,
           status: p.status as any, budget: p.budget,
           organizationId: org?.id ?? null, createdById: creator.id,
           startDate: new Date(Date.now() - Math.floor(Math.random() * 90) * 86400000),
