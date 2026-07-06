@@ -144,7 +144,7 @@ export async function GET() {
       if (!creator) continue
       await prisma.project.upsert({
         where: { slug: p.slug },
-        update: {},
+        update: { image: projectImages[p.slug] ?? null },
         create: {
           title: p.title, slug: p.slug, description: p.description,
           image: projectImages[p.slug] ?? null,
