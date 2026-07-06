@@ -1,11 +1,9 @@
 import { PrismaClient } from "../src/generated/prisma/client"
-import { PrismaLibSql } from "@prisma/adapter-libsql"
+import { PrismaPg } from "@prisma/adapter-pg"
 import bcrypt from "bcryptjs"
 import type { Role, ProjectStatus, ActivityAction, NotificationType } from "../src/generated/prisma/client/enums"
 
-const dbUrl = process.env.DATABASE_URL ?? "file:C:\\xampp\\htdocs\\tbpglobalstrategist\\dev.db"
-const adapter = new PrismaLibSql({ url: dbUrl })
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL!) })
 
 async function main() {
   const passwordHash = await bcrypt.hash("Password123!", 12)
