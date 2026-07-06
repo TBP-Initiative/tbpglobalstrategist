@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "set NODE_OPTIONS=--max-http-header-size=65536 && next dev --webpack",
-    "build": "next build --webpack",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
