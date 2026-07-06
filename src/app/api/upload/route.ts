@@ -1,7 +1,5 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
 
 export async function POST(request: Request) {
   const session = await auth()
@@ -17,18 +15,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 422 })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const supabaseUrl = process.env.SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ error: "Storage not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 500 })
+    }
 
     const ext = file.name.split(".").pop() ?? "jpg"
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const dir = join(process.cwd(), "public", "uploads")
-    const path = join(dir, filename)
+    const filename = `projects/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const buffer = Buffer.from(await file.arrayBuffer())
 
-    await mkdir(dir, { recursive: true })
-    await writeFile(path, buffer)
+    const res = await fetch(`${supabaseUrl}/storage/v1/object/projects/${filename}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": file.type || "application/octet-stream",
+      },
+      body: buffer,
+    })
 
-    const url = `/uploads/${filename}`
+    if (!res.ok) {
+      const err = await res.text()
+      console.error("Supabase storage error:", err)
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    }
+
+    const url = `${supabaseUrl}/storage/v1/object/public/projects/${filename}`
 
     return NextResponse.json({ url })
   } catch (error) {
