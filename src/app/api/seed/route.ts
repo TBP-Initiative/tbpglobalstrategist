@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { execSync } from "child_process"
 
 const userSeeds = [
   { name: "Admin User", email: "admin@tbp.global", role: "ADMIN", title: "Platform Administrator", bio: "Platform administrator overseeing all operations." },
@@ -50,6 +51,7 @@ const projectSeeds = [
 
 export async function GET() {
   try {
+    execSync("npx prisma db push --accept-data-loss --skip-generate", { stdio: "pipe", timeout: 120000 })
     const passwordHash = await bcrypt.hash("Password123!", 12)
     const createdUsers: { email: string; id: string }[] = []
 
