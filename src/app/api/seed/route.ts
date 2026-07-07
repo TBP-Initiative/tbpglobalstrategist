@@ -64,13 +64,19 @@ const projectSeeds = [
 ]
 
 async function pushSchema() {
-  const sql = readFileSync(join(process.cwd(), "prisma/migrations/202507060001_init/migration.sql"), "utf-8")
-  const statements = sql
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith("--"))
-  for (const stmt of statements) {
-    try { await prisma.$executeRawUnsafe(stmt + ";") } catch { }
+  const migrationFiles = [
+    "prisma/migrations/202507060001_init/migration.sql",
+    "prisma/migrations/202507070001_progression_stage/migration.sql",
+  ]
+  for (const file of migrationFiles) {
+    const sql = readFileSync(join(process.cwd(), file), "utf-8")
+    const statements = sql
+      .split(";")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !s.startsWith("--"))
+    for (const stmt of statements) {
+      try { await prisma.$executeRawUnsafe(stmt + ";") } catch { }
+    }
   }
 }
 
