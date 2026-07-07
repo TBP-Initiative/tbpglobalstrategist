@@ -58,7 +58,10 @@ export async function POST(request: Request) {
         name: data.name,
         email: data.email,
         passwordHash,
-        role: data.role,
+        role: data.role as any,
+        strategistProfile: data.role === "STRATEGIST"
+          ? { create: { stage: "CANDIDATE" } }
+          : undefined,
       },
       select: { id: true },
     })

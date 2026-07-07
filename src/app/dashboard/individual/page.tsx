@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
-import { PageHeader } from "@/components/shared/page-header"
 import { StatsCard } from "@/components/dashboards/stats-card"
 import { ActivityFeed } from "@/components/dashboards/activity-feed"
 import { NotificationsPanel } from "@/components/dashboards/notifications-panel"
@@ -13,10 +13,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
+import { LoadingSpinner } from "@/components/shared/loading-spinner"
+import { cn } from "@/lib/utils"
 import {
   FolderKanban,
-  Users,
   UserPlus,
   FileText,
   Plus,
@@ -26,15 +26,38 @@ import {
   ExternalLink,
   ArrowRight,
   Clock,
-  CheckCircle2,
-  AlertCircle,
   Sparkles,
-  BarChart3,
   Globe,
-  Zap,
 } from "lucide-react"
 
-const profileProgress = 75
+const stageColors: Record<string, string> = {
+  CANDIDATE: "border-blue-500/30 bg-blue-500/10 text-blue-400",
+  STRATEGIST: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400",
+  CONTRIBUTOR: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+  PROJECT_ALIGNED: "border-purple-500/30 bg-purple-500/10 text-purple-400",
+  SECTOR_LEAD: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  PAID_ADVISER: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+}
+
+const stageLabels: Record<string, string> = {
+  CANDIDATE: "Global Strategist Candidate",
+  STRATEGIST: "Global Strategist",
+  CONTRIBUTOR: "Strategic Contributor",
+  PROJECT_ALIGNED: "Project-Aligned Strategist",
+  SECTOR_LEAD: "Sector Lead or Workstream Lead",
+  PAID_ADVISER: "Paid Project Adviser, Specialist or Implementation Contributor",
+}
+
+const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
+
+const stageDescriptions: Record<string, string> = {
+  CANDIDATE: "You are in the onboarding phase. Complete your profile and submit a reflection to progress.",
+  STRATEGIST: "You have been recognized as a TBP Global Strategist. Begin contributing to workstreams.",
+  CONTRIBUTOR: "You are actively contributing to TBP workstreams. Your reliability and output are being assessed.",
+  PROJECT_ALIGNED: "You are attached to a specific TBP project. Continue delivering high-quality contributions.",
+  SECTOR_LEAD: "You lead a sector workstream, coordinating contributors and supporting TBP's development process.",
+  PAID_ADVISER: "You are eligible for paid advisory, research, or implementation roles on active projects.",
+}
 
 const projects = [
   {
@@ -218,37 +241,100 @@ const statusConfig = {
 }
 
 export default function IndividualDashboard() {
+  const { data: session } = useSession()
   const [showAllProjects, setShowAllProjects] = useState(false)
+  const [stats, setStats] = useState<{
+    activeProjects: number
+    inProgress: number
+    inDraft: number
+    collaborations: number
+    pendingRequests: number
+    networkSize: number
+    newThisMonth: number
+    publications: number
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<{ stage: string; sector: string | null } | null>(null)
+
+  useEffect(() => {
+    fetch("/api/dashboard/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.stage) setProfile(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  const firstName = session?.user?.name?.split(" ")[0] || "Strategist"
+  const currentStage = profile?.stage ?? "CANDIDATE"
+  const currentStageIndex = stageOrder.indexOf(currentStage)
+  const nextStage = currentStageIndex < stageOrder.length - 1 ? stageOrder[currentStageIndex + 1] : null
   const visibleProjects = showAllProjects ? projects : projects.slice(0, 3)
 
   return (
     <div className="space-y-8">
       <AnimatedSection>
+        <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent p-6 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                Welcome back, {firstName}
+              </h1>
+              <Sparkles size={20} className="text-amber-500" />
+            </div>
+            <Badge className={cn("text-[11px] uppercase tracking-wider px-3 py-1", stageColors[currentStage])}>
+              {stageLabels[currentStage]}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {stageDescriptions[currentStage]}
+          </p>
+          <div className="flex items-center gap-4">
+            {stageOrder.map((stage, i) => (
+              <div key={stage} className="flex items-center gap-1.5">
+                <div className={cn(
+                  "h-2.5 w-2.5 rounded-full",
+                  i <= currentStageIndex ? "bg-primary" : "bg-muted-foreground/20"
+                )} />
+                <span className={cn(
+                  "text-[10px]",
+                  i <= currentStageIndex ? "text-primary font-medium" : "text-muted-foreground/40"
+                )}>
+                  {stage === "CANDIDATE" ? "Candidate" : stage === "STRATEGIST" ? "Strategist" : stage === "CONTRIBUTOR" ? "Contributor" : stage === "PROJECT_ALIGNED" ? "Aligned" : stage === "SECTOR_LEAD" ? "Lead" : "Adviser"}
+                </span>
+                {i < stageOrder.length - 1 && (
+                  <div className={cn(
+                    "h-px w-4",
+                    i < currentStageIndex ? "bg-primary" : "bg-muted-foreground/20"
+                  )} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      <AnimatedSection>
         <div className="flex flex-col gap-6 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                Welcome back, Alex
+                Welcome back, {firstName}
               </h1>
               <Sparkles size={20} className="text-amber-500" />
             </div>
             <p className="text-sm text-muted-foreground">
-              Here's your strategic overview for today. You have{" "}
-              <span className="font-medium text-primary">3 active projects</span> and{" "}
-              <span className="font-medium text-primary">2 pending requests</span>.
+              Here&apos;s your strategic overview for today. You have{" "}
+              <span className="font-medium text-primary">{stats?.activeProjects ?? 0} active projects</span> and{" "}
+              <span className="font-medium text-primary">{stats?.pendingRequests ?? 0} pending requests</span>.
             </p>
-            <div className="flex items-center gap-3 pt-1">
-              <div className="flex-1 sm:w-64">
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-muted-foreground">Profile completion</span>
-                  <span className="font-medium">{profileProgress}%</span>
-                </div>
-                <Progress value={profileProgress} variant="default" className="h-2" />
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {profileProgress < 100 ? "Complete your profile to unlock more features" : "Profile complete!"}
-              </span>
-            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Button variant="outline" size="sm" className="gap-1.5">
@@ -263,40 +349,46 @@ export default function IndividualDashboard() {
         </div>
       </AnimatedSection>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          icon={<FolderKanban size={18} />}
-          label="Active Projects"
-          value="3"
-          trend={{ value: 12, positive: true }}
-          description="2 in progress, 1 in draft"
-          delay={0}
-        />
-        <StatsCard
-          icon={<UserPlus size={18} />}
-          label="Collaborations"
-          value="8"
-          trend={{ value: 5, positive: true }}
-          description="3 pending requests"
-          delay={0.1}
-        />
-        <StatsCard
-          icon={<Globe size={18} />}
-          label="Network Size"
-          value="142"
-          trend={{ value: 8, positive: true }}
-          description="+6 this month"
-          delay={0.2}
-        />
-        <StatsCard
-          icon={<FileText size={18} />}
-          label="Publications"
-          value="12"
-          trend={{ value: 0, positive: true }}
-          description="2 under review"
-          delay={0.3}
-        />
-      </div>
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            icon={<FolderKanban size={18} />}
+            label="Active Projects"
+            value={stats?.activeProjects ?? 0}
+            trend={{ value: 0, positive: true }}
+            description={`${stats?.inProgress ?? 0} in progress, ${stats?.inDraft ?? 0} in draft`}
+            delay={0}
+          />
+          <StatsCard
+            icon={<UserPlus size={18} />}
+            label="Collaborations"
+            value={stats?.collaborations ?? 0}
+            trend={{ value: 0, positive: true }}
+            description={`${stats?.pendingRequests ?? 0} pending requests`}
+            delay={0.1}
+          />
+          <StatsCard
+            icon={<Globe size={18} />}
+            label="Network Size"
+            value={stats?.networkSize ?? 0}
+            trend={{ value: 0, positive: true }}
+            description={`+${stats?.newThisMonth ?? 0} this month`}
+            delay={0.2}
+          />
+          <StatsCard
+            icon={<FileText size={18} />}
+            label="Publications"
+            value={stats?.publications ?? 0}
+            trend={{ value: 0, positive: true }}
+            description=""
+            delay={0.3}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">

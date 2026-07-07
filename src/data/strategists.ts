@@ -3,6 +3,8 @@ export interface StrategistProfile {
   name: string;
   headline: string;
   badge: string;
+  stage?: string;
+  sector?: string | null;
   avatar: string;
   coverImage: string;
   bio: string;
@@ -37,6 +39,8 @@ const strategists: StrategistProfile[] = [
     name: "Dr. Elena Voss",
     headline: "Chief Digital Strategist & Innovation Architect",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-1",
     bio: "Dr. Elena Voss is a globally recognized digital transformation leader with over two decades of experience architecting enterprise-wide innovation programs. She has led 50+ large-scale transformations across Fortune 500 companies, specializing in bridging the gap between cutting-edge technology and organizational strategy. Her work has been featured in Harvard Business Review, McKinsey Quarterly, and World Economic Forum publications. She holds a Ph.D. in Information Systems from MIT and serves on the advisory boards of three tech unicorns.",
@@ -124,6 +128,8 @@ const strategists: StrategistProfile[] = [
     name: "Marcus Chen",
     headline: "Senior M&A Strategist & Financial Transformation Lead",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-2",
     bio: "Marcus Chen brings 25+ years of experience in financial strategy, mergers & acquisitions, and organizational restructuring. He has advised on over $75B in transaction value across technology, healthcare, and industrial sectors. A former Managing Director at Goldman Sachs, Marcus now leads his own strategic advisory firm, helping mid-to-large enterprises navigate complex financial transformations and value creation initiatives.",
@@ -204,6 +210,8 @@ const strategists: StrategistProfile[] = [
     name: "Priya Kapoor",
     headline: "Sustainability & ESG Strategy Director",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-3",
     bio: "Priya Kapoor is a pioneering force in corporate sustainability and ESG strategy. With 15 years of experience spanning three continents, she has helped over 40 organizations integrate environmental and social governance into their core business strategies. Priya led the development of the first net-zero transition framework adopted by the UN Global Compact and regularly advises Fortune 500 boards on climate strategy, circular economy, and sustainable innovation.",
@@ -285,6 +293,8 @@ const strategists: StrategistProfile[] = [
     name: "James Okafor",
     headline: "Global Market Expansion & Operational Excellence Strategist",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-4",
     bio: "James Okafor is a dual-threat strategist combining deep expertise in market expansion with operational excellence. Over his 20-year career, he has led market entry strategies for 30+ countries across Africa, Southeast Asia, and Latin America. His operational turnaround programs have consistently delivered 30-50% efficiency improvements. James advises sovereign wealth funds, multinational corporations, and high-growth startups on scaling operations across emerging markets.",
@@ -365,6 +375,8 @@ const strategists: StrategistProfile[] = [
     name: "Dr. Yuki Tanaka",
     headline: "AI & Technology Adoption Strategist",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-5",
     bio: "Dr. Yuki Tanaka is at the forefront of AI-driven business transformation. With a Ph.D. in Machine Learning from Stanford and experience at DeepMind and BCG, she bridges the gap between cutting-edge AI capabilities and practical business applications. Her work focuses on helping organizations navigate the complex landscape of AI adoption, from strategy development to implementation. She was named one of Forbes' '30 Under 30' in enterprise technology.",
@@ -446,6 +458,8 @@ const strategists: StrategistProfile[] = [
     name: "Sarah Al-Rashid",
     headline: "Risk & Change Management Strategist",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-6",
     bio: "Sarah Al-Rashid is a leading authority in enterprise risk management and organizational change. With 18 years of experience advising governments and multinational corporations, she specializes in navigating complex risk landscapes and leading large-scale change initiatives. Her frameworks for geopolitical risk assessment are used by Fortune 500 companies and government agencies worldwide. She previously served as Director of Strategic Risk at the World Economic Forum.",
@@ -527,6 +541,8 @@ const strategists: StrategistProfile[] = [
     name: "Dmitri Volkov",
     headline: "Supply Chain & Operational Excellence Director",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-7",
     bio: "Dmitri Volkov is a world-class supply chain strategist with 27 years of experience optimizing global operations. A former VP of Global Supply Chain at Siemens, he has led operational transformations across 40+ countries. His lean-six sigma methodologies have delivered over $2B in cumulative cost savings for clients. Dmitri is a certified Master Black Belt and the author of three books on operational excellence and supply chain optimization.",
@@ -600,6 +616,8 @@ const strategists: StrategistProfile[] = [
     name: "Amara Osei",
     headline: "Customer Experience & Innovation Strategy Consultant",
     badge: "TBP Global Strategist",
+    stage: "CONTRIBUTOR",
+    sector: null,
     avatar: "",
     coverImage: "gradient-8",
     bio: "Amara Osei is a dynamic customer experience strategist who combines deep human-centered design expertise with business strategy. Starting her career at IDEO and later leading CX at a top consulting firm, she has helped 30+ brands transform their customer experiences, driving measurable improvements in NPS, retention, and revenue. She is passionate about using design thinking to solve complex business challenges and create experiences that customers love.",

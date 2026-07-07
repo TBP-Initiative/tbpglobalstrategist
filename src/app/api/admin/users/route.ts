@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     if (data.role === "STRATEGIST" || data.role === "RESEARCHER") {
       await prisma.strategistProfile.create({
-        data: { userId: user.id, title: "Strategist", bio: "" },
+        data: { userId: user.id, stage: "CANDIDATE", bio: "" },
       })
     }
 

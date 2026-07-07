@@ -17,6 +17,24 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { getStrategists, getUniqueExpertiseAreas, getUniqueIndustries } from "@/data/strategists";
 import type { StrategistProfile } from "@/data/strategists";
 
+const stageColors: Record<string, string> = {
+  CANDIDATE: "border-blue-500/30 bg-blue-500/10 text-blue-400",
+  STRATEGIST: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400",
+  CONTRIBUTOR: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+  PROJECT_ALIGNED: "border-purple-500/30 bg-purple-500/10 text-purple-400",
+  SECTOR_LEAD: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  PAID_ADVISER: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+}
+
+const stageLabels: Record<string, string> = {
+  CANDIDATE: "Global Strategist Candidate",
+  STRATEGIST: "Global Strategist",
+  CONTRIBUTOR: "Strategic Contributor",
+  PROJECT_ALIGNED: "Project-Aligned Strategist",
+  SECTOR_LEAD: "Sector Lead or Workstream Lead",
+  PAID_ADVISER: "Paid Project Adviser, Specialist or Implementation Contributor",
+}
+
 const badgeColors: Record<string, string> = {
   "TBP Global Strategist": "border-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25",
 };
@@ -99,8 +117,8 @@ function StrategistCard({ strategist, index }: { strategist: StrategistProfile; 
               </div>
             </div>
 
-            <Badge className={cn("mb-3 w-fit text-[10px] uppercase tracking-wider", badgeColors[strategist.badge])}>
-              {strategist.badge}
+            <Badge className={cn("mb-3 w-fit text-[10px] uppercase tracking-wider", strategist.stage ? stageColors[strategist.stage] : badgeColors[strategist.badge])}>
+              {strategist.stage ? stageLabels[strategist.stage] : strategist.badge}
             </Badge>
 
             <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -156,7 +174,24 @@ function StrategistCard({ strategist, index }: { strategist: StrategistProfile; 
 }
 
 export default function StrategistsDirectory() {
-  const allStrategists = React.useMemo(() => getStrategists(), []);
+  const [dbStrategists, setDbStrategists] = React.useState<StrategistProfile[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/strategists")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setDbStrategists(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const mockStrategists = React.useMemo(() => getStrategists(), []);
+  const allStrategists = React.useMemo(
+    () => [...dbStrategists, ...mockStrategists.filter((m) => !dbStrategists.some((d) => d.id === m.id))],
+    [dbStrategists, mockStrategists]
+  );
   const allExpertise = React.useMemo(() => getUniqueExpertiseAreas(), []);
   const allIndustries = React.useMemo(() => getUniqueIndustries(), []);
 

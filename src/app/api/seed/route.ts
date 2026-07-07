@@ -89,10 +89,14 @@ export async function GET() {
       createdUsers.push({ email: created.email, id: created.id })
 
       if (u.bio) {
+        const stage = u.title === "Platform Administrator" ? "STRATEGIST" as const
+          : ["Senior Strategist", "Digital Transformation Lead", "M&A Strategist", "Risk Management Specialist", "Customer Experience Strategist"].includes(u.title || "") ? "CONTRIBUTOR" as const
+          : ["Sustainability Consultant", "AI Research Lead"].includes(u.title || "") ? "STRATEGIST" as const
+          : "CANDIDATE" as const
         await prisma.strategistProfile.upsert({
           where: { userId: created.id },
           update: {},
-          create: { userId: created.id, bio: u.bio, title: u.title, yearsOfExperience: Math.floor(Math.random() * 20) + 3, hourlyRate: Math.floor(Math.random() * 100) + 100, availability: Math.random() > 0.3 },
+          create: { userId: created.id, bio: u.bio, title: u.title, stage, yearsOfExperience: Math.floor(Math.random() * 20) + 3, hourlyRate: Math.floor(Math.random() * 100) + 100, availability: Math.random() > 0.3 },
         })
       }
     }
