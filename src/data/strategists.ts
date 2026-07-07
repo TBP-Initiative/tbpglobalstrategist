@@ -5,6 +5,9 @@ export interface StrategistProfile {
   badge: string;
   stage?: string;
   sector?: string | null;
+  city?: string | null;
+  country?: string | null;
+  countryCode?: string | null;
   avatar: string;
   coverImage: string;
   bio: string;

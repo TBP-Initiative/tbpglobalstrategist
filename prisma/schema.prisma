@@ -123,6 +123,9 @@ model StrategistProfile {
   title             String?
   stage             ProgressionStage @default(CANDIDATE)
   sector            String?
+  city              String?
+  country           String?
+  countryCode       String?
   yearsOfExperience Int?
   hourlyRate        Decimal? 
   availability      Boolean          @default(true)

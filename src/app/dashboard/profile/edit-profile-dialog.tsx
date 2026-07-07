@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react"
 import { toast } from "sonner"
-import { Camera, Loader2 } from "lucide-react"
+import { Camera, Loader2, MapPin } from "lucide-react"
+import { COUNTRIES } from "@/lib/countries"
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,9 @@ interface EditProfileDialogProps {
     profile: {
       title: string | null
       bio: string | null
+      city: string | null
+      country: string | null
+      countryCode: string | null
       yearsOfExperience: number | null
       hourlyRate: string | null
       availability: boolean
@@ -46,6 +50,9 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
     name: user.name ?? "",
     title: user.profile?.title ?? "",
     bio: user.profile?.bio ?? "",
+    city: user.profile?.city ?? "",
+    country: user.profile?.country ?? "",
+    countryCode: user.profile?.countryCode ?? "",
     yearsOfExperience: user.profile?.yearsOfExperience?.toString() ?? "",
     hourlyRate: user.profile?.hourlyRate?.toString() ?? "",
     availability: user.profile?.availability ?? true,
@@ -93,6 +100,9 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
         profile: {
           title: form.title || null,
           bio: form.bio || null,
+          city: form.city || null,
+          country: form.country || null,
+          countryCode: form.countryCode || null,
           yearsOfExperience: form.yearsOfExperience ? Number(form.yearsOfExperience) : null,
           hourlyRate: form.hourlyRate || null,
           availability: form.availability,
@@ -179,6 +189,36 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
               <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.title.length}/100</p>
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-3">
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">City</label>
+                <input
+                  type="text"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="e.g. London"
+                  maxLength={100}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">Country</label>
+                <select
+                  value={form.countryCode}
+                  onChange={(e) => {
+                    const code = e.target.value
+                    const country = COUNTRIES.find((c) => c.code === code)
+                    setForm({ ...form, countryCode: code, country: country?.name ?? "" })
+                  }}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                >
+                  <option value="">Select country</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </GlassCard>
 

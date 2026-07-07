@@ -16,11 +16,14 @@ export default async function ProfilePage() {
       role: true,
       image: true,
       createdAt: true,
-      strategistProfile: {
-        select: {
-          title: true,
-          bio: true,
-          yearsOfExperience: true,
+        strategistProfile: {
+          select: {
+            title: true,
+            bio: true,
+            city: true,
+            country: true,
+            countryCode: true,
+            yearsOfExperience: true,
           hourlyRate: true,
           availability: true,
           linkedinUrl: true,
@@ -62,6 +65,9 @@ export default async function ProfilePage() {
           ? {
               title: user.strategistProfile.title,
               bio: user.strategistProfile.bio,
+              city: user.strategistProfile.city,
+              country: user.strategistProfile.country,
+              countryCode: user.strategistProfile.countryCode,
               yearsOfExperience: user.strategistProfile.yearsOfExperience,
               hourlyRate: user.strategistProfile.hourlyRate?.toString() ?? null,
               availability: user.strategistProfile.availability,

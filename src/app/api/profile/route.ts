@@ -23,6 +23,9 @@ export async function GET() {
             bio: true,
             stage: true,
             sector: true,
+            city: true,
+            country: true,
+            countryCode: true,
             yearsOfExperience: true,
             hourlyRate: true,
             availability: true,
@@ -78,6 +81,9 @@ export async function PATCH(req: Request) {
       if (profile.yearsOfExperience !== undefined) profileData.yearsOfExperience = profile.yearsOfExperience
       if (profile.hourlyRate !== undefined) profileData.hourlyRate = profile.hourlyRate?.toString()
       if (profile.availability !== undefined) profileData.availability = profile.availability
+      if (profile.city !== undefined) profileData.city = profile.city
+      if (profile.country !== undefined) profileData.country = profile.country
+      if (profile.countryCode !== undefined) profileData.countryCode = profile.countryCode
       if (profile.linkedinUrl !== undefined) profileData.linkedinUrl = profile.linkedinUrl
       if (profile.websiteUrl !== undefined) profileData.websiteUrl = profile.websiteUrl
 

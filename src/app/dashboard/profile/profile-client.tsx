@@ -61,6 +61,9 @@ export function ProfileClient({
     profile: {
       title: string | null
       bio: string | null
+      city: string | null
+      country: string | null
+      countryCode: string | null
       yearsOfExperience: number | null
       hourlyRate: string | null
       availability: boolean
@@ -123,6 +126,18 @@ export function ProfileClient({
                 </div>
                 {user.profile?.title && (
                   <p className="text-sm font-medium text-primary">{user.profile.title}</p>
+                )}
+                {(user.profile?.city || user.profile?.country) && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    {user.profile.countryCode && (
+                      <img
+                        src={`https://flagcdn.com/24x18/${user.profile.countryCode.toLowerCase()}.png`}
+                        alt={user.profile.country ?? ""}
+                        className="h-3.5 w-[18px] rounded-sm object-cover"
+                      />
+                    )}
+                    <span>{[user.profile.city, user.profile.country].filter(Boolean).join(", ")}</span>
+                  </div>
                 )}
               </div>
               <Separator className="my-4" />

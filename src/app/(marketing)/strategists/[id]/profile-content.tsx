@@ -23,6 +23,9 @@ function mapStrategist(strategist: StrategistProfile) {
     role: strategist.badge,
     expertiseTags: strategist.expertiseAreas,
     location: strategist.location || "",
+    city: strategist.city ?? null,
+    country: strategist.country ?? null,
+    countryCode: strategist.countryCode ?? null,
     stats: {
       projectsCompleted: strategist.stats.projects,
       activeProjects: 0,

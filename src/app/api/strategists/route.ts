@@ -25,6 +25,9 @@ export async function GET() {
             bio: true,
             stage: true,
             sector: true,
+            city: true,
+            country: true,
+            countryCode: true,
             yearsOfExperience: true,
             availability: true,
             linkedinUrl: true,
@@ -48,6 +51,9 @@ export async function GET() {
       badge: stageLabels[user.strategistProfile?.stage ?? "CANDIDATE"] ?? "Global Strategist Candidate",
       stage: user.strategistProfile?.stage ?? "CANDIDATE",
       sector: user.strategistProfile?.sector ?? null,
+      city: user.strategistProfile?.city ?? null,
+      country: user.strategistProfile?.country ?? null,
+      countryCode: user.strategistProfile?.countryCode ?? null,
       avatar: user.image ?? "",
       coverImage: "gradient-1",
       bio: user.strategistProfile?.bio ?? "",
@@ -78,7 +84,7 @@ export async function GET() {
         linkedin: user.strategistProfile?.linkedinUrl ?? "",
         website: user.strategistProfile?.websiteUrl ?? "",
       },
-      location: "",
+      location: [user.strategistProfile?.city, user.strategistProfile?.country].filter(Boolean).join(", "),
       createdAt: user.createdAt.toISOString(),
     }))
 

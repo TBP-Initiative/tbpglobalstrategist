@@ -17,6 +17,9 @@ interface ProfileHeroProps {
     role: string;
     expertiseTags: string[];
     location: string;
+    city: string | null;
+    country: string | null;
+    countryCode: string | null;
     stats: {
       projectsCompleted: number;
       activeProjects: number;
@@ -36,7 +39,7 @@ const fadeUp = {
 };
 
 export function ProfileHero({ strategist }: ProfileHeroProps) {
-  const { name, headline, bio, avatar, isOnline, verified, role, expertiseTags, location } =
+  const { name, headline, bio, avatar, isOnline, verified, role, expertiseTags, location, city, country, countryCode } =
     strategist;
 
   const [expanded, setExpanded] = useState(false)
@@ -92,9 +95,18 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
             <p className="mt-1 text-sm text-gray-700 md:text-base">{headline}</p>
 
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5">
-                <span className="text-base">{location}</span>
-              </span>
+              {(city || country || countryCode) && (
+                <span className="flex items-center gap-1.5">
+                  {countryCode && (
+                    <img
+                      src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
+                      alt={country ?? ""}
+                      className="h-3.5 w-[18px] rounded-sm object-cover"
+                    />
+                  )}
+                  <span>{[city, country].filter(Boolean).join(", ") || location}</span>
+                </span>
+              )}
             </div>
           </div>
         </motion.div>
