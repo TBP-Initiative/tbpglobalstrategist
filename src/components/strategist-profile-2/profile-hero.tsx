@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { formatBio } from "@/lib/format-bio";
 
 interface ProfileHeroProps {
@@ -36,6 +38,10 @@ const fadeUp = {
 export function ProfileHero({ strategist }: ProfileHeroProps) {
   const { name, headline, bio, avatar, isOnline, verified, role, expertiseTags, location } =
     strategist;
+
+  const [expanded, setExpanded] = useState(false)
+  const isLong = bio.length > 400
+  const displayBio = expanded || !isLong ? bio : bio.slice(0, 400).replace(/\s+\S*$/, "")
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white shadow-lg shadow-black/5">
@@ -119,7 +125,20 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           animate="visible"
           className="mt-6 text-xs leading-relaxed text-gray-600 md:text-sm"
         >
-          {formatBio(bio)}
+          {formatBio(displayBio)}
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#013466] hover:underline"
+            >
+              {expanded ? "Show less" : "Read more"}
+              <ChevronDown
+                size={14}
+                className={cn("transition-transform", expanded && "rotate-180")}
+              />
+            </button>
+          )}
         </motion.div>
       </div>
     </section>
