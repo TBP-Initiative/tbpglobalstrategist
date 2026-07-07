@@ -175,8 +175,10 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="e.g. Senior Strategist"
+                maxLength={100}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
+              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.title.length}/100</p>
             </div>
           </GlassCard>
 
@@ -207,12 +209,14 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Bio</label>
               <textarea
-                rows={3}
+                rows={5}
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
                 placeholder="Tell us about yourself..."
+                maxLength={2000}
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
+              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.bio.length}/2000</p>
             </div>
             <div className="flex items-center gap-2">
               <input

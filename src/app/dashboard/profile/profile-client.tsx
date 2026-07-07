@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { EditProfileDialog } from "./edit-profile-dialog"
+import { formatBio } from "@/lib/format-bio"
 import {
   User,
   Mail,
@@ -200,7 +201,7 @@ export function ProfileClient({
             <AnimatedSection delay={0.15}>
               <GlassCard className="p-6" intensity="light">
                 <h3 className="text-sm font-semibold mb-3">About</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{user.profile.bio}</p>
+                <div className="text-sm text-muted-foreground leading-relaxed">{formatBio(user.profile.bio)}</div>
               </GlassCard>
             </AnimatedSection>
           )}

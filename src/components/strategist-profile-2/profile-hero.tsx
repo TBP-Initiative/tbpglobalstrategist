@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BadgeCheck } from "lucide-react";
+import { formatBio } from "@/lib/format-bio";
 
 interface ProfileHeroProps {
   strategist: {
@@ -111,15 +112,15 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
         </motion.div>
 
         {/* Bio */}
-        <motion.p
+        <motion.div
           custom={5}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
           className="mt-6 text-xs leading-relaxed text-gray-600 md:text-sm"
         >
-          {bio}
-        </motion.p>
+          {formatBio(bio)}
+        </motion.div>
       </div>
     </section>
   );
