@@ -174,7 +174,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="e.g. Senior Strategist"
+                placeholder="e.g. Senior Strategist (max 100 chars)"
                 maxLength={100}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
@@ -212,7 +212,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 rows={5}
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
+                placeholder='Tell us about yourself... (max 2000 chars)&#10;&#10;Use double newlines between paragraphs.&#10;Use "- " or "* " for bullet lists.'
                 maxLength={2000}
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
