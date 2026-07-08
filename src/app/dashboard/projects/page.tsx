@@ -7,6 +7,13 @@ export default async function AdminProjectsPage() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/dashboard")
 
+  // Ensure default organization exists
+  const defaultOrg = await prisma.organization.upsert({
+    where: { slug: "tbp-world-vision-project" },
+    update: {},
+    create: { name: "TBP World Vision Project", slug: "tbp-world-vision-project" },
+  })
+
   const [projects, organizations] = await Promise.all([
     prisma.project.findMany({
       select: {
@@ -60,11 +67,12 @@ export default async function AdminProjectsPage() {
     contributors: p._count.contributors,
   }))
 
-  const serializedOrgs = organizations.map((o) => ({
-    id: o.id,
-    name: o.name,
-    slug: o.slug,
-  }))
+  const serializedOrgs = [
+    { id: defaultOrg.id, name: defaultOrg.name, slug: defaultOrg.slug },
+    ...organizations
+      .filter((o) => o.id !== defaultOrg.id)
+      .map((o) => ({ id: o.id, name: o.name, slug: o.slug })),
+  ]
 
   const counts = {
     total: projects.length,

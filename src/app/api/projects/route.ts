@@ -10,10 +10,25 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories } = body
+    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories, newOrganizationName } = body
 
     if (!title || typeof title !== "string") {
       return NextResponse.json({ error: "Title is required" }, { status: 422 })
+    }
+
+    // Create new organization if name provided
+    let resolvedOrgId = organizationId
+    if (newOrganizationName && typeof newOrganizationName === "string") {
+      const orgSlug = newOrganizationName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+      const org = await prisma.organization.upsert({
+        where: { slug: orgSlug },
+        update: {},
+        create: { name: newOrganizationName.trim(), slug: orgSlug },
+      })
+      resolvedOrgId = org.id
     }
 
     const slug = title
@@ -40,7 +55,7 @@ export async function POST(request: Request) {
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         category: categories ? JSON.stringify(categories) : null,
-        organizationId: organizationId ?? null,
+        organizationId: resolvedOrgId ?? null,
         createdById: session.user.id!,
       },
       select: {

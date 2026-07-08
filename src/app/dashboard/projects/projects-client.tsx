@@ -131,6 +131,8 @@ function NewProjectDialog({
   const [status, setStatus] = useState("DRAFT")
   const [budget, setBudget] = useState("")
   const [organizationId, setOrganizationId] = useState("")
+  const [newOrgName, setNewOrgName] = useState("")
+  const [creatingOrg, setCreatingOrg] = useState(false)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [image, setImage] = useState("")
@@ -188,6 +190,7 @@ function NewProjectDialog({
           status,
           budget: budget ? Number(budget) : undefined,
           organizationId: organizationId || undefined,
+          newOrganizationName: newOrgName.trim() || undefined,
           startDate: startDate || undefined,
           endDate: endDate || undefined,
         }),
@@ -370,15 +373,24 @@ function NewProjectDialog({
           </div>
           <div className="space-y-2">
             <Label htmlFor="org">Organization</Label>
-            <Select value={organizationId} onValueChange={setOrganizationId}>
+            <Select value={organizationId} onValueChange={(val) => { setOrganizationId(val); if (val !== "_new") setNewOrgName("") }}>
               <SelectTrigger id="org" placeholder="Select organization...">
               </SelectTrigger>
               <SelectContent>
                 {organizations.map((o) => (
                   <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
                 ))}
+                <SelectItem value="_new">+ Create new organization</SelectItem>
               </SelectContent>
             </Select>
+            {organizationId === "_new" && (
+              <Input
+                value={newOrgName}
+                onChange={(e) => setNewOrgName(e.target.value)}
+                placeholder="Enter new organization name"
+                className="mt-1"
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
