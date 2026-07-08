@@ -2,10 +2,29 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+const DEFAULT_AREAS = [
+  "Capital Advisory", "Engineering", "Architecture",
+  "AI Automation", "Software Development", "Energy",
+  "Maritime", "Logistics", "Policy",
+  "Communications", "Regional Development",
+]
+
 export async function GET() {
   const session = await auth()
   if (!session?.user || (session.user as Record<string, string>).role !== "ADMIN") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
+  }
+
+  const count = await prisma.workArea.count()
+
+  if (count === 0) {
+    const slug = (name: string) =>
+      name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+
+    await prisma.workArea.createMany({
+      data: DEFAULT_AREAS.map((name) => ({ name, slug: slug(name) })),
+      skipDuplicates: true,
+    })
   }
 
   const areas = await prisma.workArea.findMany({
