@@ -19,7 +19,6 @@ import {
   Calendar,
   Briefcase,
   Clock,
-  DollarSign,
   Globe,
   Link2,
   FolderKanban,
@@ -67,7 +66,6 @@ export function ProfileClient({
       country: string | null
       countryCode: string | null
       yearsOfExperience: number | null
-      hourlyRate: string | null
       availability: boolean
       linkedinUrl: string | null
       websiteUrl: string | null
@@ -170,13 +168,6 @@ export function ProfileClient({
                     <Briefcase size={14} className="text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground">Experience</span>
                     <span className="ml-auto font-medium">{user.profile.yearsOfExperience} years</span>
-                  </div>
-                )}
-                {user.profile?.hourlyRate && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <DollarSign size={14} className="text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground">Hourly Rate</span>
-                    <span className="ml-auto font-medium">${user.profile.hourlyRate}/hr</span>
                   </div>
                 )}
               </div>

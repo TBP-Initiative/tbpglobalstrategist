@@ -34,7 +34,6 @@ interface EditProfileDialogProps {
       country: string | null
       countryCode: string | null
       yearsOfExperience: number | null
-      hourlyRate: string | null
       availability: boolean
       linkedinUrl: string | null
       websiteUrl: string | null
@@ -57,7 +56,6 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
     country: user.profile?.country ?? "",
     countryCode: user.profile?.countryCode ?? "",
     yearsOfExperience: user.profile?.yearsOfExperience?.toString() ?? "",
-    hourlyRate: user.profile?.hourlyRate?.toString() ?? "",
     availability: user.profile?.availability ?? true,
     linkedinUrl: user.profile?.linkedinUrl ?? "",
     websiteUrl: user.profile?.websiteUrl ?? "",
@@ -108,7 +106,6 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
           country: form.country || null,
           countryCode: form.countryCode || null,
           yearsOfExperience: form.yearsOfExperience ? Number(form.yearsOfExperience) : null,
-          hourlyRate: form.hourlyRate || null,
           availability: form.availability,
           linkedinUrl: form.linkedinUrl || null,
           websiteUrl: form.websiteUrl || null,
@@ -249,16 +246,6 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                   min="0"
                   value={form.yearsOfExperience}
                   onChange={(e) => setForm({ ...form, yearsOfExperience: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Hourly Rate ($)</label>
-                <input
-                  type="text"
-                  value={form.hourlyRate}
-                  onChange={(e) => setForm({ ...form, hourlyRate: e.target.value })}
-                  placeholder="e.g. 150"
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
                 />
               </div>
