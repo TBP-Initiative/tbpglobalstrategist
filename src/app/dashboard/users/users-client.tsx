@@ -30,6 +30,8 @@ import { AddUserDialog } from "@/components/admin/add-user-dialog"
 import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
 import { ChangeRoleDialog } from "@/components/admin/change-role-dialog"
 import { ChangePasswordDialog } from "@/components/admin/change-password-dialog"
+import { ChangeStageDialog } from "@/components/admin/change-stage-dialog"
+import { StageBadge } from "@/components/ui/stage-badge"
 import {
   Users,
   UserCheck,
@@ -50,6 +52,7 @@ type UserData = {
   image: string | null
   createdAt: string
   projects: number
+  stage: string | null
 }
 
 const roleColors: Record<string, string> = {
@@ -156,6 +159,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Stage</TableHead>
                   <TableHead>Projects</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -183,6 +187,13 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      {user.stage ? (
+                        <StageBadge stage={user.stage} />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <span className="text-sm font-medium">{user.projects}</span>
                     </TableCell>
                     <TableCell>
@@ -208,6 +219,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <ChangeRoleDialog userId={user.id} userName={user.name ?? "Unnamed"} currentRole={user.role} />
+                            <ChangeStageDialog userId={user.id} userName={user.name ?? "Unnamed"} currentStage={user.stage} />
                             <ChangePasswordDialog userId={user.id} userName={user.name ?? "Unnamed"} />
                             <DropdownMenuSeparator />
                             <DeleteUserDialog userId={user.id} userName={user.name ?? "Unnamed"} />
@@ -219,7 +231,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                       No users found matching your filters.
                     </TableCell>
                   </TableRow>
