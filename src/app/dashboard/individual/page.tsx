@@ -301,6 +301,19 @@ export default function IndividualDashboard() {
           <p className="text-sm text-muted-foreground">
             {stageDescriptions[currentStage]}
           </p>
+          {profile?.workAreas && profile.workAreas.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Assigned areas:</span>
+              {profile.workAreas.map((area: string) => (
+                <span
+                  key={area}
+                  className="inline-block rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-500"
+                >
+                  {area}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-4">
             {stageOrder.map((stage, i) => (
               <div key={stage} className="flex items-center gap-1.5">
@@ -431,21 +444,8 @@ export default function IndividualDashboard() {
                           <p className="text-xs text-muted-foreground">
                             {project.description}
                           </p>
-          {profile?.workAreas && profile.workAreas.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-muted-foreground mr-1">Assigned:</span>
-              {profile.workAreas.map((area: string) => (
-                <span
-                  key={area}
-                  className="inline-block rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-500"
-                >
-                  {area}
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="flex items-center gap-4">
-                            <div className="flex-1 max-w-xs">
+                            <div className="flex items-center gap-4">
+                              <div className="flex-1 max-w-xs">
                               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                                 <span>Progress</span>
                                 <span>{project.progress}%</span>
