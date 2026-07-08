@@ -41,6 +41,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
       badge: stageLabels[user.strategistProfile?.stage ?? "CANDIDATE"] ?? "Global Strategist Candidate",
       stage: user.strategistProfile?.stage ?? "CANDIDATE",
       sector: user.strategistProfile?.sector ?? null,
+      category: user.strategistProfile?.category ?? null,
       city: user.strategistProfile?.city ?? null,
       country: user.strategistProfile?.country ?? null,
       countryCode: user.strategistProfile?.countryCode ?? null,

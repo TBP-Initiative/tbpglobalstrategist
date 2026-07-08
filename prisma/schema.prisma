@@ -123,6 +123,7 @@ model StrategistProfile {
   title             String?
   stage             ProgressionStage @default(CANDIDATE)
   sector            String?
+  category          String?
   city              String?
   country           String?
   countryCode       String?

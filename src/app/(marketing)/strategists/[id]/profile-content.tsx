@@ -9,6 +9,7 @@ import { FeaturedProject } from "@/components/strategist-profile-2/featured-proj
 import { ProjectGrid } from "@/components/strategist-profile-2/project-grid"
 import { ActivityTimeline } from "@/components/strategist-profile-2/activity-timeline"
 import type { StrategistProfile } from "@/data/strategists"
+import { getCategory } from "@/lib/categories"
 
 function mapStrategist(strategist: StrategistProfile) {
   const avatar = strategist.avatar || `https://i.pravatar.cc/300?u=${strategist.name.replace(/\s+/g, "-").toLowerCase()}`
@@ -39,10 +40,14 @@ function mapStrategist(strategist: StrategistProfile) {
     year: "numeric",
   })
 
+  const cat = getCategory(strategist.category)
+
   const focus = {
-    strategicDomain: strategist.strategicFocusAreas[0]?.title || "Strategic Advisory",
-    primaryContribution: strategist.strategicFocusAreas[1]?.title || "Strategic Planning",
-    currentTbpFocus: strategist.strategicFocusAreas[0]?.description || "Strategy & Innovation",
+    strategicDomain: cat?.name ?? strategist.strategicFocusAreas[0]?.title || "Strategic Advisory",
+    primaryContribution: cat?.name
+      ? cat.name.replace("Global Strategist – ", "").replace(" and ", " & ")
+      : strategist.strategicFocusAreas[1]?.title || "Strategic Planning",
+    currentTbpFocus: cat?.description ?? strategist.strategicFocusAreas[0]?.description || "Strategy & Innovation",
     collaborationStatus: strategist.collaborationStatus === "open"
       ? "Open for Strategic Partnerships"
       : strategist.collaborationStatus === "limited"

@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { toast } from "sonner"
 import { Camera, Loader2, MapPin } from "lucide-react"
 import { COUNTRIES } from "@/lib/countries"
+import { STRATEGIST_CATEGORIES } from "@/lib/categories"
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ interface EditProfileDialogProps {
     profile: {
       title: string | null
       bio: string | null
+      category: string | null
       city: string | null
       country: string | null
       countryCode: string | null
@@ -50,6 +52,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
     name: user.name ?? "",
     title: user.profile?.title ?? "",
     bio: user.profile?.bio ?? "",
+    category: user.profile?.category ?? "",
     city: user.profile?.city ?? "",
     country: user.profile?.country ?? "",
     countryCode: user.profile?.countryCode ?? "",
@@ -100,6 +103,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
         profile: {
           title: form.title || null,
           bio: form.bio || null,
+          category: form.category || null,
           city: form.city || null,
           country: form.country || null,
           countryCode: form.countryCode || null,
@@ -219,6 +223,19 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                   ))}
                 </select>
               </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Global Strategist Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+              >
+                <option value="">Select a category</option>
+                {STRATEGIST_CATEGORIES.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
             </div>
           </GlassCard>
 

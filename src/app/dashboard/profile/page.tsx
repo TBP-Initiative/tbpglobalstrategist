@@ -20,6 +20,7 @@ export default async function ProfilePage() {
           select: {
             title: true,
             bio: true,
+            category: true,
             city: true,
             country: true,
             countryCode: true,
@@ -65,6 +66,7 @@ export default async function ProfilePage() {
           ? {
               title: user.strategistProfile.title,
               bio: user.strategistProfile.bio,
+              category: user.strategistProfile.category,
               city: user.strategistProfile.city,
               country: user.strategistProfile.country,
               countryCode: user.strategistProfile.countryCode,

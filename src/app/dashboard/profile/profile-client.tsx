@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { EditProfileDialog } from "./edit-profile-dialog"
 import { formatBio } from "@/lib/format-bio"
+import { getCategory } from "@/lib/categories"
 import {
   User,
   Mail,
@@ -61,6 +62,7 @@ export function ProfileClient({
     profile: {
       title: string | null
       bio: string | null
+      category: string | null
       city: string | null
       country: string | null
       countryCode: string | null
@@ -138,6 +140,9 @@ export function ProfileClient({
                     )}
                     <span>{[user.profile.city, user.profile.country].filter(Boolean).join(", ")}</span>
                   </div>
+                )}
+                {user.profile?.category && (
+                  <p className="text-[11px] text-muted-foreground italic">{getCategory(user.profile.category)?.name ?? user.profile.category}</p>
                 )}
               </div>
               <Separator className="my-4" />
