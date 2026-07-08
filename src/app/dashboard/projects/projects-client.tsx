@@ -375,11 +375,14 @@ function NewProjectDialog({
             <Label htmlFor="org">Organization</Label>
             <Select value={organizationId} onValueChange={(val) => { setOrganizationId(val); if (val !== "_new") setNewOrgName("") }}>
               <SelectTrigger id="org" placeholder="Select organization...">
+                {organizationId && organizationId !== "_new"
+                  ? organizations.find((o) => o.id === organizationId)?.name
+                  : organizationId === "_new"
+                    ? newOrgName || "Create new organization..."
+                    : undefined}
               </SelectTrigger>
               <SelectContent>
-                {organizations.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
+                <SelectItem value={organizations[0]?.id ?? ""}>{organizations[0]?.name ?? "TBP World Vision Project"}</SelectItem>
                 <SelectItem value="_new">+ Create new organization</SelectItem>
               </SelectContent>
             </Select>
@@ -822,11 +825,10 @@ function EditProjectDialog({
             <Label htmlFor="edit-org">Organization</Label>
             <Select value={organizationId} onValueChange={setOrganizationId}>
               <SelectTrigger id="edit-org" placeholder="Select organization...">
+                {organizationId ? organizations.find((o) => o.id === organizationId)?.name : undefined}
               </SelectTrigger>
               <SelectContent>
-                {organizations.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
+                <SelectItem value={organizations[0]?.id ?? ""}>{organizations[0]?.name ?? "TBP World Vision Project"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
