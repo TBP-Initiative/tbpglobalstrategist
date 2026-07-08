@@ -6,6 +6,8 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
+import { ProgressionPathway } from "@/components/dashboards/progression-pathway"
+import { SubmissionForm } from "@/components/dashboards/submission-form"
 import { StatsCard } from "@/components/dashboards/stats-card"
 import { ActivityFeed } from "@/components/dashboards/activity-feed"
 import { NotificationsPanel } from "@/components/dashboards/notifications-panel"
@@ -405,6 +407,10 @@ export default function IndividualDashboard() {
           />
         </div>
       )}
+
+      {profile?.stage && <ProgressionPathway currentStage={profile.stage} />}
+
+      {profile?.stage && <SubmissionForm currentStage={profile.stage} />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
