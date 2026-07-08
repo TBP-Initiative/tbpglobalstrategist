@@ -8,7 +8,6 @@ import { GlassCard } from "@/components/shared/glass-card"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import {
   FolderKanban,
-  Search,
   ArrowLeft,
   Clock,
   AlertTriangle,
@@ -18,6 +17,7 @@ import {
   Users,
   ExternalLink,
 } from "lucide-react"
+import { parseFirstCategory, stripHtml } from "@/lib/project-utils"
 
 const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
 
@@ -145,17 +145,16 @@ export default async function BrowseProjectsPage() {
                   </div>
                 )}
                 <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold leading-tight">{project.title}</h3>
-                    {project.category && (
-                      <Badge variant="outline" className="shrink-0 text-[10px]">
-                        {project.category}
-                      </Badge>
-                    )}
-                  </div>
+                  <h3 className="font-semibold leading-tight mb-1">{project.title}</h3>
+
+                  {parseFirstCategory(project.category) && (
+                    <Badge variant="outline" className="w-fit text-[10px] mb-2">
+                      {parseFirstCategory(project.category)}
+                    </Badge>
+                  )}
 
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-                    {project.shortDescription ?? project.description}
+                    {stripHtml(project.shortDescription ?? project.description)}
                   </p>
 
                   <div className="mt-auto space-y-2">

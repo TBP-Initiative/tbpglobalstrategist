@@ -29,3 +29,18 @@ export function progressToStage(progress: number): string {
   if (progress >= 1) return "Research"
   return "Concept"
 }
+
+export function parseFirstCategory(cat: string | null | undefined): string {
+  if (!cat) return ""
+  try {
+    const parsed = JSON.parse(cat)
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : typeof parsed === "string" ? parsed : ""
+  } catch {
+    return cat
+  }
+}
+
+export function stripHtml(html: string | null | undefined): string {
+  if (!html) return ""
+  return html.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&#x2F;/g, "/").trim()
+}

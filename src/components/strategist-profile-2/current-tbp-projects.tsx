@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/shared/glass-card"
 import { ArrowRight, FolderKanban } from "lucide-react"
+import { parseFirstCategory, stripHtml } from "@/lib/project-utils"
 
 type ProjectItem = {
   id: string
@@ -80,9 +81,9 @@ export function CurrentTbpProjects() {
                 <p className="text-sm font-medium leading-tight group-hover:text-primary transition-colors">
                   {project.title}
                 </p>
-                {project.category && (
+                {parseFirstCategory(project.category) && (
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {project.category}
+                    {parseFirstCategory(project.category)}
                   </p>
                 )}
               </div>

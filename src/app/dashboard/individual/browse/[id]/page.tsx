@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { AnimatedSection } from "@/components/shared/animated-section"
-import { ArrowLeft, Building2, DollarSign, Users, Clock, Calendar, User, AlertTriangle, Sparkles } from "lucide-react"
+import { ArrowLeft, Building2, DollarSign, Users, Clock, AlertTriangle, Sparkles } from "lucide-react"
+import { parseFirstCategory, stripHtml } from "@/lib/project-utils"
 
 const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
 
@@ -104,7 +105,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <GlassCard className="p-6" intensity="light">
               <h2 className="mb-3 text-lg font-semibold">About this project</h2>
               <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {project.description ?? project.shortDescription ?? "No description provided."}
+                {stripHtml(project.description ?? project.shortDescription ?? "No description provided.")}
               </p>
             </GlassCard>
           </AnimatedSection>
@@ -113,7 +114,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <AnimatedSection>
               <GlassCard className="p-6" intensity="light">
                 <h2 className="mb-3 text-lg font-semibold">Objectives</h2>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{project.objectives}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{stripHtml(project.objectives)}</p>
               </GlassCard>
             </AnimatedSection>
           )}
@@ -122,7 +123,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <AnimatedSection>
               <GlassCard className="p-6" intensity="light">
                 <h2 className="mb-3 text-lg font-semibold">Strategic Relevance</h2>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{project.strategicRelevance}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{stripHtml(project.strategicRelevance)}</p>
               </GlassCard>
             </AnimatedSection>
           )}
@@ -133,10 +134,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <GlassCard className="p-6" intensity="light">
               <h3 className="mb-4 text-sm font-semibold">Project Details</h3>
               <div className="space-y-3">
-                {project.category && (
+                {parseFirstCategory(project.category) && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Category</span>
-                    <Badge variant="outline" className="text-xs">{project.category}</Badge>
+                    <Badge variant="outline" className="text-xs">{parseFirstCategory(project.category)}</Badge>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
