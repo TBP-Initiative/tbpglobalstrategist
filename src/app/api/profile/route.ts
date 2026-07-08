@@ -35,6 +35,9 @@ export async function GET() {
             websiteUrl: true,
           },
         },
+        workAreaAssignments: {
+          select: { workArea: { select: { id: true, name: true, slug: true } } },
+        },
       },
     })
 

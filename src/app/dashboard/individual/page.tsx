@@ -253,7 +253,7 @@ export default function IndividualDashboard() {
     publications: number
   } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<{ stage: string; sector: string | null } | null>(null)
+  const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[] } | null>(null)
 
   useEffect(() => {
     fetch("/api/dashboard/stats")
@@ -266,7 +266,13 @@ export default function IndividualDashboard() {
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
-        if (data.stage) setProfile(data)
+        if (data.stage) {
+          setProfile({
+            stage: data.stage,
+            sector: data.sector,
+            workAreas: data.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
+          })
+        }
       })
       .catch(() => {})
   }, [])
@@ -425,7 +431,20 @@ export default function IndividualDashboard() {
                           <p className="text-xs text-muted-foreground">
                             {project.description}
                           </p>
-                          <div className="flex items-center gap-4">
+          {profile?.workAreas && profile.workAreas.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground mr-1">Assigned:</span>
+              {profile.workAreas.map((area: string) => (
+                <span
+                  key={area}
+                  className="inline-block rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-500"
+                >
+                  {area}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-4">
                             <div className="flex-1 max-w-xs">
                               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                                 <span>Progress</span>

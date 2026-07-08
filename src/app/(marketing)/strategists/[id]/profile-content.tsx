@@ -91,8 +91,10 @@ function mapStrategist(strategist: StrategistProfile) {
   return { heroData, focus, projects, activities }
 }
 
-export function ProfileContent({ strategist }: { strategist: StrategistProfile }) {
+export function ProfileContent({ strategist, workAreas = [] }: { strategist: StrategistProfile; workAreas?: string[] }) {
   const { heroData, focus, projects, activities } = mapStrategist(strategist)
+
+  const focusWithAreas = { ...focus, workAreas }
 
   return (
     <div className="min-h-screen bg-white">
@@ -129,7 +131,7 @@ export function ProfileContent({ strategist }: { strategist: StrategistProfile }
           <div className="w-full lg:w-[30%]">
             <div className="flex flex-col gap-5 lg:sticky lg:top-24">
               <AnimatedSection>
-                <StrategistFocusCard focus={focus} />
+                <StrategistFocusCard focus={focusWithAreas} />
               </AnimatedSection>
               <AnimatedSection>
                 <CurrentTbpProjects />

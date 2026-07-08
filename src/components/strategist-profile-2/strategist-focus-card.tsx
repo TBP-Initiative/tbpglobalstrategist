@@ -11,6 +11,7 @@ interface StrategistFocusCardProps {
     collaborationStatus: string
     memberSince: string
     basedIn: string
+    workAreas?: string[]
   }
 }
 
@@ -18,6 +19,7 @@ const rows: { label: string; key: keyof StrategistFocusCardProps["focus"] }[] = 
   { label: "Strategic Domain", key: "strategicDomain" },
   { label: "Primary Contribution", key: "primaryContribution" },
   { label: "Current TBP Focus", key: "currentTbpFocus" },
+  { label: "Work Areas", key: "workAreas" },
   { label: "Collaboration Status", key: "collaborationStatus" },
   { label: "Member Since", key: "memberSince" },
   { label: "Based In", key: "basedIn" },
@@ -70,9 +72,26 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
             <span className="shrink-0 text-sm font-medium text-gray-500">
               {row.label}
             </span>
-            <span className="text-right text-sm text-gray-800">
-              {focus[row.key]}
-            </span>
+            {row.key === "workAreas" && Array.isArray(focus.workAreas) ? (
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                {focus.workAreas.length > 0 ? (
+                  focus.workAreas.map((area) => (
+                    <span
+                      key={area}
+                      className="inline-block rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-medium text-indigo-600"
+                    >
+                      {area}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-right text-xs text-gray-400">None assigned</span>
+                )}
+              </div>
+            ) : (
+              <span className="text-right text-sm text-gray-800">
+                {typeof focus[row.key] === "string" ? focus[row.key] as string : ""}
+              </span>
+            )}
           </motion.div>
         ))}
       </div>

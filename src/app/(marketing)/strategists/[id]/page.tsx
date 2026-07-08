@@ -23,6 +23,9 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
       where: { id },
       include: {
         strategistProfile: true,
+        workAreaAssignments: {
+          select: { workArea: { select: { name: true } } },
+        },
         _count: {
           select: {
             projectContributors: true,
@@ -110,5 +113,21 @@ export default async function StrategistProfilePage({
     notFound()
   }
 
-  return <ProfileContent strategist={strategist} />
+  let workAreas: string[] = []
+
+  if (!getLocalStrategistById(id)) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+          workAreaAssignments: {
+            select: { workArea: { select: { name: true } } },
+          },
+        },
+      })
+      workAreas = user?.workAreaAssignments.map((a) => a.workArea.name) ?? []
+    } catch { /* ignore */ }
+  }
+
+  return <ProfileContent strategist={strategist} workAreas={workAreas} />
 }
