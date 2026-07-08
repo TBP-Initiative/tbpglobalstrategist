@@ -8,6 +8,7 @@ import { RightSidebar } from "@/components/strategist-profile-2/right-sidebar"
 import { FeaturedProject } from "@/components/strategist-profile-2/featured-project"
 import { ProjectGrid } from "@/components/strategist-profile-2/project-grid"
 import { ActivityTimeline } from "@/components/strategist-profile-2/activity-timeline"
+import { CurrentTbpProjects } from "@/components/strategist-profile-2/current-tbp-projects"
 import type { StrategistProfile } from "@/data/strategists"
 import { getCategory } from "@/lib/categories"
 
@@ -129,6 +130,9 @@ export function ProfileContent({ strategist }: { strategist: StrategistProfile }
             <div className="flex flex-col gap-5 lg:sticky lg:top-24">
               <AnimatedSection>
                 <StrategistFocusCard focus={focus} />
+              </AnimatedSection>
+              <AnimatedSection>
+                <CurrentTbpProjects />
               </AnimatedSection>
               <AnimatedSection>
                 <RightSidebar

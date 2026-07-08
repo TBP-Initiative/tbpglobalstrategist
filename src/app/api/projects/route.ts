@@ -3,6 +3,29 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { createNotification, notifyAdmins } from "@/lib/notifications"
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const status = searchParams.get("status") ?? "ACTIVE"
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "10"), 50)
+
+  const projects = await prisma.project.findMany({
+    where: { status },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      image: true,
+      category: true,
+      shortDescription: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  })
+
+  return NextResponse.json(projects)
+}
+
 export async function POST(request: Request) {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
