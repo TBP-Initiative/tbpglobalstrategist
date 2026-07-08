@@ -17,6 +17,9 @@ export default async function AdminUsersPage() {
         image: true,
         createdAt: true,
         strategistProfile: { select: { stage: true } },
+        workAreaAssignments: {
+          select: { workArea: { select: { id: true, name: true, slug: true } } },
+        },
         _count: { select: { createdProjects: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -33,6 +36,7 @@ export default async function AdminUsersPage() {
     createdAt: u.createdAt.toISOString(),
     projects: u._count.createdProjects,
     stage: u.strategistProfile?.stage ?? null,
+    workAreas: u.workAreaAssignments.map((a) => a.workArea.name),
   }))
 
   return <UsersClient users={serialized} total={totalUsers} />

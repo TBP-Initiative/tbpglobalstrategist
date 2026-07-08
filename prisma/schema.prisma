@@ -78,6 +78,7 @@ model User {
   activityLogs     ActivityLog[]
   achievements     Achievement[]
   publications     Publication[]
+  workAreaAssignments UserWorkArea[]
 }
 
 model Account {
@@ -353,4 +354,26 @@ model ActivityLog {
   createdAt DateTime       @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkArea {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments UserWorkArea[]
+}
+
+model UserWorkArea {
+  id         String   @id @default(cuid())
+  userId     String
+  workAreaId String
+  createdAt  DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workArea WorkArea  @relation(fields: [workAreaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workAreaId])
 }

@@ -31,6 +31,7 @@ import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
 import { ChangeRoleDialog } from "@/components/admin/change-role-dialog"
 import { ChangePasswordDialog } from "@/components/admin/change-password-dialog"
 import { ChangeStageDialog } from "@/components/admin/change-stage-dialog"
+import { AssignAreasDialog } from "@/components/admin/assign-areas-dialog"
 import { StageBadge } from "@/components/ui/stage-badge"
 import {
   Users,
@@ -53,6 +54,7 @@ type UserData = {
   createdAt: string
   projects: number
   stage: string | null
+  workAreas: string[]
 }
 
 const roleColors: Record<string, string> = {
@@ -160,6 +162,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Stage</TableHead>
+                  <TableHead>Areas</TableHead>
                   <TableHead>Projects</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -194,6 +197,19 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                       )}
                     </TableCell>
                     <TableCell>
+                      {user.workAreas.length > 0 ? (
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {user.workAreas.map((area) => (
+                            <span key={area} className="inline-block rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                              {area}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <span className="text-sm font-medium">{user.projects}</span>
                     </TableCell>
                     <TableCell>
@@ -220,6 +236,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                             <DropdownMenuSeparator />
                             <ChangeRoleDialog userId={user.id} userName={user.name ?? "Unnamed"} currentRole={user.role} />
                             <ChangeStageDialog userId={user.id} userName={user.name ?? "Unnamed"} currentStage={user.stage} />
+                            <AssignAreasDialog userId={user.id} userName={user.name ?? "Unnamed"} />
                             <ChangePasswordDialog userId={user.id} userName={user.name ?? "Unnamed"} />
                             <DropdownMenuSeparator />
                             <DeleteUserDialog userId={user.id} userName={user.name ?? "Unnamed"} />
@@ -231,7 +248,7 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                       No users found matching your filters.
                     </TableCell>
                   </TableRow>
