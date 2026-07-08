@@ -5,7 +5,6 @@ import { MessageSquare, Mail, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RightSidebarProps {
-  projects: { id: string; title: string; category: string; image: string }[]
   collaborationStatus: string
   location: string
 }
@@ -32,49 +31,11 @@ function GlassCard({ children, className }: { children: React.ReactNode; classNa
   );
 }
 
-export function RightSidebar({ projects, collaborationStatus, location }: RightSidebarProps) {
+export function RightSidebar({ collaborationStatus, location }: RightSidebarProps) {
   return (
     <aside className="flex flex-col gap-5">
-      {/* CARD 1: Current TBP Projects */}
+      {/* CARD 1: Collaboration Status */}
       <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-        <GlassCard>
-          <div className="border-b border-gray-100 px-5 py-4">
-            <h3 className="text-sm font-semibold tracking-wider text-gray-500 uppercase">
-              Current TBP Projects
-            </h3>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="flex items-center gap-3 px-5 py-3 transition-colors duration-200 hover:bg-gray-50"
-              >
-                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-gray-800">
-                    {project.title}
-                  </p>
-                  <p className="truncate text-xs text-gray-500">{project.category}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-gray-100 px-5 py-3">
-            <button className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500">
-              View all →
-            </button>
-          </div>
-        </GlassCard>
-      </motion.div>
-
-      {/* CARD 2: Collaboration Status */}
-      <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
         <GlassCard className="px-5 py-5">
           <h3 className="text-sm font-semibold tracking-wider text-gray-500 uppercase">
             Collaboration Status
@@ -96,8 +57,8 @@ export function RightSidebar({ projects, collaborationStatus, location }: RightS
         </GlassCard>
       </motion.div>
 
-      {/* CARD 3: Contact */}
-      <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+      {/* CARD 2: Contact */}
+      <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
         <GlassCard className="px-5 py-5">
           <h3 className="text-sm font-semibold tracking-wider text-gray-500 uppercase">
             Contact

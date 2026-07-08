@@ -136,7 +136,6 @@ export function ProfileContent({ strategist }: { strategist: StrategistProfile }
               </AnimatedSection>
               <AnimatedSection>
                 <RightSidebar
-                  projects={projects.slice(0, 3)}
                   collaborationStatus={focus.collaborationStatus}
                   location={focus.basedIn}
                 />
