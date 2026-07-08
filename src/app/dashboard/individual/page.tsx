@@ -19,7 +19,6 @@ import {
   FolderKanban,
   UserPlus,
   FileText,
-  Plus,
   Search,
   UserCog,
   Bookmark,
@@ -337,13 +336,11 @@ export default function IndividualDashboard() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Search size={14} />
-              Browse Projects
-            </Button>
-            <Button size="sm" className="gap-1.5">
-              <Plus size={14} />
-              New Project
+            <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <Link href="/dashboard/individual/browse">
+                <Search size={14} />
+                Browse Projects
+              </Link>
             </Button>
           </div>
         </div>
@@ -576,17 +573,17 @@ export default function IndividualDashboard() {
             <GlassCard className="p-6" intensity="light">
               <h3 className="mb-4 text-sm font-semibold">Quick Actions</h3>
               <div className="grid grid-cols-1 gap-2">
-                <Button variant="default" size="sm" className="w-full justify-start gap-2">
-                  <Plus size={14} />
-                  Create Project
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
+                  <Link href="/dashboard/individual/browse">
+                    <Search size={14} />
+                    Browse Projects
+                  </Link>
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
-                  <Search size={14} />
-                  Find Collaborators
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
-                  <UserCog size={14} />
-                  Update Profile
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
+                  <Link href="/dashboard/profile">
+                    <UserCog size={14} />
+                    Update Profile
+                  </Link>
                 </Button>
               </div>
             </GlassCard>
