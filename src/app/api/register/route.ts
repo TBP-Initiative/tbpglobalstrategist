@@ -4,6 +4,7 @@ import { z } from "zod"
 
 import { prisma } from "@/lib/prisma"
 import { registerSchema } from "@/lib/validations"
+import { createNotification, notifyAdmins } from "@/lib/notifications"
 
 const individualRegistrationSchema = registerSchema.extend({
   inviteCode: z.string().optional(),
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(data.password, 12)
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
@@ -63,7 +64,20 @@ export async function POST(request: Request) {
           ? { create: { stage: "CANDIDATE" } }
           : undefined,
       },
-      select: { id: true },
+      select: { id: true, name: true },
+    })
+
+    await createNotification({
+      userId: user.id,
+      title: "Welcome to TBP Global Strategist",
+      message: `Hi ${user.name ?? "there"}! Your account has been created successfully.`,
+      link: "/dashboard",
+    })
+
+    await notifyAdmins({
+      title: "New user registered",
+      message: `${user.name ?? "Someone"} registered as a ${data.role}.`,
+      link: "/dashboard/admin",
     })
 
     return NextResponse.json(

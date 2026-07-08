@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { createNotification, notifyAdmins } from "@/lib/notifications"
 
 export async function POST(request: Request) {
   const session = await auth()
@@ -82,6 +83,20 @@ export async function POST(request: Request) {
     })
 
     const { _count, ...rest } = project
+
+    await createNotification({
+      userId: session.user.id!,
+      title: "Project created",
+      message: `"${project.title}" has been created successfully.`,
+      link: `/dashboard/projects`,
+    })
+
+    await notifyAdmins({
+      title: "New project created",
+      message: `"${project.title}" was created by ${session.user.name ?? "an admin"}.`,
+      link: "/dashboard/projects",
+    })
+
     return NextResponse.json({ ...rest, contributors: _count.contributors }, { status: 201 })
   } catch (error) {
     console.error("Failed to create project:", error)

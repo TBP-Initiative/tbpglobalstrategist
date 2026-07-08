@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { createNotification, notifyAdmins } from "@/lib/notifications"
 
 export async function GET() {
   try {
@@ -95,8 +96,21 @@ export async function PATCH(req: Request) {
           create: { userId: session.user.id, ...profileData },
           update: profileData,
         } as any)
+
+        notifyAdmins({
+          title: "Profile updated",
+          message: `${session.user.name ?? "A user"} updated their profile.`,
+          link: "/dashboard/admin",
+        })
       }
     }
+
+    await createNotification({
+      userId: session.user.id,
+      title: "Profile updated",
+      message: "Your profile has been updated successfully.",
+      link: "/dashboard/profile",
+    })
 
     return NextResponse.json({ success: true })
   } catch (err) {

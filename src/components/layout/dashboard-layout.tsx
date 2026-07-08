@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/layout/sidebar";
@@ -16,7 +16,33 @@ import {
   UserPlus,
   Shield,
   Award,
+  Info,
+  AlertTriangle,
 } from "lucide-react";
+
+const notifIcons: Record<string, React.ReactNode> = {
+  SYSTEM: <Info size={14} />,
+  MESSAGE: <MessageSquare size={14} />,
+  PROJECT_INVITE: <Shield size={14} />,
+  ACHIEVEMENT_UNLOCKED: <Award size={14} />,
+}
+
+const notifColors: Record<string, string> = {
+  SYSTEM: "text-blue-500",
+  MESSAGE: "text-purple-500",
+  PROJECT_INVITE: "text-amber-500",
+  ACHIEVEMENT_UNLOCKED: "text-green-500",
+}
+
+type NotifItem = {
+  id: string
+  title: string
+  message: string
+  type: string
+  read: boolean
+  link: string | null
+  createdAt: string
+}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -51,7 +77,26 @@ export default function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotifItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications")
+      if (res.ok) {
+        const data = await res.json()
+        setNotifications(data.items ?? data)
+        setUnreadCount(data.unreadCount ?? data.filter((n: NotifItem) => !n.read).length)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [fetchNotifications])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -63,12 +108,28 @@ export default function DashboardLayout({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const notifications = [
-    { icon: <UserPlus size={14} />, text: "New user registered", time: "2m ago", color: "text-blue-500" },
-    { icon: <MessageSquare size={14} />, text: "New message from Elena Voss", time: "15m ago", color: "text-purple-500" },
-    { icon: <Shield size={14} />, text: "Project approval needed", time: "1h ago", color: "text-amber-500" },
-    { icon: <Award size={14} />, text: "Strategist milestone achieved", time: "3h ago", color: "text-green-500" },
-  ];
+  async function markAsRead(id: string) {
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch { /* ignore */ }
+  }
+
+  function formatNotifTime(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return "just now"
+    if (mins < 60) return `${mins}m ago`
+    const hrs = Math.floor(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    const days = Math.floor(hrs / 24)
+    return `${days}d ago`
+  }
 
   const pathSegments = pathname.split("/").filter(Boolean);
 
@@ -162,7 +223,11 @@ export default function DashboardLayout({
                 className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-fg transition-colors hover:bg-muted hover:text-fg"
               >
                 <Bell size={18} />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-fg leading-none">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </button>
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border bg-background shadow-2xl z-50 overflow-hidden">
@@ -173,19 +238,35 @@ export default function DashboardLayout({
                     </button>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
-                    {notifications.map((n, i) => (
-                      <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer">
-                        <div className={`mt-0.5 ${n.color}`}>{n.icon}</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-fg">{n.text}</p>
-                          <p className="text-xs text-muted-fg">{n.time}</p>
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-muted-fg">No notifications yet</div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => { markAsRead(n.id); if (n.link) window.location.href = n.link }}
+                          className={`flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer ${n.read ? "" : "bg-muted/30"} hover:bg-muted/50`}
+                        >
+                          <div className={`mt-0.5 ${notifColors[n.type] ?? "text-muted-fg"}`}>
+                            {notifIcons[n.type] ?? <UserPlus size={14} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm ${n.read ? "text-muted-fg" : "text-fg font-medium"}`}>
+                              {n.title}
+                            </p>
+                            <p className="text-xs text-muted-fg truncate">{n.message}</p>
+                            <p className="text-xs text-muted-fg mt-0.5">{formatNotifTime(n.createdAt)}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
-                  <div className="border-t border-border p-3 text-center">
-                    <button type="button" className="text-xs text-primary hover:underline">View all notifications</button>
-                  </div>
+                  <Link
+                    href={`/${role}/notifications`}
+                    className="block border-t border-border p-3 text-center text-xs text-primary hover:underline"
+                  >
+                    View all notifications
+                  </Link>
                 </div>
               )}
             </div>
