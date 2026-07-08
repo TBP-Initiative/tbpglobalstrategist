@@ -11,7 +11,7 @@ export async function GET() {
 
     const userId = session.user.id
 
-    const [activeProjects, draftProjects, totalProjects, userContributions, publications, pendingRequests] =
+    const [activeProjects, draftProjects, totalProjects, userContributions, publications, pendingRequests, totalActiveProjects] =
       await Promise.all([
         prisma.project.count({
           where: { contributors: { some: { userId } }, status: "ACTIVE" },
@@ -28,6 +28,7 @@ export async function GET() {
         }),
         prisma.publication.count({ where: { authorId: userId } }),
         prisma.message.count({ where: { receiverId: userId, read: false } }),
+        prisma.project.count({ where: { status: "ACTIVE" } }),
       ])
 
     const projectIds = userContributions.map((pc) => pc.projectId)
@@ -59,6 +60,7 @@ export async function GET() {
       networkSize,
       newThisMonth,
       publications,
+      totalActiveProjects,
     })
   } catch (err) {
     console.error("Dashboard stats error:", err)

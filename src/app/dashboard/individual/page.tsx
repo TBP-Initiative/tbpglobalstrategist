@@ -355,9 +355,9 @@ export default function IndividualDashboard() {
           <StatsCard
             icon={<FolderKanban size={18} />}
             label="Active Projects"
-            value={stats?.activeProjects ?? 0}
+            value={stats?.totalActiveProjects ?? 0}
             trend={{ value: 0, positive: true }}
-            description={`${stats?.inProgress ?? 0} in progress, ${stats?.inDraft ?? 0} in draft`}
+            description={`${stats?.activeProjects ?? 0} you're contributing to`}
             delay={0}
           />
           <StatsCard
