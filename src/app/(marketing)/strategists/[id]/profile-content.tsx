@@ -43,11 +43,11 @@ function mapStrategist(strategist: StrategistProfile) {
   const cat = getCategory(strategist.category)
 
   const focus = {
-    strategicDomain: cat?.name ?? strategist.strategicFocusAreas[0]?.title || "Strategic Advisory",
+    strategicDomain: (cat?.name ?? strategist.strategicFocusAreas[0]?.title) || "Strategic Advisory",
     primaryContribution: cat?.name
       ? cat.name.replace("Global Strategist – ", "").replace(" and ", " & ")
-      : strategist.strategicFocusAreas[1]?.title || "Strategic Planning",
-    currentTbpFocus: cat?.description ?? strategist.strategicFocusAreas[0]?.description || "Strategy & Innovation",
+      : (strategist.strategicFocusAreas[1]?.title || "Strategic Planning"),
+    currentTbpFocus: (cat?.description ?? strategist.strategicFocusAreas[0]?.description) || "Strategy & Innovation",
     collaborationStatus: strategist.collaborationStatus === "open"
       ? "Open for Strategic Partnerships"
       : strategist.collaborationStatus === "limited"
