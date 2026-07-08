@@ -266,10 +266,10 @@ export default function IndividualDashboard() {
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
-        if (data.stage) {
+        if (data.strategistProfile?.stage) {
           setProfile({
-            stage: data.stage,
-            sector: data.sector,
+            stage: data.strategistProfile.stage,
+            sector: data.strategistProfile.sector,
             workAreas: data.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
           })
         }
