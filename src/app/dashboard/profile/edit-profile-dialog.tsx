@@ -146,8 +146,15 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
               <Avatar size="xl" className="ring-2 ring-border">
-                <AvatarImage src={preview ?? undefined} />
-                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt={form.name || user.email}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
+                  <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                )}
               </Avatar>
               <button
                 type="button"

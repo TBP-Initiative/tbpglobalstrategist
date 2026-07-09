@@ -154,9 +154,15 @@ export function ProfileClient() {
               <div className="flex flex-col items-center text-center space-y-4">
                 <Avatar size="lg">
                   {user.image && !avatarError ? (
-                    <AvatarImage key={user.image} src={user.image} onError={() => setAvatarError(true)} />
-                  ) : null}
-                  <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                    <img
+                      src={user.image}
+                      alt={user.name ?? ""}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      onError={() => setAvatarError(true)}
+                    />
+                  ) : (
+                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                  )}
                 </Avatar>
                 <div>
                   <h2 className="text-xl font-bold">{user.name ?? "Unnamed"}</h2>
