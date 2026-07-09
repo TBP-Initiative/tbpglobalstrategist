@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
 import { StatsCard } from "@/components/dashboards/stats-card"
@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { EditProfileDialog } from "./edit-profile-dialog"
 import { formatBio } from "@/lib/format-bio"
 import { getCategory } from "@/lib/categories"
+import { LoadingSpinner } from "@/components/shared/loading-spinner"
 import {
   User,
   Mail,
@@ -48,44 +49,96 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-red-500/10 text-red-500 border-red-500/20",
 }
 
-export function ProfileClient({
-  user,
-}: {
-  user: {
-    id: string
-    name: string | null
-    email: string
-    role: string
-    image: string | null
-    createdAt: string
-    profile: {
-      title: string | null
-      bio: string | null
-      category: string | null
-      city: string | null
-      country: string | null
-      countryCode: string | null
-      yearsOfExperience: number | null
-      availability: boolean
-      linkedinUrl: string | null
-      websiteUrl: string | null
-    } | null
-    stats: {
-      projects: number
-      sentMessages: number
-      receivedMessages: number
-      notifications: number
-      achievements: number
-      publications: number
-    }
-    latestProjects: { id: string; title: string; status: string; createdAt: string }[]
+type ProfileData = {
+  id: string
+  name: string | null
+  email: string
+  role: string
+  image: string | null
+  createdAt: string
+  profile: {
+    title: string | null
+    bio: string | null
+    category: string | null
+    city: string | null
+    country: string | null
+    countryCode: string | null
+    yearsOfExperience: number | null
+    availability: boolean
+    linkedinUrl: string | null
+    websiteUrl: string | null
+  } | null
+  stats: {
+    projects: number
+    sentMessages: number
+    receivedMessages: number
+    notifications: number
+    achievements: number
+    publications: number
   }
+  latestProjects: { id: string; title: string; status: string; createdAt: string }[]
+}
+
+export function ProfileClient({
+  user: initialUser,
+}: {
+  user: ProfileData
 }) {
   const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
+  const [user, setUser] = useState<ProfileData>(initialUser)
+  const [loading, setLoading] = useState(false)
+
+  const refreshProfile = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/profile")
+      const data = await res.json()
+      if (res.ok && data) {
+        setUser({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          image: data.image,
+          createdAt: data.createdAt?.toISOString?.() ?? data.createdAt ?? initialUser.createdAt,
+          profile: data.strategistProfile
+            ? {
+                title: data.strategistProfile.title,
+                bio: data.strategistProfile.bio,
+                category: data.strategistProfile.category,
+                city: data.strategistProfile.city,
+                country: data.strategistProfile.country,
+                countryCode: data.strategistProfile.countryCode,
+                yearsOfExperience: data.strategistProfile.yearsOfExperience,
+                availability: data.strategistProfile.availability,
+                linkedinUrl: data.strategistProfile.linkedinUrl,
+                websiteUrl: data.strategistProfile.websiteUrl,
+              }
+            : null,
+          stats: initialUser.stats,
+          latestProjects: initialUser.latestProjects,
+        })
+      }
+    } catch {
+      // fallback to server-rendered data
+    } finally {
+      setLoading(false)
+    }
+  }, [initialUser])
+
+  useEffect(() => {
+    setUser(initialUser)
+  }, [initialUser])
+
   const initials = user.name
     ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)
     : user.email.slice(0, 2).toUpperCase()
+  const [avatarError, setAvatarError] = useState(false)
+
+  useEffect(() => {
+    setAvatarError(false)
+  }, [user.image])
 
   return (
     <div className="space-y-8">
@@ -114,7 +167,9 @@ export function ProfileClient({
             <GlassCard className="p-6" intensity="light">
               <div className="flex flex-col items-center text-center space-y-4">
                 <Avatar size="lg">
-                  <AvatarImage src={user.image ?? undefined} />
+                  {user.image && !avatarError ? (
+                    <AvatarImage src={user.image} onError={() => setAvatarError(true)} />
+                  ) : null}
                   <AvatarFallback className="text-lg">{initials}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -282,7 +337,13 @@ export function ProfileClient({
         </div>
       </div>
 
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+          <LoadingSpinner />
+        </div>
+      )}
       <EditProfileDialog
+        key={user.image ?? "no-image"}
         open={editOpen}
         onOpenChange={setEditOpen}
         user={{
@@ -293,7 +354,10 @@ export function ProfileClient({
           role: user.role,
           profile: user.profile,
         }}
-        onSaved={() => router.refresh()}
+        onSaved={() => {
+          router.refresh()
+          refreshProfile()
+        }}
       />
     </div>
   )

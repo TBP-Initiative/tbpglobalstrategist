@@ -90,10 +90,13 @@ const ITEMS_PER_PAGE = 9;
 
 function StrategistCard({ strategist, index }: { strategist: StrategistProfile; index: number }) {
   const [imgError, setImgError] = React.useState(false);
+  const initials = strategist.name
+    ? strategist.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
 
   return (
     <motion.div variants={cardVariants} custom={index} layout>
-      <Link href={`/strategists/${strategist.id}`} className="group block">
+      <Link href={`/strategists/${strategist.id}`} className="block group">
         <GlassCard
           hover
           intensity="light"
@@ -103,13 +106,18 @@ function StrategistCard({ strategist, index }: { strategist: StrategistProfile; 
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           <div className="relative z-10 flex flex-1 flex-col">
             <div className="mb-4 flex items-center gap-4">
-              <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden ring-2 ring-white/20 shadow-lg">
-                <img
-                  src={`https://i.pravatar.cc/150?u=${strategist.name.replace(/\s+/g, "-").toLowerCase()}`}
-                  alt={strategist.name}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full overflow-hidden ring-2 ring-white/20 shadow-lg bg-muted">
+                {strategist.avatar && !imgError ? (
+                  <img
+                    src={strategist.avatar}
+                    alt={strategist.name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-muted-foreground">{initials}</span>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-base font-semibold leading-tight">{strategist.name}</h3>
