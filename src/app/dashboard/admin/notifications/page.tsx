@@ -4,6 +4,6 @@ export const metadata = {
   title: "Notifications",
 }
 
-export default function NotificationsPage() {
+export default function AdminNotificationsPage() {
   return <NotificationsClient />
 }

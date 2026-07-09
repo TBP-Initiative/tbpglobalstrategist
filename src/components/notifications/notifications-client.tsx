@@ -45,7 +45,7 @@ const colorMap: Record<string, string> = {
   PUBLICATION_APPROVED: "text-cyan-500 bg-cyan-500/10",
 }
 
-export default function NotificationsClient() {
+export function NotificationsClient() {
   const [items, setItems] = useState<RawNotification[]>([])
   const [loading, setLoading] = useState(true)
 
