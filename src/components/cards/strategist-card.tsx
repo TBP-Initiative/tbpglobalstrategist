@@ -58,10 +58,11 @@ const StrategistCard = React.forwardRef<HTMLDivElement, StrategistCardProps>(
               <Avatar size="md">
                 {avatar ? (
                   <AvatarImage src={avatar} alt={name} />
-                ) : null}
-                <AvatarFallback className="text-xs font-semibold">
-                  {initials}
-                </AvatarFallback>
+                ) : (
+                  <AvatarFallback className="text-xs font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div className="min-w-0 flex-1">
                 <h4 className="truncate text-sm font-semibold group-hover:text-primary transition-colors">
@@ -96,10 +97,11 @@ const StrategistCard = React.forwardRef<HTMLDivElement, StrategistCardProps>(
             <Avatar size="lg">
               {avatar ? (
                 <AvatarImage src={avatar} alt={name} />
-              ) : null}
-              <AvatarFallback className="font-semibold">
-                {initials}
-              </AvatarFallback>
+              ) : (
+                <AvatarFallback className="font-semibold">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             <div className="min-w-0 flex-1">
               <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">

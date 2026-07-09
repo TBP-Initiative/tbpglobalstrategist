@@ -90,16 +90,19 @@ export function FeaturedProjectCard({ project, index }: FeaturedProjectCardProps
                     size="sm"
                     className="ring-2 ring-card"
                   >
-                    <AvatarImage
-                      src={contributor.avatar || undefined}
-                      alt={contributor.name}
-                    />
-                    <AvatarFallback className="text-[10px]">
-                      {contributor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
+                    {contributor.avatar ? (
+                      <AvatarImage
+                        src={contributor.avatar}
+                        alt={contributor.name}
+                      />
+                    ) : (
+                      <AvatarFallback className="text-[10px]">
+                        {contributor.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                 ))}
                 {project.contributorCount > 3 && (
