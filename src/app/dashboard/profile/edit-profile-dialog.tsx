@@ -39,7 +39,7 @@ interface EditProfileDialogProps {
       websiteUrl: string | null
     } | null
   }
-  onSaved: () => void
+  onSaved: (newImage: string | null) => void
 }
 
 export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditProfileDialogProps) {
@@ -123,9 +123,10 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
         throw new Error(data.error || "Failed to save")
       }
       toast.success("Profile updated!")
+      const savedImage = optimizedDataUrl
       setOptimizedDataUrl(null)
       onOpenChange(false)
-      onSaved()
+      onSaved(savedImage)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save profile")
     } finally {

@@ -75,7 +75,7 @@ export function ProfileClient() {
   const fetchProfile = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/profile")
+      const res = await fetch(`/api/profile?t=${Date.now()}`)
       const data = await res.json()
       if (res.ok && data) {
         setUser({
@@ -154,7 +154,7 @@ export function ProfileClient() {
               <div className="flex flex-col items-center text-center space-y-4">
                 <Avatar size="lg">
                   {user.image && !avatarError ? (
-                    <AvatarImage src={user.image} onError={() => setAvatarError(true)} />
+                    <AvatarImage key={user.image} src={user.image} onError={() => setAvatarError(true)} />
                   ) : null}
                   <AvatarFallback className="text-lg">{initials}</AvatarFallback>
                 </Avatar>
@@ -272,7 +272,10 @@ export function ProfileClient() {
           role: user.role,
           profile: user.profile,
         }}
-        onSaved={() => {
+        onSaved={(newImage: string | null) => {
+          if (newImage) {
+            setUser((prev) => prev ? { ...prev, image: newImage } : prev)
+          }
           fetchProfile()
         }}
       />

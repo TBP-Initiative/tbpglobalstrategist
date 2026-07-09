@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createNotification, notifyAdmins } from "@/lib/notifications"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     const session = await auth()
