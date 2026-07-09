@@ -13,7 +13,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { GlassCard } from "@/components/shared/glass-card"
 import { optimizeImage } from "@/lib/image-optimize"
 
