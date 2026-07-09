@@ -262,7 +262,7 @@ export default function DashboardLayout({
                     )}
                   </div>
                   <Link
-                    href={`/${role}/notifications`}
+                    href={`/dashboard/${role}/notifications`}
                     className="block border-t border-border p-3 text-center text-xs text-primary hover:underline"
                   >
                     View all notifications
