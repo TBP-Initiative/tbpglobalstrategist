@@ -158,15 +158,19 @@ const features = [
   },
 ]
 
-const featuredStrategists = [
-  { name: "Dr. Elena Voss", title: "AI & Digital Transformation", area: "Technology", color: "from-blue-500 to-cyan-500", image: `https://i.pravatar.cc/150?u=elena-voss` },
-  { name: "Marcus Chen", title: "Financial Strategy & M&A", area: "Finance", color: "from-violet-500 to-purple-500", image: `https://i.pravatar.cc/150?u=marcus-chen` },
-  { name: "Aisha Patel", title: "Sustainability & ESG", area: "Energy", color: "from-emerald-500 to-teal-500", image: `https://i.pravatar.cc/150?u=aisha-patel` },
-  { name: "James Okonkwo", title: "Market Expansion & Operations", area: "Consulting", color: "from-amber-500 to-orange-500", image: `https://i.pravatar.cc/150?u=james-okonkwo` },
-  { name: "Sofia Laurent", title: "Organizational Design & Change", area: "HR", color: "from-rose-500 to-pink-500", image: `https://i.pravatar.cc/150?u=sofia-laurent` },
-  { name: "Kenji Tanaka", title: "Supply Chain & Logistics", area: "Manufacturing", color: "from-indigo-500 to-blue-500", image: `https://i.pravatar.cc/150?u=kenji-tanaka` },
-  { name: "Isabella Rossi", title: "Innovation & R&D Strategy", area: "Pharma", color: "from-cyan-500 to-teal-500", image: `https://i.pravatar.cc/150?u=isabella-rossi` },
-  { name: "David Kim", title: "Cybersecurity & Risk", area: "Defense", color: "from-purple-500 to-pink-500", image: `https://i.pravatar.cc/150?u=david-kim` },
+const gradientColors = [
+  "from-blue-500 to-cyan-500",
+  "from-violet-500 to-purple-500",
+  "from-emerald-500 to-teal-500",
+  "from-amber-500 to-orange-500",
+  "from-rose-500 to-pink-500",
+  "from-indigo-500 to-blue-500",
+  "from-cyan-500 to-teal-500",
+  "from-purple-500 to-pink-500",
+  "from-teal-500 to-green-500",
+  "from-orange-500 to-red-500",
+  "from-sky-500 to-indigo-500",
+  "from-fuchsia-500 to-pink-500",
 ]
 
 const activeProjects = [
@@ -479,6 +483,30 @@ function FeaturesSection() {
 }
 
 function StrategistsSection() {
+  const [strategists, setStrategists] = useState<{ name: string; title: string; area: string; color: string; image: string }[]>([])
+
+  useEffect(() => {
+    fetch("/api/strategists")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!Array.isArray(data)) return
+        const shuffled = [...data].sort(() => Math.random() - 0.5)
+        const picked = shuffled.slice(0, 12)
+        setStrategists(
+          picked.map((s: Record<string, unknown>, i: number) => ({
+            name: (s.name as string) ?? "Unknown",
+            title: (s.headline as string) ?? (s.badge as string) ?? "Strategist",
+            area: (s.sector as string) ?? (s.category as string) ?? "Strategy",
+            color: gradientColors[i % gradientColors.length],
+            image: (s.avatar as string) || `https://i.pravatar.cc/150?u=${encodeURIComponent((s.name as string) ?? i)}`,
+          }))
+        )
+      })
+      .catch(() => {})
+  }, [])
+
+  if (strategists.length === 0) return null
+
   return (
     <section className="relative pt-8 pb-24">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/[0.02] to-transparent" />
@@ -513,7 +541,7 @@ function StrategistsSection() {
           className="flex gap-6 px-4"
           style={{ width: "max-content" }}
         >
-          {[...featuredStrategists, ...featuredStrategists].map((strategist, i) => {
+          {[...strategists, ...strategists].map((strategist, i) => {
             return (
               <GlassCard
                 key={`${strategist.name}-${i}`}
