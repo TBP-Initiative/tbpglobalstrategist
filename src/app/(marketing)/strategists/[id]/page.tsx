@@ -26,6 +26,28 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
         workAreaAssignments: {
           select: { workArea: { select: { name: true } } },
         },
+        submissions: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            stage: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+        activityLogs: {
+          select: {
+            id: true,
+            action: true,
+            entity: true,
+            entityId: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
         _count: {
           select: {
             projectContributors: true,
@@ -68,7 +90,20 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
         yearsActive: user.strategistProfile?.yearsOfExperience ?? 0,
       },
       featuredProjects: [],
-      activityTimeline: [],
+      activityTimeline: [
+        ...user.submissions.map((s) => ({
+          date: s.createdAt.toISOString(),
+          type: "contribution",
+          title: s.title,
+          description: s.description ?? `Submitted for ${s.stage} stage`,
+        })),
+        ...user.activityLogs.map((log) => ({
+          date: log.createdAt.toISOString(),
+          type: log.action === "PUBLISH" ? "publication" : log.action.includes("PROJECT") ? "milestone" : "contribution",
+          title: `${log.action.toLowerCase().replace(/_/g, " ")}${log.entity ? ` — ${log.entity}` : ""}`,
+          description: log.entity ? `${log.action} on ${log.entity}` : log.action,
+        })),
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
       publications: [],
       achievements: [],
       mediaGallery: [],
