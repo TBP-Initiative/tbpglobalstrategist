@@ -341,32 +341,6 @@ export default function IndividualDashboard() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection>
-        <div className="flex flex-col gap-6 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                Welcome back, {firstName}
-              </h1>
-              <Sparkles size={20} className="text-amber-500" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Here&apos;s your strategic overview for today. You have{" "}
-              <span className="font-medium text-primary">{stats?.activeProjects ?? 0} active projects</span> and{" "}
-              <span className="font-medium text-primary">{stats?.pendingRequests ?? 0} pending requests</span>.
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5" asChild>
-              <Link href="/dashboard/individual/browse">
-                <Search size={14} />
-                Browse Projects
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </AnimatedSection>
-
       {loading ? (
         <div className="flex justify-center py-12">
           <LoadingSpinner />
