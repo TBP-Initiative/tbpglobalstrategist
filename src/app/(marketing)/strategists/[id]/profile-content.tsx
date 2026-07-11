@@ -86,6 +86,9 @@ function mapStrategist(strategist: StrategistProfile) {
       year: "numeric",
     }),
     type: typeMap[a.type] || "contribution",
+    fileUrl: a.fileUrl,
+    fileType: a.fileType,
+    fileSize: a.fileSize,
   }))
 
   return { heroData, focus, projects, activities }

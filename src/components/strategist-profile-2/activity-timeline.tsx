@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { FileText, Trophy, GitBranch, Users, Clock } from "lucide-react"
+import { FileText, Trophy, GitBranch, Users, Clock, Download } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ActivityTimelineProps {
@@ -11,6 +11,9 @@ interface ActivityTimelineProps {
     description: string
     date: string
     type: "publication" | "milestone" | "contribution" | "assignment"
+    fileUrl?: string
+    fileType?: string
+    fileSize?: number | null
   }[]
 }
 
@@ -96,6 +99,18 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
                     <Clock className="h-3 w-3 text-gray-400" />
                     <span className="text-sm text-gray-400">{activity.date}</span>
                   </div>
+                  {activity.fileUrl && (
+                    <a
+                      href={activity.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      <Download className="h-3 w-3" />
+                      {activity.fileType?.toUpperCase() ?? "File"}
+                      {activity.fileSize ? ` · ${(activity.fileSize / 1024).toFixed(0)} KB` : ""}
+                    </a>
+                  )}
                 </div>
               </div>
             </motion.div>

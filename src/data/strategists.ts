@@ -26,7 +26,7 @@ export interface StrategistProfile {
     image: string;
     status: string;
   }[];
-  activityTimeline: { date: string; type: string; title: string; description: string }[];
+  activityTimeline: { date: string; type: string; title: string; description: string; fileUrl?: string; fileType?: string; fileSize?: number | null }[];
   publications: { title: string; journal: string; year: number; link: string }[];
   achievements: { title: string; organization: string; year: number; description: string }[];
   mediaGallery: { url: string; title: string; type: "image" | "video" }[];
