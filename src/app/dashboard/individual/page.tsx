@@ -23,7 +23,6 @@ import {
   FileText,
   Search,
   UserCog,
-  Bookmark,
   ExternalLink,
   ArrowRight,
   Clock,
@@ -60,185 +59,64 @@ const stageDescriptions: Record<string, string> = {
   PAID_ADVISER: "You are eligible for paid advisory, research, or implementation roles on active projects.",
 }
 
-const projects = [
-  {
-    id: "1",
-    title: "Digital Transformation Strategy",
-    description: "Enterprise-wide digital transformation roadmap for a Fortune 500 manufacturing client.",
-    status: "active" as const,
-    progress: 65,
-    team: ["AS", "MK", "JL"],
-    deadline: "2026-08-15",
-  },
-  {
-    id: "2",
-    title: "Market Expansion APAC",
-    description: "Strategic market entry analysis for Southeast Asian markets.",
-    status: "active" as const,
-    progress: 40,
-    team: ["AS", "RN"],
-    deadline: "2026-09-30",
-  },
-  {
-    id: "3",
-    title: "Sustainability Framework",
-    description: "Developing ESG measurement framework for financial services sector.",
-    status: "draft" as const,
-    progress: 15,
-    team: ["AS"],
-    deadline: "2026-10-01",
-  },
-  {
-    id: "4",
-    title: "Operational Excellence Review",
-    description: "Process optimization and operational efficiency analysis.",
-    status: "completed" as const,
-    progress: 100,
-    team: ["AS", "MK", "JL", "RN"],
-    deadline: "2026-05-01",
-  },
-]
-
-const activities = [
-  {
-    id: "a1",
-    type: "project_created" as const,
-    title: "New project created",
-    description: "Digital Transformation Strategy has been initiated",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    user: "Alex Strategist",
-  },
-  {
-    id: "a2",
-    type: "collaboration" as const,
-    title: "Collaboration request accepted",
-    description: "Michael K. joined Market Expansion APAC",
-    timestamp: new Date(Date.now() - 1000 * 60 * 120),
-    user: "Michael K.",
-  },
-  {
-    id: "a3",
-    type: "message" as const,
-    title: "New message from Sarah",
-    description: "Feedback on the sustainability framework draft",
-    timestamp: new Date(Date.now() - 1000 * 60 * 180),
-    user: "Sarah Chen",
-  },
-  {
-    id: "a4",
-    type: "project_completed" as const,
-    title: "Project completed",
-    description: "Operational Excellence Review marked as complete",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    user: "Alex Strategist",
-  },
-  {
-    id: "a5",
-    type: "profile_update" as const,
-    title: "Profile updated",
-    description: "Expertise areas and skills section updated",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    user: "Alex Strategist",
-  },
-  {
-    id: "a6",
-    type: "project_created" as const,
-    title: "Market Expansion project scoped",
-    description: "APAC market research phase defined with milestones",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    user: "Alex Strategist",
-  },
-]
-
-const notifications = [
-  {
-    id: "n1",
-    type: "info" as const,
-    title: "Project deadline approaching",
-    description: "Digital Transformation Strategy deliverable due in 3 days",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    read: false,
-  },
-  {
-    id: "n2",
-    type: "achievement" as const,
-    title: "Milestone unlocked: 5 Projects",
-    description: "You've reached 5 completed projects milestone",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    read: false,
-  },
-  {
-    id: "n3",
-    type: "reminder" as const,
-    title: "Profile completion reminder",
-    description: "Add your portfolio to reach 100% profile completion",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    read: false,
-  },
-  {
-    id: "n4",
-    type: "warning" as const,
-    title: "Collaboration request expiring",
-    description: "Request from TechVentures Inc. expires in 2 days",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    read: true,
-  },
-  {
-    id: "n5",
-    type: "alert" as const,
-    title: "New platform feature",
-    description: "AI-powered project insights now available",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    read: true,
-  },
-  {
-    id: "n6",
-    type: "info" as const,
-    title: "Team member joined",
-    description: "Jessica L. has joined your network",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 96),
-    read: true,
-  },
-]
-
-const collaborationRequests = [
-  {
-    id: "c1",
-    name: "Sarah Chen",
-    role: "Innovation Strategist",
-    expertise: ["Digital Transformation", "AI Strategy"],
-    avatar: "SC",
-    mutualConnections: 4,
-  },
-  {
-    id: "c2",
-    name: "Marcus Rivera",
-    role: "Organizational Design Lead",
-    expertise: ["Change Management", "Org Design"],
-    avatar: "MR",
-    mutualConnections: 2,
-  },
-  {
-    id: "c3",
-    name: "Priya Sharma",
-    role: "Sustainability Consultant",
-    expertise: ["ESG", "Circular Economy"],
-    avatar: "PS",
-    mutualConnections: 7,
-  },
-]
-
-const savedInitiatives = [
-  { id: "s1", title: "AI Governance Framework", saves: 234, category: "Innovation" },
-  { id: "s2", title: "Net Zero Roadmap 2030", saves: 189, category: "Sustainability" },
-  { id: "s3", title: "Future of Work Report", saves: 156, category: "Trends" },
-]
-
-const statusConfig = {
+const statusConfig: Record<string, { label: string; color: string }> = {
   active: { label: "Active", color: "bg-green-500/10 text-green-500 border-green-500/20" },
   draft: { label: "Draft", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
   completed: { label: "Completed", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-  "on-hold": { label: "On Hold", color: "bg-red-500/10 text-red-500 border-red-500/20" },
+  cancelled: { label: "Cancelled", color: "bg-red-500/10 text-red-500 border-red-500/20" },
+}
+
+const notificationTypeMap: Record<string, "info" | "warning" | "achievement" | "reminder" | "alert"> = {
+  MESSAGE: "info",
+  PROJECT_INVITE: "info",
+  ORGANIZATION_INVITE: "warning",
+  ACHIEVEMENT_UNLOCKED: "achievement",
+  PUBLICATION_APPROVED: "achievement",
+  SYSTEM: "info",
+}
+
+interface ProjectItem {
+  id: string
+  title: string
+  slug: string
+  description: string
+  status: string
+  progress: number
+  contributorCount: number
+  role: string
+  joinedAt: string
+  startDate: string | null
+  endDate: string | null
+}
+
+interface ActivityItem {
+  id: string
+  type: "project_created" | "project_completed" | "collaboration" | "message" | "profile_update"
+  title: string
+  description: string
+  timestamp: Date
+}
+
+interface NotificationItem {
+  id: string
+  type: "info" | "warning" | "achievement" | "reminder" | "alert"
+  title: string
+  description: string
+  timestamp: Date
+  read: boolean
+}
+
+interface CollaborationItem {
+  id: string
+  userId: string
+  name: string
+  image: string
+  title: string
+  sector: string | null
+  stage: string
+  projectRole: string
+  projectName: string
+  joinedAt: string
 }
 
 export default function IndividualDashboard() {
@@ -246,43 +124,76 @@ export default function IndividualDashboard() {
   const [showAllProjects, setShowAllProjects] = useState(false)
   const [stats, setStats] = useState<{
     activeProjects: number
-    inProgress: number
-    inDraft: number
     collaborations: number
     pendingRequests: number
     networkSize: number
     newThisMonth: number
     publications: number
+    totalActiveProjects: number
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[] } | null>(null)
 
+  const [projects, setProjects] = useState<ProjectItem[]>([])
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [collaborations, setCollaborations] = useState<CollaborationItem[]>([])
+
   useEffect(() => {
-    fetch("/api/dashboard/stats")
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-    fetch("/api/profile")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.strategistProfile?.stage) {
+    Promise.all([
+      fetch("/api/dashboard/stats").then((r) => r.json()),
+      fetch("/api/profile").then((r) => r.json()),
+      fetch("/api/dashboard/my-projects").then((r) => r.json()),
+      fetch("/api/dashboard/activities").then((r) => r.json()),
+      fetch("/api/notifications").then((r) => r.json()),
+      fetch("/api/dashboard/collaborations").then((r) => r.json()),
+    ])
+      .then(([statsData, profileData, projectsData, activitiesData, notificationsData, collabsData]) => {
+        setStats(statsData)
+        if (profileData.strategistProfile?.stage) {
           setProfile({
-            stage: data.strategistProfile.stage,
-            sector: data.strategistProfile.sector,
-            workAreas: data.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
+            stage: profileData.strategistProfile.stage,
+            sector: profileData.strategistProfile.sector,
+            workAreas: profileData.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
           })
+        }
+        if (Array.isArray(projectsData)) {
+          setProjects(projectsData)
+        }
+        if (Array.isArray(activitiesData)) {
+          setActivities(
+            activitiesData.map((a: { id: string; type: string; title: string; description: string; timestamp: string }) => ({
+              id: a.id,
+              type: (["project_created", "project_completed", "collaboration", "message", "profile_update"].includes(a.type) ? a.type : "profile_update") as ActivityItem["type"],
+              title: a.title,
+              description: a.description,
+              timestamp: new Date(a.timestamp),
+            }))
+          )
+        }
+        if (Array.isArray(notificationsData)) {
+          setNotifications(
+            notificationsData.map((n: { id: string; type: string; title: string; message: string; read: boolean; createdAt: string }) => ({
+              id: n.id,
+              type: notificationTypeMap[n.type] ?? "info",
+              title: n.title,
+              description: n.message,
+              timestamp: new Date(n.createdAt),
+              read: n.read,
+            }))
+          )
+        }
+        if (Array.isArray(collabsData)) {
+          setCollaborations(collabsData)
         }
       })
       .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const firstName = session?.user?.name?.split(" ")[0] || "Strategist"
   const currentStage = profile?.stage ?? "CANDIDATE"
   const currentStageIndex = stageOrder.indexOf(currentStage)
-  const nextStage = currentStageIndex < stageOrder.length - 1 ? stageOrder[currentStageIndex + 1] : null
   const visibleProjects = showAllProjects ? projects : projects.slice(0, 3)
 
   return (
@@ -423,8 +334,13 @@ export default function IndividualDashboard() {
                 </Button>
               </div>
               <div className="space-y-3">
+                {visibleProjects.length === 0 && (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    No projects yet. Browse and join projects to get started.
+                  </p>
+                )}
                 {visibleProjects.map((project, index) => {
-                  const status = statusConfig[project.status]
+                  const status = statusConfig[project.status] ?? statusConfig.draft
                   return (
                     <motion.div
                       key={project.id}
@@ -444,8 +360,8 @@ export default function IndividualDashboard() {
                           <p className="text-xs text-muted-foreground">
                             {project.description}
                           </p>
-                            <div className="flex items-center gap-4">
-                              <div className="flex-1 max-w-xs">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1 max-w-xs">
                               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                                 <span>Progress</span>
                                 <span>{project.progress}%</span>
@@ -459,7 +375,7 @@ export default function IndividualDashboard() {
                             <div className="flex items-center gap-1.5">
                               <Clock size={10} className="text-muted-foreground" />
                               <span className="text-[10px] text-muted-foreground">
-                                {project.deadline}
+                                {project.endDate ? new Date(project.endDate).toLocaleDateString() : "No deadline"}
                               </span>
                             </div>
                           </div>
@@ -468,8 +384,11 @@ export default function IndividualDashboard() {
                           variant="ghost"
                           size="icon"
                           className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                          asChild
                         >
-                          <ExternalLink size={14} />
+                          <Link href={`/dashboard/projects/${project.slug}`}>
+                            <ExternalLink size={14} />
+                          </Link>
                         </Button>
                       </div>
                     </motion.div>
@@ -490,7 +409,17 @@ export default function IndividualDashboard() {
           </AnimatedSection>
 
           <AnimatedSection delay={0.3}>
-            <ActivityFeed items={activities} title="Recent Activity" />
+            {activities.length > 0 ? (
+              <ActivityFeed items={activities} title="Recent Activity" />
+            ) : (
+              <GlassCard className="p-6" intensity="light">
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Clock size={24} className="mb-2 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground">No activity yet</p>
+                  <p className="text-xs text-muted-foreground/70">Your recent actions will appear here</p>
+                </div>
+              </GlassCard>
+            )}
           </AnimatedSection>
         </div>
 
@@ -503,87 +432,52 @@ export default function IndividualDashboard() {
             <GlassCard className="p-6" intensity="light">
               <div className="mb-4 flex items-center gap-2">
                 <UserPlus size={16} className="text-muted-foreground" />
-                <h3 className="text-sm font-semibold">Collaboration Requests</h3>
+                <h3 className="text-sm font-semibold">Collaborators</h3>
               </div>
               <div className="space-y-3">
-                {collaborationRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <Avatar size="sm">
-                      <AvatarFallback className="text-xs">{req.avatar}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">{req.name}</p>
-                      <p className="text-xs text-muted-foreground">{req.role}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {req.expertise.map((exp) => (
-                          <Badge
-                            key={exp}
-                            variant="outline"
-                            className="text-[10px] px-1.5 py-0"
-                          >
-                            {exp}
+                {collaborations.length === 0 && (
+                  <p className="py-4 text-center text-xs text-muted-foreground">
+                    No collaborators yet. Join a project to start collaborating.
+                  </p>
+                )}
+                {collaborations.map((collab) => {
+                  const initials = collab.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)
+                  return (
+                    <div
+                      key={collab.id}
+                      className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted/50"
+                    >
+                      <Avatar size="sm">
+                        {collab.image ? (
+                          <img src={collab.image} alt={collab.name} className="h-full w-full object-cover" />
+                        ) : null}
+                          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">{collab.name}</p>
+                        <p className="text-xs text-muted-foreground">{collab.title}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {collab.sector && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                              {collab.sector}
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            {collab.projectRole}
                           </Badge>
-                        ))}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          on {collab.projectName}
+                        </p>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">
-                        {req.mutualConnections} mutual connections
-                      </p>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <Button size="sm" className="h-7 text-xs px-2">
-                        Accept
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs px-2 text-muted-foreground"
-                      >
-                        Decline
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </GlassCard>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.4}>
-            <GlassCard className="p-6" intensity="light">
-              <div className="mb-4 flex items-center gap-2">
-                <Bookmark size={16} className="text-muted-foreground" />
-                <h3 className="text-sm font-semibold">Saved Initiatives</h3>
-              </div>
-              <div className="space-y-2">
-                {savedInitiatives.map((initiative) => (
-                  <div
-                    key={initiative.id}
-                    className="flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{initiative.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {initiative.category} &middot; {initiative.saves} saves
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                      <ExternalLink size={12} />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs text-muted-foreground"
-                  asChild
-                >
-                  <Link href="/dashboard/initiatives">
-                    Browse all initiatives
-                    <ArrowRight size={12} className="ml-1" />
-                  </Link>
-                </Button>
+                  )
+                })}
               </div>
             </GlassCard>
           </AnimatedSection>
