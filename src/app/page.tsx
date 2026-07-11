@@ -483,7 +483,7 @@ function FeaturesSection() {
 }
 
 function StrategistsSection() {
-  const [strategists, setStrategists] = useState<{ name: string; title: string; area: string; color: string; image: string }[]>([])
+  const [strategists, setStrategists] = useState<{ id: string; name: string; title: string; area: string; color: string; image: string }[]>([])
 
   useEffect(() => {
     fetch("/api/strategists")
@@ -494,6 +494,7 @@ function StrategistsSection() {
         const picked = shuffled.slice(0, 12)
         setStrategists(
           picked.map((s: Record<string, unknown>, i: number) => ({
+            id: (s.id as string) ?? "",
             name: (s.name as string) ?? "Unknown",
             title: (s.headline as string) ?? (s.badge as string) ?? "Strategist",
             area: (s.sector as string) ?? (s.category as string) ?? "Strategy",
@@ -543,29 +544,30 @@ function StrategistsSection() {
         >
           {[...strategists, ...strategists].map((strategist, i) => {
             return (
-              <GlassCard
-                key={`${strategist.name}-${i}`}
-                hover
-                className="group w-64 shrink-0 p-5"
-              >
-                <div className="flex justify-center mb-3">
-                  <div className="h-28 w-28 rounded-full overflow-hidden ring-2 ring-gray-200 ring-offset-2">
-                    <img
-                      src={strategist.image}
-                      alt={strategist.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
+              <Link key={`${strategist.id}-${i}`} href={`/strategists/${strategist.id}`}>
+                <GlassCard
+                  hover
+                  className="group w-64 shrink-0 p-5"
+                >
+                  <div className="flex justify-center mb-3">
+                    <div className="h-28 w-28 rounded-full overflow-hidden ring-2 ring-gray-200 ring-offset-2">
+                      <img
+                        src={strategist.image}
+                        alt={strategist.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="text-center">
-                  <h4 className="text-sm font-semibold text-black">{strategist.name}</h4>
-                  <p className="mt-0.5 text-xs text-gray-500">{strategist.title}</p>
-                  <Badge variant="outline" className="mt-3 border-gray-200 bg-gray-50 text-xs text-gray-600">
-                    {strategist.area}
-                  </Badge>
-                </div>
-              </GlassCard>
+                  <div className="text-center">
+                    <h4 className="text-sm font-semibold text-black">{strategist.name}</h4>
+                    <p className="mt-0.5 text-xs text-gray-500">{strategist.title}</p>
+                    <Badge variant="outline" className="mt-3 border-gray-200 bg-gray-50 text-xs text-gray-600">
+                      {strategist.area}
+                    </Badge>
+                  </div>
+                </GlassCard>
+              </Link>
             )
           })}
         </motion.div>
