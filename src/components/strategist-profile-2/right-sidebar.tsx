@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { MessageSquare, Mail, MapPin } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface RightSidebarProps {
@@ -67,15 +66,19 @@ export function RightSidebar({ collaborationStatus, location, email, userId }: R
             Contact
           </h3>
           <div className="mt-3 flex flex-col gap-3">
-            <Link
-              href={userId ? `/dashboard/messages?user=${userId}` : "/dashboard/messages"}
+            <button
+              onClick={() => {
+                if (userId) {
+                  window.dispatchEvent(new CustomEvent("open-chat", { detail: { userId } }))
+                }
+              }}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50"
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                 <MessageSquare className="h-3.5 w-3.5" />
               </div>
               <span className="text-sm text-gray-700">Send Message</span>
-            </Link>
+            </button>
             {email ? (
               <a
                 href={`mailto:${email}`}
