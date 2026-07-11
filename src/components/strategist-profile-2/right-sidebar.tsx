@@ -2,11 +2,14 @@
 
 import { motion } from "framer-motion";
 import { MessageSquare, Mail, MapPin } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface RightSidebarProps {
   collaborationStatus: string
   location: string
+  email?: string
+  userId?: string
 }
 
 const cardVariants = {
@@ -31,7 +34,7 @@ function GlassCard({ children, className }: { children: React.ReactNode; classNa
   );
 }
 
-export function RightSidebar({ collaborationStatus, location }: RightSidebarProps) {
+export function RightSidebar({ collaborationStatus, location, email, userId }: RightSidebarProps) {
   return (
     <aside className="flex flex-col gap-5">
       {/* CARD 1: Collaboration Status */}
@@ -64,18 +67,33 @@ export function RightSidebar({ collaborationStatus, location }: RightSidebarProp
             Contact
           </h3>
           <div className="mt-3 flex flex-col gap-3">
-            <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50">
+            <Link
+              href={userId ? `/dashboard/messages?user=${userId}` : "/dashboard/messages"}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50"
+            >
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                 <MessageSquare className="h-3.5 w-3.5" />
               </div>
               <span className="text-sm text-gray-700">Send Message</span>
-            </div>
-            <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
-                <Mail className="h-3.5 w-3.5" />
+            </Link>
+            {email ? (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+                  <Mail className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm text-gray-700">Email</span>
+              </a>
+            ) : (
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+                  <Mail className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm text-gray-400">Email not available</span>
               </div>
-              <span className="text-sm text-gray-700">Email</span>
-            </div>
+            )}
             <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                 <MapPin className="h-3.5 w-3.5" />

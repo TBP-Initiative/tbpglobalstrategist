@@ -143,6 +143,8 @@ export function ProfileContent({ strategist, workAreas = [] }: { strategist: Str
                 <RightSidebar
                   collaborationStatus={focus.collaborationStatus}
                   location={focus.basedIn}
+                  email={strategist.contact.email}
+                  userId={strategist.id}
                 />
               </AnimatedSection>
             </div>
