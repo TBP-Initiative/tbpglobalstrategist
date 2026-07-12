@@ -97,7 +97,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-2xl font-bold text-white lg:text-3xl">
+          <h3 className="truncate text-lg font-bold text-white lg:text-xl">
             {project.title}
           </h3>
 
