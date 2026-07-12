@@ -86,7 +86,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           variants={contentVariants}
           initial="hidden"
           animate="visible"
-          className="flex w-full flex-1 flex-col justify-center gap-3 md:w-1/2"
+          className="flex w-full flex-1 flex-col justify-start gap-2 md:w-1/2"
           style={{ padding: "1%" }}
         >
           {/* Category */}
