@@ -92,12 +92,23 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
             CONTRIBUTOR: "Strategic Contributor", PROJECT_ALIGNED: "Project-Aligned Strategist",
             SECTOR_LEAD: "Sector Lead or Workstream Lead", PAID_ADVISER: "Paid Project Adviser",
           }
+
+          let contribution = ""
+          try {
+            const latestSubmission = await prisma.submission.findFirst({
+              where: { authorId: user.id, stage: { not: null } },
+              orderBy: { createdAt: "desc" },
+              select: { title: true },
+            })
+            if (latestSubmission) contribution = latestSubmission.title
+          } catch { /* ignore */ }
+
           featuredProject = {
             id: proj.id, title: proj.title, slug: proj.slug,
             category: proj.category ?? "Strategic",
             role: contrib.role === "CONTRIBUTOR" ? (stageLabelsMap[user.strategistProfile?.stage ?? "CANDIDATE"] ?? "Contributor") : contrib.role,
             image: proj.image ?? "", description: proj.shortDescription ?? proj.description ?? "",
-            contribution: "", status: proj.status, progress,
+            contribution, status: proj.status, progress,
           }
         }
       } catch { /* ignore */ }

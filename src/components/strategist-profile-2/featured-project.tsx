@@ -53,32 +53,32 @@ function getProgressColor(pct: number) {
   return "bg-indigo-500"
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+}
+
 export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
   const status = project.status ?? "ACTIVE"
   const progress = project.progress ?? 0
   const projectLink = project.slug ? `/projects/${project.slug}` : `/projects/${project.id}`
+  const shortDescription = stripHtml(project.description).slice(0, 200)
 
   return (
     <motion.div
       variants={cardVariants}
       initial="hidden"
       animate="visible"
-      className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg shadow-black/5 transition-all duration-500 hover:border-indigo-500/50 hover:shadow-indigo-500/10"
+      className="group relative overflow-hidden rounded-2xl shadow-lg shadow-black/5 transition-all duration-500"
+      style={{ backgroundColor: "#013466" }}
     >
-      {/* Glow accent on hover */}
-      <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-transparent to-teal-500/10" />
-      </div>
-
-      <div className="relative z-10 flex flex-col md:flex-row">
+      <div className="relative z-10 flex flex-col md:flex-row" style={{ padding: "1%" }}>
         {/* LEFT: Image */}
-        <div className="relative aspect-video w-full overflow-hidden md:aspect-auto md:h-full md:min-h-[400px] md:w-1/2">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl md:aspect-auto md:h-full md:min-h-[400px] md:w-1/2">
           <img
             src={project.image}
             alt={project.title}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/30 md:to-transparent" />
         </div>
 
         {/* RIGHT: Content */}
@@ -86,51 +86,50 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           variants={contentVariants}
           initial="hidden"
           animate="visible"
-          className="flex w-full flex-1 flex-col justify-center gap-3 p-5 md:w-1/2 md:p-6 lg:p-8"
+          className="flex w-full flex-1 flex-col justify-center gap-3 md:w-1/2"
+          style={{ padding: "1%" }}
         >
           {/* Category */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-block rounded-full bg-gradient-to-r from-indigo-500/20 to-teal-500/20 px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-400/30">
+            <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white ring-1 ring-white/30">
               {project.category}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="text-2xl font-bold text-gray-900 lg:text-3xl">
+          <h3 className="text-2xl font-bold text-white lg:text-3xl">
             {project.title}
           </h3>
 
           {/* Short Description */}
-          <p className="max-w-prose text-base leading-relaxed text-gray-600">
-            {project.description}
+          <p className="max-w-prose text-sm leading-relaxed text-white/80 line-clamp-3">
+            {shortDescription}
           </p>
 
           {/* Project Information */}
-          <div className="mt-1 space-y-2 rounded-xl bg-gray-50 p-4 text-sm">
+          <div className="mt-1 space-y-2 rounded-xl bg-white/10 p-4 text-sm">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Role</p>
-                <p className="font-medium text-gray-800">{project.role}</p>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Category</p>
+                <p className="font-medium text-white">{project.category}</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Status</p>
-                <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${statusColors[status] ?? statusColors.DRAFT}`}>
-                  {status.replace(/_/g, " ")}
-                </span>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Role</p>
+                <p className="font-medium text-white">{project.role}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Contribution</p>
-              <p className="text-gray-700">{project.contribution || "—"}</p>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Contribution</p>
+              <p className="text-white/90">{project.contribution || "—"}</p>
             </div>
 
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Progress</p>
-                <span className="text-xs font-semibold text-gray-600">{progress}%</span>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Progress</p>
+                <span className="text-xs font-semibold text-white">{progress}%</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ${getProgressColor(progress)}`}
                   style={{ width: `${progress}%` }}
@@ -143,7 +142,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           <div className="mt-2 flex flex-nowrap items-center gap-3 pt-2">
             <Link
               href={projectLink}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-teal-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/30 hover:brightness-110 active:scale-[0.97]"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-[#013466] shadow-lg transition-all duration-300 hover:bg-white/90 active:scale-[0.97]"
             >
               View Project
               <ArrowRight className="h-4 w-4" />
@@ -155,7 +154,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-chat", { detail: { userId } }))
                 }}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 active:scale-[0.97]"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-transparent px-4 py-2 text-xs font-medium text-white transition-all duration-300 hover:bg-white/10 active:scale-[0.97]"
               >
                 <MessageSquare className="h-4 w-4" />
                 Message Strategist
