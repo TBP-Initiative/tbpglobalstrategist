@@ -98,11 +98,11 @@ function mapStrategist(strategist: StrategistProfile) {
     fileSize: a.fileSize,
   }))
 
-  return { heroData, focus, projects, activities }
+  return { heroData, focus, featured, remainingProjects, activities }
 }
 
 export function ProfileContent({ strategist, workAreas = [] }: { strategist: StrategistProfile; workAreas?: string[] }) {
-  const { heroData, focus, projects, activities } = mapStrategist(strategist)
+  const { heroData, focus, featured, remainingProjects, activities } = mapStrategist(strategist)
 
   const focusWithAreas = { ...focus, workAreas }
 
