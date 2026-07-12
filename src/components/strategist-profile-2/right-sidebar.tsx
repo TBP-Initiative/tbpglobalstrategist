@@ -69,7 +69,12 @@ export function RightSidebar({ collaborationStatus, location, email, userId }: R
             <button
               onClick={() => {
                 if (userId) {
-                  window.dispatchEvent(new CustomEvent("open-chat", { detail: { userId } }))
+                  const onDashboard = window.location.pathname.startsWith("/dashboard")
+                  if (onDashboard) {
+                    window.dispatchEvent(new CustomEvent("open-chat", { detail: { userId } }))
+                  } else {
+                    window.location.href = `/dashboard?user=${userId}`
+                  }
                 }
               }}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-gray-50"
