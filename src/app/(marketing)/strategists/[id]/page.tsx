@@ -62,6 +62,47 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
 
     if (!user || user.role !== "STRATEGIST") return null
 
+    let featuredProject: {
+      id: string; title: string; category: string | null; role: string; image: string | null;
+      description: string; contribution: string; status: string; progress: number; slug: string;
+    } | null = null
+
+    const featuredId = user.strategistProfile?.featuredProjectId
+    if (featuredId) {
+      try {
+        const contrib = await prisma.projectContributor.findUnique({
+          where: { projectId_userId: { projectId: featuredId, userId: user.id } },
+          include: {
+            project: {
+              select: {
+                id: true, title: true, slug: true, description: true, shortDescription: true,
+                image: true, category: true, status: true, createdById: true,
+                milestones: { select: { weight: true, completed: true } },
+              },
+            },
+          },
+        })
+        if (contrib?.project) {
+          const proj = contrib.project
+          const totalWeight = proj.milestones.reduce((sum, m) => sum + m.weight, 0)
+          const completedWeight = proj.milestones.filter((m) => m.completed).reduce((sum, m) => sum + m.weight, 0)
+          const progress = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0
+          const stageLabelsMap: Record<string, string> = {
+            CANDIDATE: "Global Strategist Candidate", STRATEGIST: "Global Strategist",
+            CONTRIBUTOR: "Strategic Contributor", PROJECT_ALIGNED: "Project-Aligned Strategist",
+            SECTOR_LEAD: "Sector Lead or Workstream Lead", PAID_ADVISER: "Paid Project Adviser",
+          }
+          featuredProject = {
+            id: proj.id, title: proj.title, slug: proj.slug,
+            category: proj.category ?? "Strategic",
+            role: contrib.role === "CONTRIBUTOR" ? (stageLabelsMap[user.strategistProfile?.stage ?? "CANDIDATE"] ?? "Contributor") : contrib.role,
+            image: proj.image ?? "", description: proj.shortDescription ?? proj.description ?? "",
+            contribution: "", status: proj.status, progress,
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
     return {
       id: user.id,
       name: user.name ?? "Unknown",
@@ -86,6 +127,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
       strategicFocusAreas: [],
       collaborationStatus: "open" as const,
       affiliation: null,
+      featuredProject,
       stats: {
         projects: user._count.projectContributors,
         publications: user._count.publications,

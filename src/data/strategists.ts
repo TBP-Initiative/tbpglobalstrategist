@@ -26,6 +26,10 @@ export interface StrategistProfile {
     image: string;
     status: string;
   }[];
+  featuredProject?: {
+    id: string; title: string; category: string; role: string; image: string;
+    description: string; contribution: string; status: string; progress: number; slug: string;
+  } | null;
   activityTimeline: { date: string; type: string; title: string; description: string; fileUrl?: string; fileType?: string; fileSize?: number | null }[];
   publications: { title: string; journal: string; year: number; link: string }[];
   achievements: { title: string; organization: string; year: number; description: string }[];

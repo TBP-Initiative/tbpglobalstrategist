@@ -11,6 +11,9 @@ interface ProjectGridProps {
     role: string
     image: string
     description?: string
+    status?: string
+    progress?: number
+    slug?: string
   }[]
 }
 
@@ -72,10 +75,33 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
 
               <p className="text-sm text-gray-600">Role: {project.role}</p>
 
+              {project.status && (
+                <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-gray-200">
+                  {project.status.replace(/_/g, " ")}
+                </span>
+              )}
+
               {project.description && (
                 <p className="line-clamp-2 text-sm text-gray-500">
                   {project.description}
                 </p>
+              )}
+
+              {project.progress != null && (
+                <div className="mt-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Progress</span>
+                    <span className="font-medium text-gray-600">{project.progress}%</span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                    <div
+                      className={`h-full rounded-full ${
+                        project.progress >= 75 ? "bg-emerald-500" : project.progress >= 40 ? "bg-amber-500" : "bg-indigo-500"
+                      }`}
+                      style={{ width: `${project.progress}%` }}
+                    />
+                  </div>
+                </div>
               )}
             </div>
           </motion.div>

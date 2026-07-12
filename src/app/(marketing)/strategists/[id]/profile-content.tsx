@@ -58,6 +58,7 @@ function mapStrategist(strategist: StrategistProfile) {
     basedIn: strategist.location || "",
   }
 
+  const dbFeatured = strategist.featuredProject
   const projects = strategist.featuredProjects.map((p) => ({
     id: p.id,
     title: p.title,
@@ -66,7 +67,13 @@ function mapStrategist(strategist: StrategistProfile) {
     image: p.image,
     description: p.description,
     contribution: "",
+    status: p.status,
+    progress: 0,
+    slug: p.id,
   }))
+
+  const featured = dbFeatured ?? projects[0] ?? null
+  const remainingProjects = dbFeatured ? projects : projects.slice(1)
 
   const typeMap: Record<string, "publication" | "milestone" | "contribution" | "assignment"> = {
     publication: "publication",
@@ -111,15 +118,15 @@ export function ProfileContent({ strategist, workAreas = [] }: { strategist: Str
               </AnimatedSection>
 
             <div className="mt-10 space-y-10">
-              {projects[0] && (
+              {featured && (
                 <AnimatedSection>
-                  <FeaturedProject project={projects[0]} />
+                  <FeaturedProject project={featured} userId={strategist.id} />
                 </AnimatedSection>
               )}
 
-              {projects.length > 1 && (
+              {remainingProjects.length > 0 && (
                 <AnimatedSection>
-                  <ProjectGrid projects={projects.slice(1)} />
+                  <ProjectGrid projects={remainingProjects} />
                 </AnimatedSection>
               )}
 

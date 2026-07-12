@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { LoadingSpinner } from "@/components/shared/loading-spinner"
+import { FeaturedProjectSelector } from "@/components/dashboards/featured-project-selector"
 import { cn } from "@/lib/utils"
 import {
   FolderKanban,
@@ -480,6 +481,10 @@ export default function IndividualDashboard() {
                 })}
               </div>
             </GlassCard>
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.45}>
+            <FeaturedProjectSelector />
           </AnimatedSection>
 
           <AnimatedSection delay={0.45}>

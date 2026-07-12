@@ -135,6 +135,7 @@ model StrategistProfile {
   availability      Boolean          @default(true)
   linkedinUrl       String?
   websiteUrl        String?
+  featuredProjectId String?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
