@@ -314,8 +314,6 @@ export default function IndividualDashboard() {
         </div>
       )}
 
-      {profile?.stage && <ProgressionPathway currentStage={profile.stage} />}
-
       {profile?.stage && <SubmissionForm currentStage={profile.stage} />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -515,6 +513,8 @@ export default function IndividualDashboard() {
           </AnimatedSection>
         </div>
       </div>
+
+      {profile?.stage && <ProgressionPathway currentStage={profile.stage} />}
     </div>
   )
 }
