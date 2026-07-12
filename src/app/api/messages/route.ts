@@ -11,75 +11,68 @@ export async function GET() {
 
     const userId = session.user.id
 
-    const messages = await prisma.message.findMany({
-      where: {
-        OR: [{ senderId: userId }, { receiverId: userId }],
-      },
-      include: {
-        sender: { select: { id: true, name: true, email: true, image: true } },
-        receiver: { select: { id: true, name: true, email: true, image: true } },
-      },
-      orderBy: { createdAt: "desc" },
+    const participations = await prisma.conversationParticipant.findMany({
+      where: { userId },
+      select: { conversationId: true },
     })
 
-    const conversationMap = new Map<
-      string,
-      {
-        partnerId: string
-        partnerName: string
-        partnerEmail: string
-        partnerImage: string | null
-        lastMessage: string
-        lastMessageAt: string
-        unreadCount: number
+    const conversationIds = participations.map((p) => p.conversationId)
+
+    const conversations = await prisma.conversation.findMany({
+      where: { id: { in: conversationIds } },
+      include: {
+        participants: {
+          select: {
+            user: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
         messages: {
-          id: string
-          content: string
-          senderId: string
-          createdAt: string
-          read: boolean
-        }[]
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            content: true,
+            senderId: true,
+            createdAt: true,
+            read: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    })
+
+    const unreadCounts = await prisma.message.groupBy({
+      by: ["conversationId"],
+      where: {
+        conversationId: { in: conversationIds },
+        read: false,
+        senderId: { not: userId },
+      },
+      _count: { id: true },
+    })
+
+    const unreadMap = new Map(unreadCounts.map((u) => [u.conversationId, u._count.id]))
+
+    const result = conversations.map((conv) => {
+      const lastMsg = conv.messages[0] ?? null
+      const otherParticipants = conv.participants
+        .filter((p) => p.user.id !== userId)
+        .map((p) => p.user)
+
+      return {
+        id: conv.id,
+        name: conv.isGroup ? conv.name : (otherParticipants[0]?.name ?? "Unknown"),
+        isGroup: conv.isGroup,
+        participants: conv.participants.map((p) => p.user),
+        lastMessage: lastMsg?.content ?? null,
+        lastMessageAt: (lastMsg?.createdAt ?? conv.updatedAt).toISOString(),
+        unreadCount: unreadMap.get(conv.id) ?? 0,
       }
-    >()
+    })
 
-    for (const msg of messages) {
-      const partner = msg.senderId === userId ? msg.receiver : msg.sender
-      const key = partner.id
-
-      if (!conversationMap.has(key)) {
-        conversationMap.set(key, {
-          partnerId: partner.id,
-          partnerName: partner.name ?? "Unknown",
-          partnerEmail: partner.email,
-          partnerImage: partner.image,
-          lastMessage: msg.content,
-          lastMessageAt: msg.createdAt.toISOString(),
-          unreadCount: 0,
-          messages: [],
-        })
-      }
-
-      const conv = conversationMap.get(key)!
-      conv.messages.push({
-        id: msg.id,
-        content: msg.content,
-        senderId: msg.senderId,
-        createdAt: msg.createdAt.toISOString(),
-        read: msg.read,
-      })
-
-      if (!msg.read && msg.receiverId === userId) {
-        conv.unreadCount++
-      }
-    }
-
-    const conversations = Array.from(conversationMap.values()).sort(
-      (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
-    )
-
-    return NextResponse.json(conversations)
+    return NextResponse.json(result)
   } catch (err) {
-    console.error("Messages fetch error:", err)
+    console.error("Conversations fetch error:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -92,75 +85,75 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { receiverId, content } = body
+    const { participantIds, name } = body
 
-    if (!receiverId || !content?.trim()) {
-      return NextResponse.json({ error: "receiverId and content are required" }, { status: 422 })
+    if (!Array.isArray(participantIds) || participantIds.length === 0) {
+      return NextResponse.json({ error: "participantIds is required" }, { status: 422 })
     }
 
-    if (receiverId === session.user.id) {
-      return NextResponse.json({ error: "Cannot message yourself" }, { status: 422 })
+    const allParticipantIds = [...new Set([session.user.id, ...participantIds])]
+    const isGroup = allParticipantIds.length > 2
+
+    if (!isGroup) {
+      const otherUserId = allParticipantIds.find((id) => id !== session.user.id)
+      if (otherUserId) {
+        const existingParts = await prisma.conversationParticipant.findMany({
+          where: { userId: { in: [session.user.id, otherUserId] } },
+          select: { conversationId: true },
+        })
+        const existingConvIds = existingParts.map((p) => p.conversationId)
+
+        if (existingConvIds.length > 0) {
+          const existingConv = await prisma.conversation.findFirst({
+            where: {
+              id: { in: existingConvIds },
+              isGroup: false,
+              participants: { every: { userId: { in: [session.user.id, otherUserId] } } },
+            },
+            include: {
+              participants: {
+                select: { user: { select: { id: true, name: true, email: true, image: true } } },
+              },
+            },
+          })
+
+          if (existingConv) {
+            return NextResponse.json({
+              id: existingConv.id,
+              name: existingConv.participants.find((p) => p.user.id !== session.user.id)?.user.name ?? "Unknown",
+              isGroup: false,
+              participants: existingConv.participants.map((p) => p.user),
+            })
+          }
+        }
+      }
     }
 
-    const receiver = await prisma.user.findUnique({ where: { id: receiverId } })
-    if (!receiver) {
-      return NextResponse.json({ error: "Receiver not found" }, { status: 404 })
-    }
-
-    const message = await prisma.message.create({
+    const conversation = await prisma.conversation.create({
       data: {
-        senderId: session.user.id,
-        receiverId,
-        content: content.trim(),
+        name: isGroup ? (name || null) : null,
+        isGroup,
+        participants: {
+          create: allParticipantIds.map((id) => ({ userId: id })),
+        },
       },
       include: {
-        sender: { select: { id: true, name: true, email: true, image: true } },
-        receiver: { select: { id: true, name: true, email: true, image: true } },
+        participants: {
+          select: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
       },
     })
 
     return NextResponse.json({
-      id: message.id,
-      content: message.content,
-      senderId: message.senderId,
-      receiverId: message.receiverId,
-      createdAt: message.createdAt.toISOString(),
-      read: message.read,
-      sender: message.sender,
-      receiver: message.receiver,
+      id: conversation.id,
+      name: conversation.isGroup
+        ? conversation.name
+        : conversation.participants.find((p) => p.user.id !== session.user.id)?.user.name ?? "Unknown",
+      isGroup: conversation.isGroup,
+      participants: conversation.participants.map((p) => p.user),
     })
   } catch (err) {
-    console.error("Message send error:", err)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
-}
-
-export async function PATCH(req: Request) {
-  try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const body = await req.json()
-    const { senderId } = body
-
-    if (!senderId) {
-      return NextResponse.json({ error: "senderId is required" }, { status: 422 })
-    }
-
-    await prisma.message.updateMany({
-      where: {
-        senderId,
-        receiverId: session.user.id,
-        read: false,
-      },
-      data: { read: true },
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error("Message mark read error:", err)
+    console.error("Conversation create error:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MessageSquare, Send, X, Minus, Search, CircleDot } from "lucide-react"
+import { MessageSquare, Send, X, Minus, Search, Users, Plus, Check } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
@@ -10,19 +10,34 @@ interface Message {
   id: string
   content: string
   senderId: string
+  sender?: { name: string }
   createdAt: string
   read: boolean
 }
 
+interface Participant {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
+}
+
 interface Conversation {
-  partnerId: string
-  partnerName: string
-  partnerEmail: string
-  partnerImage: string | null
-  lastMessage: string
+  id: string
+  name: string
+  isGroup: boolean
+  participants: Participant[]
+  lastMessage: string | null
   lastMessageAt: string
   unreadCount: number
   messages: Message[]
+}
+
+interface Strategist {
+  id: string
+  name: string
+  avatar: string
+  headline: string
 }
 
 function formatTime(dateStr: string) {
@@ -45,16 +60,32 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
+function getGroupAvatar(participants: Participant[], excludeId?: string) {
+  const others = participants.filter((p) => p.id !== excludeId).slice(0, 2)
+  return others
+}
+
+type View = "list" | "chat" | "new-group"
+
 export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: string; openWithUser?: string | null }) {
   const [minimized, setMinimized] = useState(true)
-  const [activeChat, setActiveChat] = useState<string | null>(null)
+  const [view, setView] = useState<View>("list")
+  const [activeConvId, setActiveConvId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [sending, setSending] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loadingMessages, setLoadingMessages] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const [strategists, setStrategists] = useState<Strategist[]>([])
+  const [groupSearch, setGroupSearch] = useState("")
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [groupName, setGroupName] = useState("")
+  const [creatingGroup, setCreatingGroup] = useState(false)
+  const [myUserId, setMyUserId] = useState<string>(currentUserId)
 
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0)
 
@@ -75,100 +106,184 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
   }, [fetchConversations])
 
   useEffect(() => {
-    if (openWithUser) {
+    if (openWithUser && openWithUser !== myUserId) {
       setMinimized(false)
-      setActiveChat(openWithUser)
-      fetchConversations()
+      findOrCreateConversation(openWithUser)
     }
-  }, [openWithUser, fetchConversations])
+  }, [openWithUser])
 
   useEffect(() => {
-    if (!minimized && activeChat) {
+    if (!minimized && view === "chat") {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
-  }, [minimized, activeChat, conversations])
+  }, [minimized, view, messages])
 
   useEffect(() => {
-    if (!minimized && activeChat) {
+    if (!minimized && view === "chat") {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
-  }, [minimized, activeChat])
+  }, [minimized, view])
 
-  const markAsRead = useCallback(async (partnerId: string) => {
+  const fetchMessages = useCallback(async (convId: string) => {
+    setLoadingMessages(true)
     try {
-      await fetch("/api/messages", {
+      const res = await fetch(`/api/messages/${convId}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data)) setMessages(data)
+      }
+    } catch { /* ignore */ }
+    setLoadingMessages(false)
+  }, [])
+
+  const markAsRead = useCallback(async (convId: string) => {
+    try {
+      await fetch(`/api/messages/${convId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ senderId: partnerId }),
       })
       setConversations((prev) =>
-        prev.map((c) =>
-          c.partnerId === partnerId ? { ...c, unreadCount: 0, messages: c.messages.map((m) => ({ ...m, read: true })) } : c
-        )
+        prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0, messages: c.messages.map((m) => ({ ...m, read: true })) } : c))
       )
     } catch { /* ignore */ }
   }, [])
 
-  const openChat = useCallback((partnerId: string) => {
-    setActiveChat(partnerId)
-    setMinimized(false)
-    markAsRead(partnerId)
-  }, [markAsRead])
+  const findOrCreateConversation = useCallback(async (userId: string) => {
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantIds: [userId] }),
+      })
+      if (res.ok) {
+        const conv = await res.json()
+        await fetchConversations()
+        setActiveConvId(conv.id)
+        setView("chat")
+        fetchMessages(conv.id)
+        markAsRead(conv.id)
+      }
+    } catch { /* ignore */ }
+  }, [fetchConversations, fetchMessages, markAsRead])
+
+  const openChat = useCallback((convId: string) => {
+    setActiveConvId(convId)
+    setView("chat")
+    fetchMessages(convId)
+    markAsRead(convId)
+  }, [fetchMessages, markAsRead])
 
   const sendMessage = useCallback(async () => {
-    if (!newMessage.trim() || !activeChat || sending) return
+    if (!newMessage.trim() || !activeConvId || sending) return
     setSending(true)
     const content = newMessage.trim()
     setNewMessage("")
 
     try {
-      const res = await fetch("/api/messages", {
+      const res = await fetch(`/api/messages/${activeConvId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ receiverId: activeChat, content }),
+        body: JSON.stringify({ content }),
       })
       if (res.ok) {
         const msg = await res.json()
-        setConversations((prev) => {
-          const existing = prev.find((c) => c.partnerId === activeChat)
-          if (existing) {
-            return prev.map((c) =>
-              c.partnerId === activeChat
-                ? {
-                    ...c,
-                    lastMessage: content,
-                    lastMessageAt: msg.createdAt,
-                    messages: [...c.messages, msg],
-                  }
+        setMessages((prev) => [...prev, msg])
+        setConversations((prev) =>
+          prev
+            .map((c) =>
+              c.id === activeConvId
+                ? { ...c, lastMessage: content, lastMessageAt: msg.createdAt, messages: [...c.messages, msg] }
                 : c
-            ).sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
-          }
-          return [
-            {
-              partnerId: activeChat,
-              partnerName: activeChat,
-              partnerEmail: "",
-              partnerImage: null,
-              lastMessage: content,
-              lastMessageAt: msg.createdAt,
-              unreadCount: 0,
-              messages: [msg],
-            },
-            ...prev,
-          ]
-        })
+            )
+            .sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
+        )
       }
     } catch { /* ignore */ }
     setSending(false)
-  }, [newMessage, activeChat, sending])
+  }, [newMessage, activeConvId, sending])
 
-  const filtered = conversations.filter((c) =>
-    c.partnerName.toLowerCase().includes(searchQuery.toLowerCase())
+  const fetchStrategists = useCallback(async () => {
+    if (strategists.length > 0) return
+    try {
+      const res = await fetch("/api/strategists")
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setStrategists(data.map((s: Strategist) => ({ id: s.id, name: s.name, avatar: s.avatar, headline: s.headline })))
+        }
+      }
+    } catch { /* ignore */ }
+  }, [strategists.length])
+
+  const createGroup = useCallback(async () => {
+    if (selectedMembers.length < 2 || creatingGroup) return
+    setCreatingGroup(true)
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantIds: selectedMembers,
+          name: groupName.trim() || null,
+        }),
+      })
+      if (res.ok) {
+        const conv = await res.json()
+        await fetchConversations()
+        setActiveConvId(conv.id)
+        setView("chat")
+        setGroupName("")
+        setSelectedMembers([])
+        setGroupSearch("")
+        fetchMessages(conv.id)
+      }
+    } catch { /* ignore */ }
+    setCreatingGroup(false)
+  }, [selectedMembers, groupName, creatingGroup, fetchConversations, fetchMessages])
+
+  const activeConversation = conversations.find((c) => c.id === activeConvId)
+  const currentUserIdForCheck = myUserId || currentUserId
+
+  const filteredConversations = conversations.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const activeConversation = conversations.find((c) => c.partnerId === activeChat)
+  const filteredStrategists = strategists.filter(
+    (s) =>
+      s.name.toLowerCase().includes(groupSearch.toLowerCase()) &&
+      s.id !== currentUserIdForCheck
+  )
 
-  if (!minimized && activeChat && activeConversation) {
+  const openNewGroup = () => {
+    setView("new-group")
+    setSelectedMembers([])
+    setGroupName("")
+    setGroupSearch("")
+    fetchStrategists()
+  }
+
+  const toggleMember = (id: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+    )
+  }
+
+  const getConvDisplayName = (conv: Conversation) => {
+    if (conv.isGroup) return conv.name || conv.participants.map((p) => p.name ?? "Unknown").join(", ")
+    const other = conv.participants.find((p) => p.id !== currentUserIdForCheck)
+    return other?.name ?? "Unknown"
+  }
+
+  const getConvDisplayImage = (conv: Conversation) => {
+    if (conv.isGroup) return null
+    const other = conv.participants.find((p) => p.id !== currentUserIdForCheck)
+    return other?.image ?? null
+  }
+
+  // ── Chat thread view ──
+  if (!minimized && view === "chat" && activeConversation) {
+    const chatName = getConvDisplayName(activeConversation)
+    const chatImage = getConvDisplayImage(activeConversation)
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -179,20 +294,30 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
       >
         {/* Chat Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <button onClick={() => { setActiveChat(null); }} className="flex items-center gap-2 min-w-0">
-            <Avatar size="sm">
-              {activeConversation.partnerImage && (
-                <img src={activeConversation.partnerImage} alt="" className="h-full w-full object-cover" />
-              )}
-              <AvatarFallback className="text-xs">{getInitials(activeConversation.partnerName)}</AvatarFallback>
-            </Avatar>
+          <button onClick={() => { setView("list"); setActiveConvId(null); setMessages([]) }} className="flex items-center gap-2 min-w-0">
+            {activeConversation.isGroup ? (
+              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                <Users size={14} className="text-white" />
+              </div>
+            ) : (
+              <Avatar size="sm">
+                {chatImage && (
+                  <img src={chatImage} alt="" className="h-full w-full object-cover" />
+                )}
+                <AvatarFallback className="text-xs">{getInitials(chatName)}</AvatarFallback>
+              </Avatar>
+            )}
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{activeConversation.partnerName}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{activeConversation.partnerEmail}</p>
+              <p className="text-sm font-semibold truncate">{chatName}</p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {activeConversation.isGroup
+                  ? `${activeConversation.participants.length} members`
+                  : (activeConversation.participants.find((p) => p.id !== currentUserIdForCheck)?.email ?? "")}
+              </p>
             </div>
           </button>
           <div className="flex items-center gap-1">
-            <button onClick={() => { setActiveChat(null); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <button onClick={() => { setView("list"); setActiveConvId(null); setMessages([]) }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
               <X size={14} />
             </button>
           </div>
@@ -200,31 +325,42 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-          {activeConversation.messages.length === 0 && (
+          {loadingMessages ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-xs text-muted-foreground">Loading messages...</p>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <p className="text-xs text-muted-foreground">No messages yet. Say hello!</p>
             </div>
-          )}
-          {[...activeConversation.messages].reverse().map((msg) => {
-            const isMe = msg.senderId === currentUserId
-            return (
-              <div key={msg.id} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
-                <div
-                  className={cn(
-                    "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
-                    isMe
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-muted text-foreground rounded-bl-md"
-                  )}
-                >
-                  <p className="break-words">{msg.content}</p>
-                  <p className={cn("mt-1 text-[10px]", isMe ? "text-primary-foreground/60" : "text-muted-foreground")}>
-                    {formatTime(msg.createdAt)}
-                  </p>
+          ) : (
+            messages.map((msg) => {
+              const isMe = msg.senderId === currentUserIdForCheck
+              const showSender = activeConversation.isGroup && !isMe
+              return (
+                <div key={msg.id} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
+                  <div
+                    className={cn(
+                      "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
+                      isMe
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "bg-muted text-foreground rounded-bl-md"
+                    )}
+                  >
+                    {showSender && (
+                      <p className="mb-0.5 text-[10px] font-semibold text-primary">
+                        {msg.sender?.name ?? "Unknown"}
+                      </p>
+                    )}
+                    <p className="break-words">{msg.content}</p>
+                    <p className={cn("mt-1 text-[10px]", isMe ? "text-primary-foreground/60" : "text-muted-foreground")}>
+                      {formatTime(msg.createdAt)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -253,6 +389,121 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
     )
   }
 
+  // ── New group view ──
+  if (!minimized && view === "new-group") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        className="fixed bottom-4 right-4 z-50 flex w-[360px] flex-col rounded-xl border border-border bg-background shadow-2xl sm:w-[380px]"
+        style={{ height: "500px" }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setView("list")} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <X size={14} />
+            </button>
+            <h3 className="text-sm font-semibold">New Group</h3>
+            {selectedMembers.length >= 2 && (
+              <span className="text-[10px] text-muted-foreground">{selectedMembers.length} selected</span>
+            )}
+          </div>
+          <button
+            onClick={createGroup}
+            disabled={selectedMembers.length < 2 || creatingGroup}
+            className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+          >
+            {creatingGroup ? "Creating..." : "Create"}
+          </button>
+        </div>
+
+        {/* Group name */}
+        <div className="border-b border-border px-4 py-2">
+          <input
+            type="text"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Group name (optional)"
+            className="h-9 w-full rounded-lg border border-border bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </div>
+
+        {/* Selected members */}
+        {selectedMembers.length > 0 && (
+          <div className="flex flex-wrap gap-2 border-b border-border px-4 py-2">
+            {selectedMembers.map((id) => {
+              const s = strategists.find((x) => x.id === id)
+              if (!s) return null
+              return (
+                <button
+                  key={id}
+                  onClick={() => toggleMember(id)}
+                  className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+                >
+                  {s.name.split(" ")[0]}
+                  <X size={10} />
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Search */}
+        <div className="px-3 py-2">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={groupSearch}
+              onChange={(e) => setGroupSearch(e.target.value)}
+              placeholder="Search people..."
+              className="h-8 w-full rounded-lg border border-border bg-muted pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+
+        {/* Member list */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredStrategists.map((s) => {
+            const selected = selectedMembers.includes(s.id)
+            return (
+              <button
+                key={s.id}
+                onClick={() => toggleMember(s.id)}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
+              >
+                <Avatar size="sm">
+                  {s.avatar && (
+                    <img src={s.avatar} alt="" className="h-full w-full object-cover" />
+                  )}
+                  <AvatarFallback className="text-xs">{getInitials(s.name)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{s.name}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{s.headline}</p>
+                </div>
+                <div
+                  className={cn(
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                    selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-transparent"
+                  )}
+                >
+                  {selected && <Check size={12} />}
+                </div>
+              </button>
+            )
+          })}
+          {filteredStrategists.length === 0 && (
+            <div className="py-8 text-center text-xs text-muted-foreground">No people found</div>
+          )}
+        </div>
+      </motion.div>
+    )
+  }
+
+  // ── Conversation list view (default) ──
   return (
     <AnimatePresence>
       {!minimized && (
@@ -274,10 +525,13 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
               )}
             </div>
             <div className="flex items-center gap-1">
+              <button onClick={openNewGroup} title="New group chat" className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                <Users size={14} />
+              </button>
               <button onClick={() => setMinimized(true)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                 <Minus size={14} />
               </button>
-              <button onClick={() => { setMinimized(true); setActiveChat(null); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <button onClick={() => { setMinimized(true); setView("list"); setActiveConvId(null) }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                 <X size={14} />
               </button>
             </div>
@@ -299,44 +553,54 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
 
           {/* Conversation List */}
           <div className="flex-1 overflow-y-auto">
-            {filtered.length === 0 && (
+            {filteredConversations.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12">
                 <MessageSquare size={24} className="mb-2 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">No conversations yet</p>
               </div>
             )}
-            {filtered.map((conv) => (
-              <button
-                key={conv.partnerId}
-                onClick={() => openChat(conv.partnerId)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
-              >
-                <div className="relative shrink-0">
-                  <Avatar size="sm">
-                    {conv.partnerImage && (
-                      <img src={conv.partnerImage} alt="" className="h-full w-full object-cover" />
+            {filteredConversations.map((conv) => {
+              const displayName = getConvDisplayName(conv)
+              const displayImage = getConvDisplayImage(conv)
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => openChat(conv.id)}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="relative shrink-0">
+                    {conv.isGroup ? (
+                      <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                        <Users size={16} className="text-white" />
+                      </div>
+                    ) : (
+                      <Avatar size="sm">
+                        {displayImage && (
+                          <img src={displayImage} alt="" className="h-full w-full object-cover" />
+                        )}
+                        <AvatarFallback className="text-xs">{getInitials(displayName)}</AvatarFallback>
+                      </Avatar>
                     )}
-                    <AvatarFallback className="text-xs">{getInitials(conv.partnerName)}</AvatarFallback>
-                  </Avatar>
-                  {conv.unreadCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
-                      {conv.unreadCount}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={cn("text-sm truncate", conv.unreadCount > 0 ? "font-semibold" : "font-medium")}>
-                      {conv.partnerName}
-                    </p>
-                    <span className="shrink-0 text-[10px] text-muted-foreground">{formatTime(conv.lastMessageAt)}</span>
+                    {conv.unreadCount > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                        {conv.unreadCount}
+                      </span>
+                    )}
                   </div>
-                  <p className={cn("text-xs truncate", conv.unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground")}>
-                    {conv.lastMessage}
-                  </p>
-                </div>
-              </button>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={cn("text-sm truncate", conv.unreadCount > 0 ? "font-semibold" : "font-medium")}>
+                        {displayName}
+                      </p>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">{formatTime(conv.lastMessageAt)}</span>
+                    </div>
+                    <p className={cn("text-xs truncate", conv.unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground")}>
+                      {conv.lastMessage || "No messages yet"}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </motion.div>
       )}
