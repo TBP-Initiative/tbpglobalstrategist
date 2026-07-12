@@ -102,7 +102,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           </h3>
 
           {/* Short Description */}
-          <p className="max-w-prose text-sm leading-relaxed text-white/80 line-clamp-3">
+          <p className="max-w-prose text-sm leading-relaxed text-white/80 line-clamp-2">
             {shortDescription}
           </p>
 
