@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/layout/sidebar";
-import { ChatWidget } from "@/components/chat/chat-widget";
+import { ChatIntegration } from "@/components/chat/chat-integration";
 import { Badge } from "@/components/ui/badge";
 import {
   Bell,
@@ -75,13 +75,11 @@ export default function DashboardLayout({
   user,
 }: DashboardLayoutProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [chatOpenWith, setChatOpenWith] = useState<string | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const fetchNotifications = useCallback(async () => {
@@ -100,22 +98,6 @@ export default function DashboardLayout({
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [fetchNotifications])
-
-  useEffect(() => {
-    const userParam = searchParams.get("user")
-    if (userParam) setChatOpenWith(userParam)
-  }, [searchParams])
-
-  useEffect(() => {
-    function handleOpenChat(e: Event) {
-      const customEvent = e as CustomEvent
-      if (customEvent.detail?.userId) {
-        setChatOpenWith(customEvent.detail.userId)
-      }
-    }
-    window.addEventListener("open-chat", handleOpenChat)
-    return () => window.removeEventListener("open-chat", handleOpenChat)
-  }, [])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -299,7 +281,9 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      <ChatWidget currentUserId="" openWithUser={chatOpenWith} />
+      <Suspense>
+        <ChatIntegration />
+      </Suspense>
     </div>
   );
 }
