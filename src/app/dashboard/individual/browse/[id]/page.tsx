@@ -8,6 +8,7 @@ import { GlassCard } from "@/components/shared/glass-card"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { ArrowLeft, Building2, DollarSign, Users, Clock, AlertTriangle, Sparkles } from "lucide-react"
 import { parseFirstCategory, stripHtml } from "@/lib/project-utils"
+import { JoinProjectButton } from "./join-project-button"
 
 const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
 
@@ -183,10 +184,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <Badge variant="outline" className="text-xs">{stageLabel}</Badge>
               </div>
               {canWork ? (
-                <Button className="w-full gap-1.5" size="sm">
-                  <Sparkles size={14} />
-                  Express Interest
-                </Button>
+                <JoinProjectButton projectId={project.id} />
               ) : (
                 <div className="space-y-2">
                   <Button className="w-full gap-1.5" size="sm" disabled>
