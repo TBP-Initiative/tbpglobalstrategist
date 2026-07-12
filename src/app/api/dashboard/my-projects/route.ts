@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { stripHtml } from "@/lib/project-utils"
 
 export async function GET() {
   try {
@@ -48,7 +49,7 @@ export async function GET() {
         id: c.project.id,
         title: c.project.title,
         slug: c.project.slug,
-        description: c.project.shortDescription ?? c.project.description ?? "",
+        description: stripHtml(c.project.shortDescription ?? c.project.description ?? ""),
         status: c.project.status.toLowerCase(),
         image: c.project.image,
         category: c.project.category,

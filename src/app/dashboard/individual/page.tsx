@@ -350,7 +350,14 @@ export default function IndividualDashboard() {
                       transition={{ delay: index * 0.08, duration: 0.3 }}
                       className="group rounded-xl border border-border p-4 transition-all duration-200 hover:border-primary/30 hover:bg-muted/30"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        {project.image && (
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                          />
+                        )}
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
                             <h3 className="font-medium">{project.title}</h3>
@@ -358,7 +365,7 @@ export default function IndividualDashboard() {
                               {status.label}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground line-clamp-2">
                             {project.description}
                           </p>
                           <div className="flex items-center gap-4">
