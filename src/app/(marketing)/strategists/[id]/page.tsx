@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { getStrategistById as getLocalStrategistById } from "@/data/strategists"
 import type { StrategistProfile } from "@/data/strategists"
 import { ProfileContent } from "./profile-content"
+import { parseFirstCategory } from "@/lib/project-utils"
 
 const stageLabels: Record<string, string> = {
   CANDIDATE: "Global Strategist Candidate",
@@ -105,7 +106,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
 
           featuredProject = {
             id: proj.id, title: proj.title, slug: proj.slug,
-            category: proj.category ?? "Strategic",
+            category: parseFirstCategory(proj.category) || "Strategic",
             role: contrib.role === "CONTRIBUTOR" ? (stageLabelsMap[user.strategistProfile?.stage ?? "CANDIDATE"] ?? "Contributor") : contrib.role,
             image: proj.image ?? "", description: proj.shortDescription ?? proj.description ?? "",
             contribution, status: proj.status, progress,
