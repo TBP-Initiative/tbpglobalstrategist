@@ -107,7 +107,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           </p>
 
           {/* Project Information */}
-          <div className="mt-1 space-y-2 rounded-xl bg-white/10 p-4 text-sm">
+          <div className="mt-1 space-y-2 text-sm">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Category</p>
@@ -122,19 +122,6 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
             <div>
               <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Contribution</p>
               <p className="text-white/90">{project.contribution || "—"}</p>
-            </div>
-
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Progress</p>
-                <span className="text-xs font-semibold text-white">{progress}%</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${getProgressColor(progress)}`}
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
             </div>
           </div>
 
