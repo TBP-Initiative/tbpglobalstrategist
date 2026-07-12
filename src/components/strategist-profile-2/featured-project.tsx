@@ -71,9 +71,9 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
       className="group relative overflow-hidden rounded-2xl shadow-lg shadow-black/5 transition-all duration-500"
       style={{ backgroundColor: "#013466" }}
     >
-      <div className="relative z-10 flex flex-col md:flex-row" style={{ padding: "1%" }}>
+      <div className="relative z-10 flex flex-col md:flex-row px-[1%] pt-[1%] pb-0 md:pb-0">
         {/* LEFT: Image */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl md:aspect-auto md:h-full md:min-h-[400px] md:w-1/2">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl md:aspect-auto md:h-auto md:w-1/2">
           <img
             src={project.image}
             alt={project.title}
@@ -86,8 +86,7 @@ export function FeaturedProject({ project, userId }: FeaturedProjectProps) {
           variants={contentVariants}
           initial="hidden"
           animate="visible"
-          className="flex w-full flex-1 flex-col justify-start gap-2 md:w-1/2"
-          style={{ padding: "1%" }}
+          className="flex w-full flex-1 flex-col justify-start gap-2 md:w-1/2 px-[1%] pb-[1%] pt-0 md:pt-0"
         >
           {/* Category */}
           <div className="flex flex-wrap items-center gap-2">
