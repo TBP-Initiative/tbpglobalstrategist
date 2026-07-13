@@ -314,8 +314,6 @@ export default function IndividualDashboard() {
         </div>
       )}
 
-      {profile?.stage && <SubmissionForm currentStage={profile.stage} />}
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <AnimatedSection delay={0.2}>
@@ -513,6 +511,8 @@ export default function IndividualDashboard() {
           </AnimatedSection>
         </div>
       </div>
+
+      {profile?.stage && <SubmissionForm currentStage={profile.stage} />}
 
       {profile?.stage && <ProgressionPathway currentStage={profile.stage} />}
     </div>
