@@ -76,14 +76,14 @@ export async function PATCH(req: Request) {
     if (profile && typeof profile === "object") {
       const profileData: Record<string, unknown> = {}
       if (profile.title !== undefined) {
-        if (typeof profile.title !== "string" || profile.title.length > 100) {
-          return NextResponse.json({ error: "Title must be 100 characters or fewer" }, { status: 400 })
+        if (typeof profile.title !== "string" || profile.title.length > 80) {
+          return NextResponse.json({ error: "Title must be 80 characters or fewer" }, { status: 400 })
         }
         profileData.title = profile.title
       }
       if (profile.bio !== undefined) {
-        if (typeof profile.bio !== "string" || profile.bio.length > 2000) {
-          return NextResponse.json({ error: "Bio must be 2000 characters or fewer" }, { status: 400 })
+        if (typeof profile.bio !== "string" || profile.bio.length > 900) {
+          return NextResponse.json({ error: "Bio must be 900 characters or fewer" }, { status: 400 })
         }
         profileData.bio = profile.bio
       }
