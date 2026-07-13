@@ -23,7 +23,7 @@ const navLinks = [
   { label: "Network", href: "/strategist-portal/network" },
 ];
 
-const AVATAR_URL = "https://i.pravatar.cc/80?u=strategist-portal-user";
+const AVATAR_URL = ""
 
 const containerVariants = {
   hidden: { opacity: 0, y: -20 },
@@ -194,12 +194,8 @@ export default function Navbar() {
             </button>
 
             {/* User avatar */}
-            <div className="ml-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full ring-2 ring-white/20 transition-all hover:ring-indigo-400/50">
-              <img
-                src={AVATAR_URL}
-                alt="User avatar"
-                className="h-full w-full object-cover"
-              />
+            <div className="ml-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-teal-500 ring-2 ring-white/20 transition-all hover:ring-indigo-400/50">
+              <span className="text-xs font-bold text-white">S</span>
             </div>
 
             {/* Mobile hamburger */}
@@ -271,12 +267,8 @@ export default function Navbar() {
 
                 <div className="mt-6 border-t border-white/10 pt-6">
                   <div className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-3">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full ring-2 ring-white/20">
-                      <img
-                        src={AVATAR_URL}
-                        alt="User avatar"
-                        className="h-full w-full object-cover"
-                      />
+                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-teal-500 ring-2 ring-white/20">
+                      <span className="text-sm font-bold text-white">S</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white/90">Strategist</p>

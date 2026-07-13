@@ -499,7 +499,7 @@ function StrategistsSection() {
             title: (s.headline as string) ?? (s.badge as string) ?? "Strategist",
             area: (s.sector as string) ?? (s.category as string) ?? "Strategy",
             color: gradientColors[i % gradientColors.length],
-            image: (s.avatar as string) || `https://i.pravatar.cc/150?u=${encodeURIComponent((s.name as string) ?? i)}`,
+            image: (s.avatar as string) || "",
           }))
         )
       })
@@ -551,12 +551,18 @@ function StrategistsSection() {
                 >
                   <div className="flex justify-center mb-3">
                     <div className="h-28 w-28 rounded-full overflow-hidden ring-2 ring-gray-200 ring-offset-2">
-                      <img
-                        src={strategist.image}
-                        alt={strategist.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                      />
+                      {strategist.image ? (
+                        <img
+                          src={strategist.image}
+                          alt={strategist.name}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-teal-500 text-white text-xl font-bold">
+                          {strategist.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-center">

@@ -45,7 +45,7 @@ export const strategistData: StrategistData = {
   name: "Dr. Elena Voss",
   headline: "Leading Strategic Innovation in Energy Infrastructure & Offshore Engineering",
   bio: "Dr. Elena Voss is a globally recognized strategist specializing in offshore energy infrastructure, floating systems, and cross-border energy corridors. With over 18 years of experience spanning engineering research, policy advisory, and large-scale infrastructure deployment, she currently leads TBP's strategic initiatives in the Neo-Polar Neutrality Global System (NPNGS) — focusing on resilient energy networks, maritime logistics, and Arctic engineering corridors.",
-  avatar: "https://i.pravatar.cc/400?u=elena-voss",
+  avatar: "",
   isOnline: true,
   verified: true,
   role: "TBP Global Strategist",

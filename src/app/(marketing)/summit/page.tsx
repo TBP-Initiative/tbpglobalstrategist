@@ -284,12 +284,11 @@ export default function SummitPage() {
               <motion.div key={speaker.name} variants={staggerItem}>
                 <GlassCard hover className="group p-6 text-center">
                   <div className="mx-auto mb-6 h-44 w-44 overflow-hidden rounded-full ring-2 ring-white/20 shadow-lg">
-                    <img
-                      src={`https://i.pravatar.cc/500?u=${speaker.name.replace(/\s+/g, "-").toLowerCase()}`}
-                      alt={speaker.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
+                    <div
+                      className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-teal-500 text-white text-2xl font-bold"
+                    >
+                      {speaker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
                   </div>
                   <h3 className="text-lg font-semibold text-black">{speaker.name}</h3>
                   <p className="mt-1 text-sm text-gray-500">{speaker.title}</p>
