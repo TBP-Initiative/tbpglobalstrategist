@@ -113,33 +113,28 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           </div>
         </motion.div>
 
-        {/* Expertise Tags */}
-        <motion.div
-          custom={6}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-4 flex flex-wrap gap-2"
-        >
-          {expertiseTags.slice(0, 5).map((tag) => (
-            <span
-              key={tag}
-            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900"
-          >
-              {tag}
-            </span>
-          ))}
-        </motion.div>
-
-        {/* Bio */}
+        {/* Bio + Expertise Tags */}
         <motion.div
           custom={5}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
-          className="mt-6 text-xs leading-relaxed text-gray-600 md:text-sm"
+          className="mt-5 space-y-3 text-xs leading-relaxed text-gray-600 md:text-sm"
         >
-          {formatBio(displayBio)}
+          {expertiseTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {expertiseTags.slice(0, 5).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p>{formatBio(displayBio)}</p>
           {isLong && (
             <button
               type="button"
