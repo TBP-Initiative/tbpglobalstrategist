@@ -209,6 +209,10 @@ export default async function StrategistProfilePage({
   }
 
   let workAreas: string[] = []
+  let projects: {
+    id: string; title: string; slug: string; image: string | null;
+    category: string | null; status: string; role: string;
+  }[] = []
 
   if (!getLocalStrategistById(id)) {
     try {
@@ -222,7 +226,33 @@ export default async function StrategistProfilePage({
       })
       workAreas = user?.workAreaAssignments.map((a) => a.workArea.name) ?? []
     } catch { /* ignore */ }
+
+    try {
+      const contributions = await prisma.projectContributor.findMany({
+        where: { userId: id },
+        select: {
+          role: true,
+          project: {
+            select: {
+              id: true, title: true, slug: true, image: true,
+              category: true, status: true,
+            },
+          },
+        },
+        orderBy: { joinedAt: "desc" },
+      })
+
+      projects = contributions.map((c) => ({
+        id: c.project.id,
+        title: c.project.title,
+        slug: c.project.slug,
+        image: c.project.image,
+        category: parseFirstCategory(c.project.category),
+        status: c.project.status,
+        role: c.role,
+      }))
+    } catch { /* ignore */ }
   }
 
-  return <ProfileContent strategist={strategist} workAreas={workAreas} />
+  return <ProfileContent strategist={strategist} workAreas={workAreas} projects={projects} />
 }

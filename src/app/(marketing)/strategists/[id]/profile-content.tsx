@@ -6,7 +6,7 @@ import { ProfileHero } from "@/components/strategist-profile-2/profile-hero"
 import { StrategistFocusCard } from "@/components/strategist-profile-2/strategist-focus-card"
 import { RightSidebar } from "@/components/strategist-profile-2/right-sidebar"
 import { FeaturedProject } from "@/components/strategist-profile-2/featured-project"
-import { ProjectGrid } from "@/components/strategist-profile-2/project-grid"
+import { ProfileProjectGrid } from "@/components/strategist-profile-2/profile-project-grid"
 import { ActivityTimeline } from "@/components/strategist-profile-2/activity-timeline"
 import { CurrentTbpProjects } from "@/components/strategist-profile-2/current-tbp-projects"
 import type { StrategistProfile } from "@/data/strategists"
@@ -59,21 +59,8 @@ function mapStrategist(strategist: StrategistProfile) {
   }
 
   const dbFeatured = strategist.featuredProject
-  const projects = strategist.featuredProjects.map((p) => ({
-    id: p.id,
-    title: p.title,
-    category: p.tags[0] || "Strategic",
-    role: "Lead Strategist",
-    image: p.image,
-    description: p.description,
-    contribution: "",
-    status: p.status,
-    progress: 0,
-    slug: p.id,
-  }))
 
-  const featured = dbFeatured ?? projects[0] ?? null
-  const remainingProjects = dbFeatured ? projects : projects.slice(1)
+  const featured = dbFeatured ?? null
 
   const typeMap: Record<string, "publication" | "milestone" | "contribution" | "assignment"> = {
     publication: "publication",
@@ -98,11 +85,16 @@ function mapStrategist(strategist: StrategistProfile) {
     fileSize: a.fileSize,
   }))
 
-  return { heroData, focus, featured, remainingProjects, activities }
+  return { heroData, focus, featured, activities }
 }
 
-export function ProfileContent({ strategist, workAreas = [] }: { strategist: StrategistProfile; workAreas?: string[] }) {
-  const { heroData, focus, featured, remainingProjects, activities } = mapStrategist(strategist)
+interface ProfileProject {
+  id: string; title: string; slug: string; image: string | null;
+  category: string; status: string; role: string;
+}
+
+export function ProfileContent({ strategist, workAreas = [], projects = [] }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[] }) {
+  const { heroData, focus, featured, activities } = mapStrategist(strategist)
 
   const focusWithAreas = { ...focus, workAreas }
 
@@ -124,9 +116,9 @@ export function ProfileContent({ strategist, workAreas = [] }: { strategist: Str
                 </AnimatedSection>
               )}
 
-              {remainingProjects.length > 0 && (
+              {projects.length > 0 && (
                 <AnimatedSection>
-                  <ProjectGrid projects={remainingProjects} />
+                  <ProfileProjectGrid projects={projects} />
                 </AnimatedSection>
               )}
 
