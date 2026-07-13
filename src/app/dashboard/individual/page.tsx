@@ -433,6 +433,10 @@ export default function IndividualDashboard() {
           </AnimatedSection>
 
           <AnimatedSection delay={0.35}>
+            <FeaturedProjectSelector />
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.45}>
             <GlassCard className="p-6" intensity="light">
               <div className="mb-4 flex items-center gap-2">
                 <UserPlus size={16} className="text-muted-foreground" />
@@ -486,11 +490,7 @@ export default function IndividualDashboard() {
             </GlassCard>
           </AnimatedSection>
 
-          <AnimatedSection delay={0.45}>
-            <FeaturedProjectSelector />
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.45}>
+          <AnimatedSection delay={0.55}>
             <GlassCard className="p-6" intensity="light">
               <h3 className="mb-4 text-sm font-semibold">Quick Actions</h3>
               <div className="grid grid-cols-1 gap-2">
