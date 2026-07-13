@@ -109,7 +109,7 @@ export function ProfileProjectGrid({ projects }: ProfileProjectGridProps) {
                 </span>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {project.title}
                 </h3>
 
