@@ -92,24 +92,20 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
               </span>
             </div>
 
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-              <p className="text-sm text-gray-700 md:text-base">{headline}</p>
-              {(city || country || countryCode) && (
-                <>
-                  <span className="text-gray-400">·</span>
-                  <span className="flex items-center gap-1">
-                    {countryCode && (
-                      <img
-                        src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
-                        alt={country ?? ""}
-                        className="h-3 w-[14px] rounded-sm object-cover"
-                      />
-                    )}
-                    <span>{[city, country].filter(Boolean).join(", ") || location}</span>
-                  </span>
-                </>
-              )}
-            </div>
+            <p className="mt-1 text-sm text-gray-700 md:text-base">{headline}</p>
+
+            {(city || country || countryCode) && (
+              <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                {countryCode && (
+                  <img
+                    src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
+                    alt={country ?? ""}
+                    className="h-3 w-[14px] rounded-sm object-cover"
+                  />
+                )}
+                <span>{[city, country].filter(Boolean).join(", ") || location}</span>
+              </div>
+            )}
           </div>
         </motion.div>
 
