@@ -34,6 +34,9 @@ export async function GET() {
             availability: true,
             linkedinUrl: true,
             websiteUrl: true,
+            expertiseTags: {
+              select: { tag: { select: { id: true, name: true } } },
+            },
           },
         },
         workAreaAssignments: {
@@ -105,6 +108,28 @@ export async function PATCH(req: Request) {
           message: `${session.user.name ?? "A user"} updated their profile.`,
           link: "/dashboard/admin",
         })
+      }
+
+      if (Array.isArray(profile.expertiseTags)) {
+        const tags = profile.expertiseTags.filter((t: unknown): t is string => typeof t === "string" && t.trim().length > 0).slice(0, 5)
+        const profileRecord = await prisma.strategistProfile.findUnique({
+          where: { userId: session.user.id },
+          select: { id: true },
+        })
+        if (profileRecord) {
+          await prisma.expertiseTag.deleteMany({ where: { profileId: profileRecord.id } })
+          for (const tagName of tags) {
+            const slug = tagName.trim().toLowerCase().replace(/\s+/g, "-")
+            const tag = await prisma.tag.upsert({
+              where: { slug },
+              create: { name: tagName.trim(), slug },
+              update: {},
+            })
+            await prisma.expertiseTag.create({
+              data: { profileId: profileRecord.id, tagId: tag.id },
+            })
+          }
+        }
       }
     }
 

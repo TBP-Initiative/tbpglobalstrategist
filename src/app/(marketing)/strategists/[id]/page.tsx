@@ -23,7 +23,11 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
-        strategistProfile: true,
+        strategistProfile: {
+          include: {
+            expertiseTags: { select: { tag: { select: { name: true } } } },
+          },
+        },
         workAreaAssignments: {
           select: { workArea: { select: { name: true } } },
         },
@@ -134,7 +138,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
           ? user.strategistProfile.bio.slice(0, 120) + "..."
           : user.strategistProfile.bio
         : "A global strategist contributing to the TBP ecosystem.",
-      expertiseAreas: [],
+      expertiseAreas: user.strategistProfile?.expertiseTags?.map((et) => et.tag.name) ?? [],
       industries: [],
       strategicFocusAreas: [],
       collaborationStatus: "open" as const,

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { toast } from "sonner"
-import { Camera, Loader2, MapPin } from "lucide-react"
+import { Camera, Loader2, MapPin, X, Plus } from "lucide-react"
 import { COUNTRIES } from "@/lib/countries"
 import { STRATEGIST_CATEGORIES } from "@/lib/categories"
 import {
@@ -38,6 +38,7 @@ interface EditProfileDialogProps {
       linkedinUrl: string | null
       websiteUrl: string | null
     } | null
+    expertiseTags?: string[]
   }
   onSaved: (newImage: string | null) => void
 }
@@ -60,6 +61,8 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
     linkedinUrl: user.profile?.linkedinUrl ?? "",
     websiteUrl: user.profile?.websiteUrl ?? "",
   })
+  const [tags, setTags] = useState<string[]>(user.expertiseTags ?? [])
+  const [tagInput, setTagInput] = useState("")
 
   const initials = form.name
     ? form.name.split(" ").map((n) => n[0]).join("").slice(0, 2)
@@ -109,6 +112,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
           availability: form.availability,
           linkedinUrl: form.linkedinUrl || null,
           websiteUrl: form.websiteUrl || null,
+          expertiseTags: tags,
         },
       }
       if (optimizedDataUrl) body.image = optimizedDataUrl
@@ -282,6 +286,56 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 Available for new projects
               </label>
             </div>
+          </GlassCard>
+
+          <GlassCard intensity="light" className="p-4 space-y-4">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Expertise Tags</h4>
+            <p className="text-[11px] text-muted-foreground">Add up to 5 expertise areas that best describe your skills.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <span key={tag} className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                  {tag}
+                  <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="rounded-full p-0.5 hover:bg-indigo-100">
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            {tags.length < 5 && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && tagInput.trim()) {
+                      e.preventDefault()
+                      if (tags.length >= 5) { toast.error("Maximum 5 tags"); return }
+                      if (tags.includes(tagInput.trim())) { toast.error("Tag already added"); return }
+                      setTags([...tags, tagInput.trim()])
+                      setTagInput("")
+                    }
+                  }}
+                  placeholder="e.g. Strategic Planning"
+                  maxLength={50}
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (!tagInput.trim()) return
+                    if (tags.length >= 5) { toast.error("Maximum 5 tags"); return }
+                    if (tags.includes(tagInput.trim())) { toast.error("Tag already added"); return }
+                    setTags([...tags, tagInput.trim()])
+                    setTagInput("")
+                  }}
+                >
+                  <Plus size={14} />
+                </Button>
+              </div>
+            )}
           </GlassCard>
 
           <GlassCard intensity="light" className="p-4 space-y-4">

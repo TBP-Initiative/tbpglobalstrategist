@@ -56,6 +56,7 @@ export function ProfileClient() {
     role: string
     image: string | null
     createdAt: string
+    expertiseTags: string[]
     profile: {
       title: string | null
       bio: string | null
@@ -85,6 +86,7 @@ export function ProfileClient() {
           role: data.role,
           image: data.image,
           createdAt: data.createdAt?.toISOString?.() ?? data.createdAt ?? new Date().toISOString(),
+          expertiseTags: data.strategistProfile?.expertiseTags?.map((t: { tag: { name: string } }) => t.tag.name) ?? [],
           profile: data.strategistProfile
             ? {
                 title: data.strategistProfile.title,
@@ -189,6 +191,15 @@ export function ProfileClient() {
                 {user.profile?.category && (
                   <p className="text-[11px] text-muted-foreground italic">{getCategory(user.profile.category)?.name ?? user.profile.category}</p>
                 )}
+                {user.expertiseTags.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                    {user.expertiseTags.map((tag) => (
+                      <span key={tag} className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Separator className="my-4" />
               <div className="space-y-3">
@@ -277,6 +288,7 @@ export function ProfileClient() {
           image: user.image,
           role: user.role,
           profile: user.profile,
+          expertiseTags: user.expertiseTags,
         }}
         onSaved={(newImage: string | null) => {
           if (newImage) {
