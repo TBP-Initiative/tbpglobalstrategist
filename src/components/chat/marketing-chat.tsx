@@ -12,7 +12,10 @@ export function MarketingChat() {
     function handleOpenChat(e: Event) {
       const customEvent = e as CustomEvent
       if (customEvent.detail?.userId) {
-        setChatOpenWith(customEvent.detail.userId)
+        setChatOpenWith(null)
+        requestAnimationFrame(() => {
+          setChatOpenWith(customEvent.detail.userId)
+        })
       }
     }
     window.addEventListener("open-chat", handleOpenChat)

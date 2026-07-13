@@ -87,6 +87,12 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [myUserId, setMyUserId] = useState<string>(currentUserId)
 
+  useEffect(() => {
+    if (currentUserId && currentUserId !== myUserId) {
+      setMyUserId(currentUserId)
+    }
+  }, [currentUserId])
+
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0)
 
   const fetchConversations = useCallback(async () => {
@@ -105,12 +111,15 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
     return () => clearInterval(interval)
   }, [fetchConversations])
 
+  const openWithUserRef = useRef<string | null>(null)
+
   useEffect(() => {
     if (openWithUser && openWithUser !== myUserId) {
+      openWithUserRef.current = openWithUser
       setMinimized(false)
       findOrCreateConversation(openWithUser)
     }
-  }, [openWithUser])
+  }, [openWithUser, myUserId, findOrCreateConversation])
 
   useEffect(() => {
     if (!minimized && view === "chat") {
