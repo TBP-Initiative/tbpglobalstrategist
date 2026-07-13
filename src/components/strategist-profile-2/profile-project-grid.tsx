@@ -104,12 +104,12 @@ export function ProfileProjectGrid({ projects }: ProfileProjectGridProps) {
 
               <div className="space-y-3 p-5">
                 {/* Category */}
-                <span className="inline-block rounded-full bg-gradient-to-r from-indigo-500/20 to-teal-500/20 px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-indigo-400/30">
+                <span className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-300">
                   {project.category || "Strategic"}
                 </span>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-gray-900 line-clamp-1">
                   {project.title}
                 </h3>
 
