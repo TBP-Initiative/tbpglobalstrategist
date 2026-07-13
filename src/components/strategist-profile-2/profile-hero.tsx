@@ -80,32 +80,37 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           </div>
 
           <div className="flex flex-col pb-1 md:pb-2">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-gray-900 md:text-lg lg:text-xl">
                 {name}
               </h1>
               {verified && (
                 <BadgeCheck className="h-5 w-5" style={{ color: "#013466" }} aria-label="Verified" />
               )}
-              <span className="rounded-full px-3 py-0.5 text-sm font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
-                {role}
-              </span>
             </div>
 
-            <p className="mt-1 text-sm text-gray-700 md:text-base">{headline}</p>
+            <span className="mt-1 inline-block w-fit rounded-full px-3 py-0.5 text-sm font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
+              {role}
+            </span>
 
-            {(city || country || countryCode) && (
-              <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-                {countryCode && (
-                  <img
-                    src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
-                    alt={country ?? ""}
-                    className="h-3 w-[14px] rounded-sm object-cover"
-                  />
-                )}
-                <span>{[city, country].filter(Boolean).join(", ") || location}</span>
-              </div>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-700">
+              <p>{headline}</p>
+              {(city || country || countryCode) && (
+                <>
+                  <span className="text-gray-400">·</span>
+                  <span className="flex items-center gap-1 text-xs text-gray-500">
+                    {countryCode && (
+                      <img
+                        src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
+                        alt={country ?? ""}
+                        className="h-3 w-[14px] rounded-sm object-cover"
+                      />
+                    )}
+                    <span>{[city, country].filter(Boolean).join(", ") || location}</span>
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </motion.div>
 
