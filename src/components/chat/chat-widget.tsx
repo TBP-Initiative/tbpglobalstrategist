@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { MessageSquare, Send, X, Minus, Search, Users, Plus, Check } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -60,12 +59,27 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
-function getGroupAvatar(participants: Participant[], excludeId?: string) {
-  const others = participants.filter((p) => p.id !== excludeId).slice(0, 2)
-  return others
-}
-
 type View = "list" | "chat" | "new-group"
+
+function ChatPanel({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "fixed bottom-4 right-4 z-50 flex w-[360px] flex-col rounded-xl border border-border bg-background shadow-2xl transition-all duration-200 ease-out sm:w-[380px]",
+        className
+      )}
+      style={{ height: "500px", animation: "chatSlideIn 0.2s ease-out" }}
+    >
+      <style>{`
+        @keyframes chatSlideIn {
+          from { opacity: 0; transform: translateY(12px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
+      {children}
+    </div>
+  )
+}
 
 export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: string; openWithUser?: string | null }) {
   const [minimized, setMinimized] = useState(true)
@@ -294,13 +308,7 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
     const chatImage = getConvDisplayImage(activeConversation)
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        className="fixed bottom-4 right-4 z-50 flex w-[360px] flex-col rounded-xl border border-border bg-background shadow-2xl sm:w-[380px]"
-        style={{ height: "500px" }}
-      >
+      <ChatPanel>
         {/* Chat Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <button onClick={() => { setView("list"); setActiveConvId(null); setMessages([]) }} className="flex items-center gap-2 min-w-0">
@@ -394,20 +402,14 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
             </button>
           </div>
         </div>
-      </motion.div>
+      </ChatPanel>
     )
   }
 
   // ── New group view ──
   if (!minimized && view === "new-group") {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        className="fixed bottom-4 right-4 z-50 flex w-[360px] flex-col rounded-xl border border-border bg-background shadow-2xl sm:w-[380px]"
-        style={{ height: "500px" }}
-      >
+      <ChatPanel>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
@@ -508,21 +510,24 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
             <div className="py-8 text-center text-xs text-muted-foreground">No people found</div>
           )}
         </div>
-      </motion.div>
+      </ChatPanel>
     )
   }
 
   // ── Conversation list view (default) ──
-  return (
-    <AnimatePresence>
-      {!minimized && (
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+  if (!minimized) {
+    return (
+      <>
+        <div
           className="fixed bottom-4 right-4 z-50 flex w-[340px] flex-col rounded-xl border border-border bg-background shadow-2xl sm:w-[360px]"
-          style={{ height: "480px" }}
+          style={{ height: "480px", animation: "chatSlideIn 0.2s ease-out" }}
         >
+          <style>{`
+            @keyframes chatSlideIn {
+              from { opacity: 0; transform: translateY(12px) scale(0.97); }
+              to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+          `}</style>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
@@ -611,29 +616,31 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
               )
             })}
           </div>
-        </motion.div>
-      )}
+        </div>
 
-      {/* Floating Action Button */}
-      <motion.button
-        onClick={() => setMinimized(!minimized)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-shadow hover:shadow-xl hover:shadow-primary/40"
-      >
-        {minimized ? (
-          <>
-            <MessageSquare size={22} />
-            {totalUnread > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                {totalUnread > 9 ? "9+" : totalUnread}
-              </span>
-            )}
-          </>
-        ) : (
+        {/* Floating Action Button */}
+        <button
+          onClick={() => setMinimized(true)}
+          className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
+        >
           <X size={22} />
-        )}
-      </motion.button>
-    </AnimatePresence>
+        </button>
+      </>
+    )
+  }
+
+  // ── Minimized: FAB only ──
+  return (
+    <button
+      onClick={() => setMinimized(false)}
+      className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
+    >
+      <MessageSquare size={22} />
+      {totalUnread > 0 && (
+        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          {totalUnread > 9 ? "9+" : totalUnread}
+        </span>
+      )}
+    </button>
   )
 }
