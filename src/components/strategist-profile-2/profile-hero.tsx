@@ -82,31 +82,31 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           <div className="flex flex-col pb-1 md:pb-2">
             {/* Line 1: Name */}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900 md:text-2xl lg:text-3xl">
+              <h1 className="text-lg font-bold text-gray-900 md:text-xl lg:text-2xl">
                 {name}
               </h1>
               {verified && (
-                <BadgeCheck className="h-6 w-6" style={{ color: "#013466" }} aria-label="Verified" />
+                <BadgeCheck className="h-5 w-5" style={{ color: "#013466" }} aria-label="Verified" />
               )}
             </div>
 
             {/* Line 2: Stage badge */}
-            <span className="mt-1 inline-flex w-fit rounded-full px-3 py-0.5 text-sm font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
+            <span className="mt-0.5 inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
               {role}
             </span>
 
             {/* Line 3: Headline + flag + location */}
-            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-gray-700 md:text-base">
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-700 md:text-sm">
               <span>{headline}</span>
               {(city || country || countryCode) && (
                 <>
                   <span className="text-gray-300">&middot;</span>
-                  <span className="flex items-center gap-1.5 text-gray-500">
+                  <span className="flex items-center gap-1 text-gray-500">
                     {countryCode && (
                       <img
                         src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
                         alt={country ?? ""}
-                        className="h-3.5 w-[18px] rounded-sm object-cover"
+                        className="h-3 w-[13px] rounded-sm object-cover"
                       />
                     )}
                     <span>{[city, country].filter(Boolean).join(", ") || location}</span>
