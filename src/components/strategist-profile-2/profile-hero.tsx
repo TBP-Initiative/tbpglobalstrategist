@@ -80,32 +80,38 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           </div>
 
           <div className="flex flex-col pb-1 md:pb-2">
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Line 1: Name */}
+            <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-gray-900 md:text-2xl lg:text-3xl">
                 {name}
               </h1>
               {verified && (
                 <BadgeCheck className="h-6 w-6" style={{ color: "#013466" }} aria-label="Verified" />
               )}
-              <span className="rounded-full px-3 py-0.5 text-sm font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
-                {role}
-              </span>
             </div>
 
-            <p className="mt-1 text-sm text-gray-700 md:text-base">{headline}</p>
+            {/* Line 2: Stage badge */}
+            <span className="mt-1 inline-flex w-fit rounded-full px-3 py-0.5 text-sm font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
+              {role}
+            </span>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            {/* Line 3: Headline + flag + location */}
+            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-gray-700 md:text-base">
+              <span>{headline}</span>
               {(city || country || countryCode) && (
-                <span className="flex items-center gap-1.5">
-                  {countryCode && (
-                    <img
-                      src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
-                      alt={country ?? ""}
-                      className="h-3.5 w-[18px] rounded-sm object-cover"
-                    />
-                  )}
-                  <span>{[city, country].filter(Boolean).join(", ") || location}</span>
-                </span>
+                <>
+                  <span className="text-gray-300">&middot;</span>
+                  <span className="flex items-center gap-1.5 text-gray-500">
+                    {countryCode && (
+                      <img
+                        src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`}
+                        alt={country ?? ""}
+                        className="h-3.5 w-[18px] rounded-sm object-cover"
+                      />
+                    )}
+                    <span>{[city, country].filter(Boolean).join(", ") || location}</span>
+                  </span>
+                </>
               )}
             </div>
           </div>
