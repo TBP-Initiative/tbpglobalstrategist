@@ -22,8 +22,29 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
   try {
     const user = await prisma.user.findUnique({
       where: { id },
-      include: {
-        strategistProfile: true,
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        role: true,
+        createdAt: true,
+        strategistProfile: {
+          select: {
+            title: true,
+            bio: true,
+            stage: true,
+            sector: true,
+            category: true,
+            city: true,
+            country: true,
+            countryCode: true,
+            featuredProjectId: true,
+            yearsOfExperience: true,
+            availability: true,
+            linkedinUrl: true,
+            websiteUrl: true,
+          },
+        },
         workAreaAssignments: {
           select: { workArea: { select: { name: true } } },
         },
@@ -38,7 +59,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
             fileSize: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: "desc" as const },
           take: 20,
         },
         activityLogs: {
@@ -49,7 +70,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
             entityId: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: "desc" as const },
           take: 20,
         },
         _count: {
