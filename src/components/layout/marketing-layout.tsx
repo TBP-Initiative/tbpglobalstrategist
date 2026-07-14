@@ -1,6 +1,5 @@
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { LazyMarketingChat } from "@/components/chat/lazy-marketing-chat";
 
 export default function MarketingLayout({
   children,
@@ -12,7 +11,6 @@ export default function MarketingLayout({
       <Navbar />
       <main className="flex-1 pt-16">{children}</main>
       <Footer />
-      <LazyMarketingChat />
     </div>
   );
 }
