@@ -23,43 +23,10 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
-        strategistProfile: {
-          include: {
-            expertiseTags: { select: { tag: { select: { name: true } } } },
-          },
-        },
-        workAreaAssignments: {
-          select: { workArea: { select: { name: true } } },
-        },
-        submissions: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            stage: true,
-            fileUrl: true,
-            fileType: true,
-            fileSize: true,
-            createdAt: true,
-          },
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        },
-        activityLogs: {
-          select: {
-            id: true,
-            action: true,
-            entity: true,
-            entityId: true,
-            createdAt: true,
-          },
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        },
+        strategistProfile: true,
         _count: {
           select: {
             projectContributors: true,
-            publications: true,
           },
         },
       },
@@ -138,7 +105,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
           ? user.strategistProfile.bio.slice(0, 120) + "..."
           : user.strategistProfile.bio
         : "A global strategist contributing to the TBP ecosystem.",
-      expertiseAreas: user.strategistProfile?.expertiseTags?.map((et) => et.tag.name) ?? [],
+      expertiseAreas: [],
       industries: [],
       strategicFocusAreas: [],
       collaborationStatus: "open" as const,
@@ -146,28 +113,12 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
       featuredProject,
       stats: {
         projects: user._count.projectContributors,
-        publications: user._count.publications,
+        publications: 0,
         network: 0,
         yearsActive: user.strategistProfile?.yearsOfExperience ?? 0,
       },
       featuredProjects: [],
-      activityTimeline: [
-        ...user.submissions.map((s) => ({
-          date: s.createdAt.toISOString(),
-          type: "contribution",
-          title: s.title,
-          description: s.description ?? `Submitted for ${s.stage} stage`,
-          fileUrl: s.fileUrl,
-          fileType: s.fileType,
-          fileSize: s.fileSize,
-        })),
-        ...user.activityLogs.map((log) => ({
-          date: log.createdAt.toISOString(),
-          type: log.action === "PUBLISH" ? "publication" : log.action.includes("PROJECT") ? "milestone" : "contribution",
-          title: `${log.action.toLowerCase().replace(/_/g, " ")}${log.entity ? ` — ${log.entity}` : ""}`,
-          description: log.entity ? `${log.action} on ${log.entity}` : log.action,
-        })),
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+      activityTimeline: [],
       publications: [],
       achievements: [],
       mediaGallery: [],
