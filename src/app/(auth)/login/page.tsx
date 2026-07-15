@@ -50,22 +50,13 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const result = await signIn("credentials", {
+      await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false,
+        callbackUrl: "/dashboard",
       })
-
-      if (result?.error) {
-        toast.error("Invalid email or password")
-        return
-      }
-
-      toast.success("Welcome back!")
-      window.location.href = result.url || "/dashboard"
     } catch {
       toast.error("An unexpected error occurred. Please try again.")
-    } finally {
       setIsLoading(false)
     }
   }
