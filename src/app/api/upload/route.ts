@@ -48,7 +48,9 @@ export async function POST(request: Request) {
     try {
       await ensureBucket()
       const ext = file.name.split(".").pop() ?? "jpg"
-      const filename = `projects/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+      const rawName = (formData.get("filename") as string)?.trim() || file.name.replace(/\.[^.]+$/, "")
+      const safeName = rawName.replace(/[^a-zA-Z0-9\s\-_.]/g, "").replace(/\s+/g, "-").slice(0, 80) || `upload-${Date.now()}`
+      const filename = `projects/${Date.now()}-${safeName}.${ext}`
       const buffer = Buffer.from(await file.arrayBuffer())
 
       const res = await fetch(`${supabaseUrl}/storage/v1/object/projects/${filename}`, {

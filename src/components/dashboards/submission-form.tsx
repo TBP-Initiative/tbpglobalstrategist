@@ -104,6 +104,7 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
     try {
       const formData = new FormData()
       formData.append("file", file)
+      formData.append("filename", title.trim())
 
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
