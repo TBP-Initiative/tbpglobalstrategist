@@ -93,8 +93,16 @@ interface ProfileProject {
   category: string; status: string; role: string;
 }
 
-export function ProfileContent({ strategist, workAreas = [], projects = [] }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[] }) {
-  const { heroData, focus, featured, activities } = mapStrategist(strategist)
+interface Activity {
+  id: string; title: string; description: string; date: string;
+  type: "publication" | "milestone" | "contribution" | "assignment";
+  fileUrl?: string; fileType?: string; fileSize?: number | null;
+}
+
+export function ProfileContent({ strategist, workAreas = [], projects = [], activities = [] }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[]; activities?: Activity[] }) {
+  const { heroData, focus, featured, activities: mappedActivities } = mapStrategist(strategist)
+
+  const allActivities = activities.length > 0 ? activities : mappedActivities
 
   const focusWithAreas = { ...focus, workAreas }
 
@@ -122,9 +130,9 @@ export function ProfileContent({ strategist, workAreas = [], projects = [] }: { 
                 </AnimatedSection>
               )}
 
-              {activities.length > 0 && (
+              {allActivities.length > 0 && (
                 <AnimatedSection>
-                  <ActivityTimeline activities={activities} />
+                  <ActivityTimeline activities={allActivities} />
                 </AnimatedSection>
               )}
             </div>
