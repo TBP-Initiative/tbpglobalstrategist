@@ -88,7 +88,7 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
                 )}
               </div>
             ) : (
-              <span className="text-right text-sm text-gray-800">
+              <span className="text-right text-sm text-gray-800 max-w-[60%] text-wrap">
                 {typeof focus[row.key] === "string" ? focus[row.key] as string : ""}
               </span>
             )}
