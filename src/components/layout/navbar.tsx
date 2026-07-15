@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -14,6 +14,7 @@ import {
   User,
   Moon,
   Sun,
+  Search,
 } from "lucide-react";
 import { useTheme } from "@/components/layout/theme-provider";
 
@@ -64,6 +65,34 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ id: string; name: string; title: string; image: string }[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const doSearch = useCallback((q: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (!q.trim()) { setSearchResults([]); return }
+    setSearchLoading(true)
+    searchTimerRef.current = setTimeout(() => {
+      fetch(`/api/strategists?search=${encodeURIComponent(q.trim())}`)
+        .then((r) => r.json())
+        .then((data) => {
+          setSearchResults(
+            (Array.isArray(data) ? data : []).slice(0, 8).map((s: Record<string, unknown>) => ({
+              id: s.id as string,
+              name: (s.name as string) ?? "Unknown",
+              title: (s.headline as string) ?? "Strategist",
+              image: (s.avatar as string) || "",
+            }))
+          )
+        })
+        .catch(() => setSearchResults([]))
+        .finally(() => setSearchLoading(false))
+    }, 300)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -74,7 +103,14 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
   }, [pathname]);
+
+  useEffect(() => {
+    if (searchOpen && searchRef.current) searchRef.current.focus();
+  }, [searchOpen]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -161,6 +197,76 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Search toggle */}
+            <div className="relative">
+              <button
+                onClick={() => { setSearchOpen((p) => !p); if (searchOpen) { setSearchQuery(""); setSearchResults([]) } }}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-muted-fg transition-colors hover:bg-muted hover:text-fg ${searchOpen ? "bg-muted text-fg" : ""}`}
+                aria-label="Search strategists"
+              >
+                <Search size={16} />
+              </button>
+              <AnimatePresence>
+                {searchOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => { setSearchOpen(false); setSearchQuery(""); setSearchResults([]) }} />
+                    <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
+                  >
+                    <div className="flex items-center gap-2 border-b border-border px-3">
+                      <Search size={14} className="text-muted-fg shrink-0" />
+                      <input
+                        ref={searchRef}
+                        type="text"
+                        placeholder="Search strategists by name..."
+                        value={searchQuery}
+                        onChange={(e) => { setSearchQuery(e.target.value); doSearch(e.target.value) }}
+                        className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-fg"
+                      />
+                      {searchQuery && (
+                        <button onClick={() => { setSearchQuery(""); setSearchResults([]) }} className="text-muted-fg hover:text-fg">
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {searchLoading && (
+                        <p className="px-4 py-3 text-xs text-muted-fg">Searching...</p>
+                      )}
+                      {!searchLoading && searchQuery && searchResults.length === 0 && (
+                        <p className="px-4 py-3 text-xs text-muted-fg">No strategists found.</p>
+                      )}
+                      {!searchLoading && searchResults.map((s) => (
+                        <Link
+                          key={s.id}
+                          href={`/strategists/${s.id}`}
+                          onClick={() => { setSearchOpen(false); setSearchQuery(""); setSearchResults([]) }}
+                          className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted"
+                        >
+                          {s.image ? (
+                            <img src={s.image} alt={s.name} className="h-9 w-9 rounded-full object-cover" />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-xs font-bold text-white">
+                              {s.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{s.name}</p>
+                            <p className="text-xs text-muted-fg truncate">{s.title}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             <button
               onClick={toggleTheme}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-fg transition-colors hover:bg-muted hover:text-fg"

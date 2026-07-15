@@ -10,10 +10,21 @@ const stageLabels: Record<string, string> = {
   PAID_ADVISER: "Paid Project Adviser, Specialist or Implementation Contributor",
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url)
+    const search = searchParams.get("search")?.trim() ?? ""
+
+    const where: Record<string, unknown> = { role: "STRATEGIST" }
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { strategistProfile: { title: { contains: search, mode: "insensitive" } } },
+      ]
+    }
+
     const dbStrategists = await prisma.user.findMany({
-      where: { role: "STRATEGIST" },
+      where,
       select: {
         id: true,
         name: true,
@@ -43,6 +54,7 @@ export async function GET() {
         },
       },
       orderBy: { createdAt: "desc" },
+      take: search ? 10 : undefined,
     })
 
     const strategists = dbStrategists.map((user) => ({

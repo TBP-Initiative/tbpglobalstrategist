@@ -13,7 +13,7 @@ import type { StrategistProfile } from "@/data/strategists"
 import { getCategory } from "@/lib/categories"
 
 function mapStrategist(strategist: StrategistProfile) {
-  const avatar = strategist.avatar || `https://i.pravatar.cc/300?u=${strategist.name.replace(/\s+/g, "-").toLowerCase()}`
+  const avatar = strategist.avatar || ""
 
   const heroData = {
     name: strategist.name,

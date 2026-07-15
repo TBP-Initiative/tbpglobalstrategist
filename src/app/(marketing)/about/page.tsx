@@ -293,13 +293,10 @@ export default function AboutPage() {
             {leadershipTeam.map((member) => (
               <motion.div key={member.name} variants={staggerItem}>
                 <GlassCard hover className="p-8 text-center">
-                  <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full ring-2 ring-white/20 shadow-lg">
-                    <img
-                      src={`https://i.pravatar.cc/200?u=${member.name.replace(/\s+/g, "-").toLowerCase()}`}
-                      alt={member.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
+                  <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full ring-2 ring-white/20 shadow-lg bg-gradient-to-br from-indigo-500 to-purple-500">
+                    <span className="text-xl font-bold text-white">
+                      {member.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </span>
                   </div>
                   <h3 className="text-lg font-semibold text-black">{member.name}</h3>
                   <p className="mt-1 text-sm text-gray-500">{member.title}</p>

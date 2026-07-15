@@ -68,11 +68,17 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
         >
           <div className="relative shrink-0">
             <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-white shadow-xl md:h-32 md:w-32 lg:h-36 lg:w-36">
-              <img
-                src={avatar}
-                alt={name}
-                className="h-full w-full object-cover"
-              />
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-3xl font-bold text-white">
+                  {name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+              )}
             </div>
             {isOnline && (
               <span className="absolute bottom-2 right-2 h-4 w-4 rounded-full border-[3px] border-white bg-emerald-500 shadow-lg shadow-emerald-500/30" />
