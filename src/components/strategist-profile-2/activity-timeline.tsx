@@ -46,6 +46,9 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
     <section className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-900">Activity & Contributions</h2>
 
+      {activities.length === 0 ? (
+        <p className="text-sm text-gray-400">No activity yet.</p>
+      ) : (
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -117,6 +120,7 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
           )
         })}
       </motion.div>
+      )}
     </section>
   )
 }

@@ -130,11 +130,9 @@ export function ProfileContent({ strategist, workAreas = [], projects = [], acti
                 </AnimatedSection>
               )}
 
-              {allActivities.length > 0 && (
-                <AnimatedSection>
-                  <ActivityTimeline activities={allActivities} />
-                </AnimatedSection>
-              )}
+              <AnimatedSection>
+                <ActivityTimeline activities={allActivities} />
+              </AnimatedSection>
             </div>
           </div>
 
