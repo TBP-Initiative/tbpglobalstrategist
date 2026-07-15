@@ -67,7 +67,7 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
             className={cn(
               "flex items-start justify-between gap-4 px-5 py-3 transition-colors duration-200",
               "hover:bg-gray-50",
-              row.key === "currentTbpFocus" && "flex-col"
+              row.key === "currentTbpFocus" && "flex-col w-[90%]"
             )}
           >
             <span className="shrink-0 text-sm font-medium text-gray-500">
@@ -89,7 +89,7 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
                 )}
               </div>
             ) : (
-              <span className="text-right text-sm text-gray-800 max-w-[60%] text-wrap">
+              <span className="text-right text-sm text-gray-800 w-full text-wrap">
                 {typeof focus[row.key] === "string" ? focus[row.key] as string : ""}
               </span>
             )}
