@@ -19,10 +19,8 @@ const ALLOWED_TYPES = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
   "text/csv",
-  "text/plain",
-  "application/rtf",
-  "application/vnd.oasis.opendocument.text",
-  "application/vnd.oasis.opendocument.spreadsheet",
+  "video/mp4",
+  "video/mpeg",
 ]
 
 const typeLabels: Record<string, string> = {
@@ -34,10 +32,8 @@ const typeLabels: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
   "application/vnd.ms-excel": "XLS",
   "text/csv": "CSV",
-  "text/plain": "TXT",
-  "application/rtf": "RTF",
-  "application/vnd.oasis.opendocument.text": "ODT",
-  "application/vnd.oasis.opendocument.spreadsheet": "ODS",
+  "video/mp4": "MP4",
+  "video/mpeg": "MPEG",
 }
 
 function getFileTypeLabel(mime: string) {
@@ -95,7 +91,12 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error("File type not supported. Please upload PDF, DOCX, PPTX, XLSX, CSV, or other standard documents.")
+      toast.error("File type not supported. Please upload PDF, DOCX, PPTX, XLSX, CSV, MP4, or MPEG.")
+      return
+    }
+
+    if (file.size > 4.5 * 1024 * 1024) {
+      toast.error("File size must be under 4.5MB.")
       return
     }
 
@@ -230,7 +231,7 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
                   </label>
                 </p>
                 <p className="text-[10px] text-muted-foreground/60">
-                  PDF, DOCX, PPTX, XLSX, CSV, TXT, RTF, ODT, ODS
+                  PDF, DOCX, PPTX, XLSX, CSV, MP4, MPEG &middot; Max 4.5MB
                 </p>
               </div>
             )}

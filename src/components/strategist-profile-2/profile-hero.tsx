@@ -88,7 +88,7 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
           <div className="flex flex-col pb-1 md:pb-2">
             {/* Line 1: Name */}
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-gray-900 md:text-lg lg:text-xl">
+              <h1 className="text-xl font-bold text-gray-900 leading-tight md:text-2xl lg:text-3xl">
                 {name}
               </h1>
               {verified && (
@@ -97,12 +97,12 @@ export function ProfileHero({ strategist }: ProfileHeroProps) {
             </div>
 
             {/* Line 2: Stage badge */}
-            <span className="mt-0.5 inline-flex w-fit rounded-full px-2 py-px text-xs font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
+            <span className="mt-1.5 inline-flex w-fit rounded-full px-2 py-px text-xs font-medium text-white ring-1 ring-white/30" style={{ backgroundColor: "#008540" }}>
               {role}
             </span>
 
             {/* Line 3: Headline + flag + location */}
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-700 md:text-sm">
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-gray-700 md:text-sm">
               <span>{headline}</span>
               {(city || country || countryCode) && (
                 <>
