@@ -34,6 +34,9 @@ export async function GET() {
             availability: true,
             linkedinUrl: true,
             websiteUrl: true,
+            expertiseTags: {
+              select: { tag: { select: { id: true, name: true } } },
+            },
           },
         },
         workAreaAssignments: {
@@ -73,14 +76,14 @@ export async function PATCH(req: Request) {
     if (profile && typeof profile === "object") {
       const profileData: Record<string, unknown> = {}
       if (profile.title !== undefined) {
-        if (typeof profile.title !== "string" || profile.title.length > 100) {
-          return NextResponse.json({ error: "Title must be 100 characters or fewer" }, { status: 400 })
+        if (typeof profile.title !== "string" || profile.title.length > 80) {
+          return NextResponse.json({ error: "Title must be 80 characters or fewer" }, { status: 400 })
         }
         profileData.title = profile.title
       }
       if (profile.bio !== undefined) {
-        if (typeof profile.bio !== "string" || profile.bio.length > 2000) {
-          return NextResponse.json({ error: "Bio must be 2000 characters or fewer" }, { status: 400 })
+        if (typeof profile.bio !== "string" || profile.bio.length > 900) {
+          return NextResponse.json({ error: "Bio must be 900 characters or fewer" }, { status: 400 })
         }
         profileData.bio = profile.bio
       }
@@ -99,13 +102,37 @@ export async function PATCH(req: Request) {
           create: { userId: session.user.id, ...profileData },
           update: profileData,
         } as any)
-
-        notifyAdmins({
-          title: "Profile updated",
-          message: `${session.user.name ?? "A user"} updated their profile.`,
-          link: "/dashboard/admin",
-        })
       }
+
+      if (Array.isArray(profile.expertiseTags)) {
+        const tags: string[] = profile.expertiseTags.slice(0, 5)
+        const profileRec = await prisma.strategistProfile.findUnique({
+          where: { userId: session.user.id },
+          select: { id: true },
+        })
+        if (profileRec) {
+          await prisma.expertiseTag.deleteMany({ where: { profileId: profileRec.id } })
+          for (const tagName of tags) {
+            const tag = await prisma.tag.upsert({
+              where: { slug: tagName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") },
+              create: {
+                name: tagName,
+                slug: tagName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+              },
+              update: {},
+            })
+            await prisma.expertiseTag.create({
+              data: { profileId: profileRec.id, tagId: tag.id },
+            })
+          }
+        }
+      }
+
+      notifyAdmins({
+        title: "Profile updated",
+        message: `${session.user.name ?? "A user"} updated their profile.`,
+        link: "/dashboard/admin",
+      })
     }
 
     await createNotification({

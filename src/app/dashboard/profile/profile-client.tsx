@@ -67,6 +67,7 @@ export function ProfileClient() {
       availability: boolean
       linkedinUrl: string | null
       websiteUrl: string | null
+      expertiseTags: string[]
     } | null
   } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -97,6 +98,7 @@ export function ProfileClient() {
                 availability: data.strategistProfile.availability,
                 linkedinUrl: data.strategistProfile.linkedinUrl,
                 websiteUrl: data.strategistProfile.websiteUrl,
+                expertiseTags: data.strategistProfile.expertiseTags?.map((e: { tag: { name: string } }) => e.tag.name) ?? [],
               }
             : null,
         })
@@ -189,6 +191,15 @@ export function ProfileClient() {
                 {user.profile?.category && (
                   <p className="text-[11px] text-muted-foreground italic">{getCategory(user.profile.category)?.name ?? user.profile.category}</p>
                 )}
+                {user.profile?.expertiseTags && user.profile.expertiseTags.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                    {user.profile.expertiseTags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Separator className="my-4" />
               <div className="space-y-3">
@@ -276,7 +287,7 @@ export function ProfileClient() {
           email: user.email,
           image: user.image,
           role: user.role,
-          profile: user.profile,
+          profile: user.profile ? { ...user.profile, expertiseTags: user.profile.expertiseTags.map((name) => ({ tag: { id: name, name } })) } : null,
         }}
         onSaved={(newImage: string | null) => {
           if (newImage) {

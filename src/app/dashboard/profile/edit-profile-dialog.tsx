@@ -2,9 +2,10 @@
 
 import { useState, useRef } from "react"
 import { toast } from "sonner"
-import { Camera, Loader2, MapPin } from "lucide-react"
+import { Camera, Loader2, MapPin, X } from "lucide-react"
 import { COUNTRIES } from "@/lib/countries"
 import { STRATEGIST_CATEGORIES } from "@/lib/categories"
+import { EXPERTISE_AREAS } from "@/lib/constants"
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ interface EditProfileDialogProps {
       availability: boolean
       linkedinUrl: string | null
       websiteUrl: string | null
+      expertiseTags: { tag: { id: string; name: string } }[]
     } | null
   }
   onSaved: (newImage: string | null) => void
@@ -59,6 +61,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
     availability: user.profile?.availability ?? true,
     linkedinUrl: user.profile?.linkedinUrl ?? "",
     websiteUrl: user.profile?.websiteUrl ?? "",
+    expertiseTags: user.profile?.expertiseTags?.map((e) => e.tag.name) ?? [],
   })
 
   const initials = form.name
@@ -109,6 +112,7 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
           availability: form.availability,
           linkedinUrl: form.linkedinUrl || null,
           websiteUrl: form.websiteUrl || null,
+          expertiseTags: form.expertiseTags,
         },
       }
       if (optimizedDataUrl) body.image = optimizedDataUrl
@@ -257,6 +261,45 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Expertise Tags <span className="text-muted-foreground/60">(max 5)</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {form.expertiseTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, expertiseTags: form.expertiseTags.filter((t) => t !== tag) })}
+                      className="ml-0.5 rounded-full hover:bg-primary/25 p-0.5"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {form.expertiseTags.length < 5 && (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const val = e.target.value
+                    if (val && !form.expertiseTags.includes(val)) {
+                      setForm({ ...form, expertiseTags: [...form.expertiseTags, val] })
+                    }
+                  }}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                >
+                  <option value="">Add an expertise tag...</option>
+                  {EXPERTISE_AREAS.filter((a) => !form.expertiseTags.includes(a)).map((area) => (
+                    <option key={area} value={area}>{area}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Bio</label>
