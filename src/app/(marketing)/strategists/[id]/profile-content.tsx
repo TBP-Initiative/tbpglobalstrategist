@@ -96,7 +96,7 @@ interface ProfileProject {
 export function ProfileContent({ strategist, workAreas = [], projects = [] }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[] }) {
   const { heroData, focus, featured, activities } = mapStrategist(strategist)
 
-  const focusWithAreas = { ...focus, workAreas, expertiseAreas: strategist.expertiseAreas }
+  const focusWithAreas = { ...focus, workAreas }
 
   return (
     <div className="min-h-screen bg-white">
