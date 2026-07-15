@@ -104,13 +104,13 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
                   </div>
                   {activity.fileUrl && (
                     <a
-                      href={activity.fileUrl}
+                      href={`/api/submissions/download?id=${activity.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                     >
                       <Download className="h-3 w-3" />
-                      {activity.fileType?.toUpperCase() ?? "File"}
+                      {activity.title}
                       {activity.fileSize ? ` · ${(activity.fileSize / 1024).toFixed(0)} KB` : ""}
                     </a>
                   )}

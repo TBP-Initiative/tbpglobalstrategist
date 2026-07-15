@@ -297,7 +297,7 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7" asChild>
-                    <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" download>
+                    <a href={`/api/submissions/download?id=${sub.id}`} target="_blank" rel="noopener noreferrer" download>
                       <Download size={14} />
                     </a>
                   </Button>
