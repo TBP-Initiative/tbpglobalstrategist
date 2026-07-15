@@ -66,7 +66,8 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
             animate="visible"
             className={cn(
               "flex items-start justify-between gap-4 px-5 py-3 transition-colors duration-200",
-              "hover:bg-gray-50"
+              "hover:bg-gray-50",
+              row.key === "currentTbpFocus" && "flex-col"
             )}
           >
             <span className="shrink-0 text-sm font-medium text-gray-500">
