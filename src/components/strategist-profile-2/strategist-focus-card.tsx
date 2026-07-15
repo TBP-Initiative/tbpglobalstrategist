@@ -12,6 +12,7 @@ interface StrategistFocusCardProps {
     memberSince: string
     basedIn: string
     workAreas?: string[]
+    expertiseAreas?: string[]
   }
 }
 
@@ -19,6 +20,7 @@ const rows: { label: string; key: keyof StrategistFocusCardProps["focus"] }[] = 
   { label: "Strategic Domain", key: "strategicDomain" },
   { label: "Primary Contribution", key: "primaryContribution" },
   { label: "Current TBP Focus", key: "currentTbpFocus" },
+  { label: "Expertise", key: "expertiseAreas" },
   { label: "Work Areas", key: "workAreas" },
   { label: "Collaboration Status", key: "collaborationStatus" },
   { label: "Member Since", key: "memberSince" },
@@ -85,6 +87,21 @@ export function StrategistFocusCard({ focus }: StrategistFocusCardProps) {
                   ))
                 ) : (
                   <span className="text-right text-xs text-gray-400">None assigned</span>
+                )}
+              </div>
+            ) : row.key === "expertiseAreas" && Array.isArray(focus.expertiseAreas) ? (
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                {focus.expertiseAreas.length > 0 ? (
+                  focus.expertiseAreas.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                    >
+                      {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-right text-xs text-gray-400">None added</span>
                 )}
               </div>
             ) : (

@@ -42,6 +42,9 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
             yearsOfExperience: true,
             linkedinUrl: true,
             websiteUrl: true,
+            expertiseTags: {
+              select: { tag: { select: { name: true } } },
+            },
           },
         },
         _count: {
@@ -126,7 +129,7 @@ async function getStrategistById(id: string): Promise<StrategistProfile | null> 
           ? user.strategistProfile.bio.slice(0, 120) + "..."
           : user.strategistProfile.bio
         : "A global strategist contributing to the TBP ecosystem.",
-      expertiseAreas: [],
+      expertiseAreas: user.strategistProfile?.expertiseTags?.map((e) => e.tag.name) ?? [],
       industries: [],
       strategicFocusAreas: [],
       collaborationStatus: "open" as const,
