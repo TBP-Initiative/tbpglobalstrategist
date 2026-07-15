@@ -62,8 +62,7 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome back!")
-      router.push("/dashboard")
-      router.refresh()
+      window.location.href = result.url || "/dashboard"
     } catch {
       toast.error("An unexpected error occurred. Please try again.")
     } finally {
