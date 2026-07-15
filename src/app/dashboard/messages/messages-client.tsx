@@ -51,9 +51,9 @@ export function MessagesClient({
         const q = search.toLowerCase()
         const other = m.isSentByMe ? m.receiver : m.sender
         return (
-          m.content.toLowerCase().includes(q) ||
-          other.name?.toLowerCase().includes(q) ||
-          other.email.toLowerCase().includes(q)
+          (m.content ?? "").toLowerCase().includes(q) ||
+          (other.name ?? "").toLowerCase().includes(q) ||
+          (other.email ?? "").toLowerCase().includes(q)
         )
       }
       return true

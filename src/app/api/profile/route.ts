@@ -20,6 +20,7 @@ export async function GET() {
         email: true,
         image: true,
         role: true,
+        createdAt: true,
         strategistProfile: {
           select: {
             title: true,

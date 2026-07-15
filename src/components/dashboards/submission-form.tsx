@@ -77,8 +77,13 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
 
   useEffect(() => {
     fetch("/api/submissions")
-      .then((res) => res.json())
-      .then(setSubmissions)
+      .then((res) => {
+        if (!res.ok) return []
+        return res.json()
+      })
+      .then((data) => {
+        if (Array.isArray(data)) setSubmissions(data)
+      })
       .catch(() => {})
       .finally(() => setLoadingSubmissions(false))
   }, [])

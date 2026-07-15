@@ -32,8 +32,8 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
       list = list.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
+          (p.description ?? "").toLowerCase().includes(q) ||
+          (p.category ?? "").toLowerCase().includes(q)
       )
     }
 

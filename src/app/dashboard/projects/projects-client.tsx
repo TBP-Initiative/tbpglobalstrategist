@@ -1211,8 +1211,8 @@ export function ProjectsClient({
         const q = search.toLowerCase()
         return (
           p.title.toLowerCase().includes(q) ||
-          p.organization?.name.toLowerCase().includes(q) ||
-          p.createdBy.name?.toLowerCase().includes(q)
+          (p.organization?.name ?? "").toLowerCase().includes(q) ||
+          (p.createdBy.name ?? "").toLowerCase().includes(q)
         )
       }
       return true

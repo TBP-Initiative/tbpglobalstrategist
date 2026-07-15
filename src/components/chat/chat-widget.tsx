@@ -51,8 +51,8 @@ function formatTime(dateStr: string) {
   return `${days}d`
 }
 
-function getInitials(name: string) {
-  return name
+function getInitials(name: string | null | undefined) {
+  return (name ?? "")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -244,12 +244,12 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
   const currentUserIdForCheck = myUserId || currentUserId
 
   const filteredConversations = conversations.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (c.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const filteredStrategists = strategists.filter(
     (s) =>
-      s.name.toLowerCase().includes(groupSearch.toLowerCase()) &&
+      (s.name ?? "").toLowerCase().includes(groupSearch.toLowerCase()) &&
       s.id !== currentUserIdForCheck
   )
 

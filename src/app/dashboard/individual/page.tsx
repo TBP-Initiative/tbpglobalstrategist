@@ -141,23 +141,39 @@ export default function IndividualDashboard() {
   const [collaborations, setCollaborations] = useState<CollaborationItem[]>([])
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/dashboard/stats").then((r) => r.json()),
-      fetch("/api/profile").then((r) => r.json()),
-      fetch("/api/dashboard/my-projects").then((r) => r.json()),
-      fetch("/api/dashboard/activities").then((r) => r.json()),
-      fetch("/api/notifications").then((r) => r.json()),
-      fetch("/api/dashboard/collaborations").then((r) => r.json()),
-    ])
-      .then(([statsData, profileData, projectsData, activitiesData, notificationsData, collabsData]) => {
-        setStats(statsData)
-        if (profileData.strategistProfile?.stage) {
-          setProfile({
-            stage: profileData.strategistProfile.stage,
-            sector: profileData.strategistProfile.sector,
-            workAreas: profileData.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
-            expertiseTags: profileData.strategistProfile.expertiseTags?.map((e: { tag: { name: string } }) => e.tag.name) ?? [],
-          })
+    async function loadDashboard() {
+      try {
+        const safeFetch = async (url: string) => {
+          try {
+            const r = await fetch(url)
+            if (!r.ok) return null
+            return await r.json()
+          } catch {
+            return null
+          }
+        }
+
+        const [statsData, profileData, projectsData, activitiesData, notificationsData, collabsData] = await Promise.all([
+          safeFetch("/api/dashboard/stats"),
+          safeFetch("/api/profile"),
+          safeFetch("/api/dashboard/my-projects"),
+          safeFetch("/api/dashboard/activities"),
+          safeFetch("/api/notifications"),
+          safeFetch("/api/dashboard/collaborations"),
+        ])
+
+        if (statsData && typeof statsData === "object" && !statsData.error) {
+          setStats(statsData)
+        }
+        if (profileData && typeof profileData === "object" && !profileData.error) {
+          if (profileData.strategistProfile?.stage) {
+            setProfile({
+              stage: profileData.strategistProfile.stage,
+              sector: profileData.strategistProfile.sector,
+              workAreas: profileData.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
+              expertiseTags: profileData.strategistProfile.expertiseTags?.map((e: { tag: { name: string } }) => e.tag.name) ?? [],
+            })
+          }
         }
         if (Array.isArray(projectsData)) {
           setProjects(projectsData)
@@ -188,9 +204,13 @@ export default function IndividualDashboard() {
         if (Array.isArray(collabsData)) {
           setCollaborations(collabsData)
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      } catch {
+        // dashboard load failed — render with defaults
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadDashboard()
   }, [])
 
   const firstName = session?.user?.name?.split(" ")[0] || "Strategist"

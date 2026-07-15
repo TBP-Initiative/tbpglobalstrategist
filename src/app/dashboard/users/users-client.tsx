@@ -79,8 +79,8 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
       if (search) {
         const q = search.toLowerCase()
         return (
-          u.name?.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q)
+          (u.name ?? "").toLowerCase().includes(q) ||
+          (u.email ?? "").toLowerCase().includes(q)
         )
       }
       return true
