@@ -193,11 +193,11 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="e.g. Senior Strategist (max 100 chars)"
-                maxLength={100}
+                placeholder="e.g. Senior Strategist (max 80 chars)"
+                maxLength={80}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
-              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.title.length}/100</p>
+              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.title.length}/80</p>
             </div>
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-3">
@@ -264,11 +264,11 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 rows={5}
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                placeholder='Tell us about yourself... (max 2000 chars)&#10;&#10;Use double newlines between paragraphs.&#10;Use "- " or "* " for bullet lists.'
-                maxLength={2000}
+                placeholder='Tell us about yourself... (max 900 chars)&#10;&#10;Use double newlines between paragraphs.&#10;Use "- " or "* " for bullet lists.'
+                maxLength={900}
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
-              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.bio.length}/2000</p>
+              <p className="mt-1 text-right text-[10px] text-muted-foreground">{form.bio.length}/900</p>
             </div>
             <div className="flex items-center gap-2">
               <input

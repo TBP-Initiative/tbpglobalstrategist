@@ -24,8 +24,8 @@ export const registerSchema = z
 
 export const strategistProfileSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  title: z.string().min(2, "Title is required"),
-  bio: z.string().min(10, "Bio must be at least 10 characters"),
+  title: z.string().min(2, "Title is required").max(80, "Title must be 80 characters or less"),
+  bio: z.string().min(10, "Bio must be at least 10 characters").max(900, "Bio must be 900 characters or less"),
   avatar: z.string().url("Invalid URL").optional().or(z.literal("")),
   expertiseAreas: z.array(z.string()).min(1, "Select at least one expertise area"),
   yearsOfExperience: z.number().min(0).optional(),
