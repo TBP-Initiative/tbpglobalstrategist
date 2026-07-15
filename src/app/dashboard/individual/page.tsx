@@ -428,6 +428,10 @@ export default function IndividualDashboard() {
         </div>
 
         <div className="space-y-6">
+          <AnimatedSection delay={0.2}>
+            <FeaturedProjectSelector />
+          </AnimatedSection>
+
           <AnimatedSection delay={0.25}>
             <NotificationsPanel items={notifications} />
           </AnimatedSection>
@@ -484,10 +488,6 @@ export default function IndividualDashboard() {
                 })}
               </div>
             </GlassCard>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.45}>
-            <FeaturedProjectSelector />
           </AnimatedSection>
 
           <AnimatedSection delay={0.45}>
