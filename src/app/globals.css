@@ -15,6 +15,11 @@
   --color-muted-foreground: var(--muted-fg);
   --color-card: var(--card);
   --color-card-foreground: var(--card-fg);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-fg);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-fg);
+  --color-input: var(--input);
   --color-border: var(--border);
   --color-ring: var(--ring);
   --color-popover: var(--popover);
@@ -28,6 +33,11 @@
   --primary-fg: #ffffff;
   --accent: #d97706;
   --accent-fg: #1a1a2e;
+  --destructive: #ef4444;
+  --destructive-fg: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-fg: #1a1a2e;
+  --input: #e2e8f0;
   --muted: #f1f5f9;
   --muted-fg: #6b7280;
   --card: #ffffff;
@@ -45,6 +55,11 @@
   --primary-fg: #ffffff;
   --accent: #f59e0b;
   --accent-fg: #1a1a2e;
+  --destructive: #dc2626;
+  --destructive-fg: #ffffff;
+  --secondary: #1e1e2a;
+  --secondary-fg: #f1f1f6;
+  --input: #2a2a3a;
   --muted: #12121a;
   --muted-fg: #8888a0;
   --card: rgba(255, 255, 255, 0.04);
