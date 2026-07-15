@@ -133,7 +133,7 @@ export default function IndividualDashboard() {
     totalActiveProjects: number
   } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[] } | null>(null)
+  const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[]; expertiseTags?: string[] } | null>(null)
 
   const [projects, setProjects] = useState<ProjectItem[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
@@ -156,6 +156,7 @@ export default function IndividualDashboard() {
             stage: profileData.strategistProfile.stage,
             sector: profileData.strategistProfile.sector,
             workAreas: profileData.workAreaAssignments?.map((a: { workArea: { name: string } }) => a.workArea.name) ?? [],
+            expertiseTags: profileData.strategistProfile.expertiseTags?.map((e: { tag: { name: string } }) => e.tag.name) ?? [],
           })
         }
         if (Array.isArray(projectsData)) {
@@ -224,6 +225,19 @@ export default function IndividualDashboard() {
                   className="inline-block rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-500"
                 >
                   {area}
+                </span>
+              ))}
+            </div>
+          )}
+          {profile?.expertiseTags && profile.expertiseTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Expertise:</span>
+              {profile.expertiseTags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                >
+                  {tag}
                 </span>
               ))}
             </div>

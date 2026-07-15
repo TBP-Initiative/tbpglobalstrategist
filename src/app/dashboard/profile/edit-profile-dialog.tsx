@@ -284,21 +284,37 @@ export function EditProfileDialog({ open, onOpenChange, user, onSaved }: EditPro
                 ))}
               </div>
               {form.expertiseTags.length < 5 && (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const val = e.target.value
-                    if (val && !form.expertiseTags.includes(val)) {
-                      setForm({ ...form, expertiseTags: [...form.expertiseTags, val] })
-                    }
-                  }}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
-                >
-                  <option value="">Add an expertise tag...</option>
-                  {EXPERTISE_AREAS.filter((a) => !form.expertiseTags.includes(a)).map((area) => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <input
+                    id="expertise-input"
+                    list="expertise-suggestions"
+                    type="text"
+                    placeholder="Type or select an expertise..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        const val = (e.target as HTMLInputElement).value.trim()
+                        if (val && !form.expertiseTags.includes(val) && form.expertiseTags.length < 5) {
+                          setForm({ ...form, expertiseTags: [...form.expertiseTags, val] })
+                          ;(e.target as HTMLInputElement).value = ""
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim()
+                      if (val && !form.expertiseTags.includes(val) && form.expertiseTags.length < 5) {
+                        setForm({ ...form, expertiseTags: [...form.expertiseTags, val] })
+                        e.target.value = ""
+                      }
+                    }}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                  />
+                  <datalist id="expertise-suggestions">
+                    {EXPERTISE_AREAS.filter((a) => !form.expertiseTags.includes(a)).map((area) => (
+                      <option key={area} value={area} />
+                    ))}
+                  </datalist>
+                </div>
               )}
             </div>
             <div>
