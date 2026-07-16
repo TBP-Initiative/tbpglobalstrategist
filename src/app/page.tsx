@@ -36,6 +36,7 @@ import {
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
 import { GradientText } from "@/components/shared/gradient-text"
+import { VideoModal } from "@/components/shared/video-modal"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -277,8 +278,15 @@ const globalInitiatives = [
 ]
 
 function HeroSection() {
+  const [videoModalOpen, setVideoModalOpen] = useState(false)
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-[10vh] pb-[10vh]">
+      <VideoModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        videoUrl="https://vimeo.com/1210458856"
+      />
       <div className="absolute inset-0 gradient-hero" />
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px]" />
@@ -364,15 +372,14 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
           className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          <Link href="/strategists">
-            <Button
-              size="lg"
-              className="h-12 rounded-full bg-primary px-8 text-base font-medium text-primary-fg shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
-            >
-              Explore the Network
-              <ArrowRight size={16} className="ml-2" />
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            onClick={() => setVideoModalOpen(true)}
+            className="h-12 rounded-full bg-primary px-8 text-base font-medium text-primary-fg shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
+          >
+            Strategist&apos;s Mindset
+            <ArrowRight size={16} className="ml-2" />
+          </Button>
           <Link href="/register">
             <Button
               size="lg"
@@ -385,18 +392,7 @@ function HeroSection() {
           </Link>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
-          className="mt-16 flex items-center justify-center gap-8 text-sm text-white/40"
-        >
-          <span>Trusted by 850+ organizations</span>
-          <span className="hidden h-4 w-px bg-white/20 sm:block" />
-          <span className="hidden sm:inline">1500+ elite strategists</span>
-          <span className="hidden h-4 w-px bg-white/20 md:block" />
-          <span className="hidden md:inline">64 countries</span>
-        </motion.div>
+
       </div>
 
       <motion.div
