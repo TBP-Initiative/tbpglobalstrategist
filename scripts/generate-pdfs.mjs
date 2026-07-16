@@ -14,6 +14,10 @@ const docs = [
     html: path.join(__dirname, 'user-guide.html'),
     pdf: path.join(__dirname, '..', 'public', 'docs', 'TBP_Global_Strategist_User_Guide.pdf'),
   },
+  {
+    html: path.join(__dirname, 'technical-architecture.html'),
+    pdf: path.join(__dirname, '..', 'public', 'docs', 'TBP_Global_Strategist_Technical_Architecture.pdf'),
+  },
 ];
 
 const browser = await puppeteer.launch({
@@ -30,7 +34,7 @@ for (const doc of docs) {
   await page.pdf({
     path: doc.pdf,
     format: 'A4',
-    margin: { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' },
+    margin: { top: '1.5cm', bottom: '1.5cm', left: '1.5cm', right: '1.5cm' },
     printBackground: true,
   });
   await page.close();
@@ -38,3 +42,4 @@ for (const doc of docs) {
 }
 
 await browser.close();
+console.log('All PDFs generated successfully.');

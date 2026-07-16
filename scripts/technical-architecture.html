@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TBP Global Strategist — Technical Architecture</title>
+<style>
+  @page { margin: 1.8cm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; font-size: 10.5pt; line-height: 1.65; color: #1a1a2e; padding: 40px; }
+  h1 { font-size: 26pt; color: #1a1a2e; margin-bottom: 6px; }
+  h2 { font-size: 16pt; color: #4f46e5; margin-top: 32px; margin-bottom: 12px; border-bottom: 2px solid #e0e7ff; padding-bottom: 5px; }
+  h3 { font-size: 13pt; color: #1a1a2e; margin-top: 20px; margin-bottom: 8px; }
+  h4 { font-size: 11pt; color: #4b5563; margin-top: 14px; margin-bottom: 6px; }
+  p { margin-bottom: 8px; }
+  ul, ol { margin-bottom: 10px; padding-left: 22px; }
+  li { margin-bottom: 3px; }
+  .cover { text-align: center; padding-top: 100px; padding-bottom: 60px; }
+  .cover h1 { font-size: 30pt; margin-bottom: 12px; }
+  .cover .subtitle { font-size: 14pt; color: #6366f1; margin-bottom: 30px; }
+  .cover .meta { font-size: 10pt; color: #6b7280; }
+  .page-break { page-break-before: always; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 10px; text-align: left; }
+  th { background: #eef2ff; color: #1a1a2e; font-weight: 600; }
+  tr:nth-child(even) { background: #f9fafb; }
+  code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 9pt; font-family: 'Consolas', 'Courier New', monospace; }
+  pre { background: #1a1a2e; color: #e5e7eb; padding: 14px; border-radius: 6px; font-size: 9pt; font-family: 'Consolas', monospace; overflow-x: auto; margin: 10px 0; line-height: 1.5; }
+  .arch-box { background: #f5f3ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .arch-box h4 { color: #4f46e5; margin-bottom: 6px; }
+  .flow-box { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .warn-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  strong { color: #1a1a2e; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>TBP Global Strategist</h1>
+  <div class="subtitle">Technical Architecture Document</div>
+  <div class="meta">Version 1.2 &mdash; July 2026</div>
+  <div class="meta" style="margin-top: 8px;">https://tbpglobalstrategist.vercel.app</div>
+</div>
+
+<div class="page-break"></div>
+
+<h2>Table of Contents</h2>
+<ol>
+  <li>System Architecture Overview</li>
+  <li>Technology Stack</li>
+  <li>Application Architecture</li>
+  <li>Database Schema</li>
+  <li>Authentication &amp; Authorization</li>
+  <li>API Architecture</li>
+  <li>Frontend Architecture</li>
+  <li>File Storage &amp; Uploads</li>
+  <li>Deployment Architecture</li>
+  <li>Security Considerations</li>
+  <li>Performance &amp; Optimization</li>
+</ol>
+
+<div class="page-break"></div>
+
+<h2>1. System Architecture Overview</h2>
+
+<p>TBP Global Strategist is a full-stack web application built on <strong>Next.js 16</strong> with the App Router pattern. The system follows a monolithic architecture with server-side rendering (SSR), API routes, and static generation where appropriate.</p>
+
+<div class="arch-box">
+  <h4>High-Level Architecture</h4>
+  <pre>
+┌─────────────────────────────────────────────────────────┐
+│                    CLIENT (Browser)                      │
+│  React 19 + Next.js App Router + Tailwind CSS v4        │
+└──────────────────────┬──────────────────────────────────┘
+                       │ HTTPS
+┌──────────────────────▼──────────────────────────────────┐
+│                 VERCEL EDGE NETWORK                      │
+│            (CDN + Edge Functions + SSL)                   │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│              NEXT.JS APPLICATION SERVER                   │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │  Page Routes │  │  API Routes  │  │   Middleware    │  │
+│  │  (SSR/SSG)   │  │  (36 endpoints)│ │  (Auth guard)  │  │
+│  └─────────────┘  └──────────────┘  └────────────────┘  │
+└──────┬───────────────┬──────────────┬───────────────────┘
+       │               │              │
+┌──────▼──────┐ ┌──────▼──────┐ ┌────▼────────────┐
+│  PostgreSQL  │ │  Supabase   │ │    Nodemailer    │
+│  (Prisma ORM)│ │  Storage    │ │   (Email)        │
+└─────────────┘ └─────────────┘ └─────────────────┘</pre>
+</div>
+
+<h2>2. Technology Stack</h2>
+
+<h3>2.1 Frontend</h3>
+<table>
+  <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+  <tr><td>Next.js</td><td>16.2.6</td><td>React framework with App Router, SSR, SSG, API routes</td></tr>
+  <tr><td>React</td><td>19.2.4</td><td>UI component library</td></tr>
+  <tr><td>TypeScript</td><td>5.x</td><td>Type-safe development</td></tr>
+  <tr><td>Tailwind CSS</td><td>4.x</td><td>Utility-first CSS framework</td></tr>
+  <tr><td>Framer Motion</td><td>12.x</td><td>Animations and transitions</td></tr>
+  <tr><td>Recharts</td><td>3.x</td><td>Chart and data visualization</td></tr>
+  <tr><td>Lucide React</td><td>1.16.0</td><td>Icon library</td></tr>
+</table>
+
+<h3>2.2 State Management</h3>
+<table>
+  <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+  <tr><td>Zustand</td><td>5.x</td><td>Lightweight client-side state management</td></tr>
+  <tr><td>TanStack React Query</td><td>5.x</td><td>Server state management, caching, and data fetching</td></tr>
+  <tr><td>React Hook Form</td><td>7.x</td><td>Form state management with validation</td></tr>
+  <tr><td>Zod</td><td>4.x</td><td>Schema validation for forms and API inputs</td></tr>
+</table>
+
+<h3>2.3 Backend</h3>
+<table>
+  <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+  <tr><td>Next.js API Routes</td><td>16.x</td><td>36 API endpoints under /api/*</td></tr>
+  <tr><td>Prisma</td><td>7.8.0</td><td>Type-safe database ORM</td></tr>
+  <tr><td>PostgreSQL</td><td>15+</td><td>Primary database (via Supabase)</td></tr>
+  <tr><td>NextAuth.js</td><td>5.0.0-beta.31</td><td>Authentication (Credentials + Google)</td></tr>
+  <tr><td>bcryptjs</td><td>3.x</td><td>Password hashing</td></tr>
+  <tr><td>Nodemailer</td><td>7.x</td><td>Transactional email sending</td></tr>
+</table>
+
+<h3>2.4 Infrastructure</h3>
+<table>
+  <tr><th>Technology</th><th>Purpose</th></tr>
+  <tr><td>Vercel</td><td>Primary deployment platform (serverless functions, edge network)</td></tr>
+  <tr><td>Supabase</td><td>PostgreSQL database (PgBouncer on port 6543) + file storage</td></tr>
+  <tr><td>Docker</td><td>Alternative containerized deployment</td></tr>
+  <tr><td>PM2</td><td>Process manager for self-hosted deployment</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>3. Application Architecture</h2>
+
+<h3>3.1 Route Groups</h3>
+<p>The Next.js App Router uses route groups to organize pages:</p>
+
+<table>
+  <tr><th>Route Group</th><th>Path</th><th>Purpose</th></tr>
+  <tr><td><code>(marketing)</code></td><td>/about, /contact, /insights, etc.</td><td>Public marketing pages with shared navbar/footer layout</td></tr>
+  <tr><td><code>(auth)</code></td><td>/login, /register</td><td>Authentication pages with split-screen layout</td></tr>
+  <tr><td><code>dashboard</code></td><td>/dashboard/*</td><td>Protected dashboard pages with sidebar layout</td></tr>
+  <tr><td><code>api</code></td><td>/api/*</td><td>36 REST API endpoints</td></tr>
+</table>
+
+<h3>3.2 Layout Hierarchy</h3>
+<pre>
+RootLayout (src/app/layout.tsx)
+├── Providers (QueryClient, Theme, Toaster)
+├── Marketing Layout (navbar + footer + marketing chat)
+│   ├── Home (/)
+│   ├── About (/about)
+│   ├── Strategists (/strategists)
+│   ├── Projects (/projects)
+│   └── ... other marketing pages
+├── Auth Layout (split screen with TBP branding)
+│   ├── Login (/login)
+│   └── Register (/register)
+└── Dashboard Layout (sidebar + header + breadcrumbs)
+    ├── Dashboard Home (/dashboard)
+    ├── Profile (/dashboard/profile)
+    ├── Projects (/dashboard/projects)
+    ├── Messages (/dashboard/messages)
+    ├── Admin (/dashboard/admin)
+    └── ... other dashboard pages</pre>
+
+<h3>3.3 Component Organization</h3>
+<table>
+  <tr><th>Directory</th><th>Components</th><th>Purpose</th></tr>
+  <tr><td><code>components/ui/</code></td><td>20 components</td><td>Base UI primitives (shadcn/ui-style): button, card, dialog, sheet, tabs, table, etc.</td></tr>
+  <tr><td><code>components/layout/</code></td><td>7 components</td><td>Layout structure: navbar, footer, sidebar, providers, theme-provider</td></tr>
+  <tr><td><code>components/shared/</code></td><td>11 components</td><td>Reusable: animated-section, glass-card, gradient-text, search-input, video-modal, etc.</td></tr>
+  <tr><td><code>components/cards/</code></td><td>4 components</td><td>Card variants: strategist, project, organization, featured-project</td></tr>
+  <tr><td><code>components/chat/</code></td><td>2 components</td><td>Chat integration and marketing chat widget</td></tr>
+  <tr><td><code>components/strategist-profile-2/</code></td><td>10 components</td><td>Profile v2: hero, activity-timeline, project-grid, sidebar, etc.</td></tr>
+  <tr><td><code>components/admin/</code></td><td>3+ components</td><td>Admin dialogs: add-user, assign-areas, etc.</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>4. Database Schema</h2>
+
+<h3>4.1 Database Configuration</h3>
+<table>
+  <tr><th>Setting</th><th>Value</th></tr>
+  <tr><td>Provider</td><td>PostgreSQL (Supabase)</td></tr>
+  <tr><td>Connection Pooling</td><td>PgBouncer on port 6543</td></tr>
+  <tr><td>ORM</td><td>Prisma 7.8.0 with @prisma/adapter-pg</td></tr>
+  <tr><td>Client</td><td>Singleton pattern for development hot reload</td></tr>
+</table>
+
+<h3>4.2 Data Models (20 models)</h3>
+
+<table>
+  <tr><th>Model</th><th>Purpose</th><th>Key Relationships</th></tr>
+  <tr><td><strong>User</strong></td><td>Core user entity with role, stage, and profile data</td><td>Has one StrategistProfile, many Projects, Messages, Notifications</td></tr>
+  <tr><td><strong>Account</strong></td><td>NextAuth OAuth account linking</td><td>Belongs to User</td></tr>
+  <tr><td><strong>Session</strong></td><td>Active user sessions</td><td>Belongs to User</td></tr>
+  <tr><td><strong>VerificationToken</strong></td><td>Email verification tokens</td><td>&mdash;</td></tr>
+  <tr><td><strong>StrategistProfile</strong></td><td>Extended profile with bio, stage, sector, category, location</td><td>Belongs to User, has many ExpertiseTags, UserWorkAreas</td></tr>
+  <tr><td><strong>Organization</strong></td><td>Company or organization entity</td><td>Has many OrganizationMembers</td></tr>
+  <tr><td><strong>OrganizationMember</strong></td><td>User-org membership with role</td><td>Belongs to User and Organization</td></tr>
+  <tr><td><strong>Project</strong></td><td>Core project with status, budget, dates, categories</td><td>Has many Milestones, Media, Contributors, Relations</td></tr>
+  <tr><td><strong>Milestone</strong></td><td>Project milestones with weight-based progress</td><td>Belongs to Project</td></tr>
+  <tr><td><strong>ProjectMedia</strong></td><td>Media attachments (images, videos, documents)</td><td>Belongs to Project</td></tr>
+  <tr><td><strong>ProjectRelation</strong></td><td>Relationships between projects</td><td>Belongs to Project</td></tr>
+  <tr><td><strong>ProjectContributor</strong></td><td>User-project membership</td><td>Belongs to User and Project</td></tr>
+  <tr><td><strong>Tag</strong></td><td>Tags for projects and expertise</td><td>Many-to-many with Projects and Profiles</td></tr>
+  <tr><td><strong>ExpertiseTag</strong></td><td>Profile-expertise tag junction</td><td>Belongs to StrategistProfile and Tag</td></tr>
+  <tr><td><strong>Publication</strong></td><td>Research publications</td><td>Belongs to User</td></tr>
+  <tr><td><strong>Achievement</strong></td><td>User achievements and certificates</td><td>Belongs to User</td></tr>
+  <tr><td><strong>Notification</strong></td><td>In-app notifications</td><td>Belongs to User</td></tr>
+  <tr><td><strong>Message</strong></td><td>Direct messages between users</td><td>Belongs to Conversation and User</td></tr>
+  <tr><td><strong>Conversation</strong></td><td>Chat conversations (1:1 and group)</td><td>Has many Messages and Participants</td></tr>
+  <tr><td><strong>ConversationParticipant</strong></td><td>Conversation membership</td><td>Belongs to Conversation and User</td></tr>
+  <tr><td><strong>ActivityLog</strong></td><td>Audit trail for user actions</td><td>Belongs to User</td></tr>
+  <tr><td><strong>WorkArea</strong></td><td>Work specialization areas (11 defaults)</td><td>Many-to-many with Users via UserWorkArea</td></tr>
+  <tr><td><strong>UserWorkArea</strong></td><td>User-work area assignments</td><td>Belongs to User and WorkArea</td></tr>
+  <tr><td><strong>Submission</strong></td><td>Document submissions for progression</td><td>Belongs to User</td></tr>
+</table>
+
+<h3>4.3 Enums</h3>
+<table>
+  <tr><th>Enum</th><th>Values</th></tr>
+  <tr><td><strong>Role</strong></td><td>ADMIN, STRATEGIST, CORPORATE, ORGANIZATION_ADMIN, RESEARCHER, MODERATOR, PARTNER</td></tr>
+  <tr><td><strong>ProjectStatus</strong></td><td>DRAFT, ACTIVE, COMPLETED, CANCELLED</td></tr>
+  <tr><td><strong>NotificationType</strong></td><td>MESSAGE, PROJECT_INVITE, ORGANIZATION_INVITE, ACHIEVEMENT_UNLOCKED, PUBLICATION_APPROVED, SYSTEM</td></tr>
+  <tr><td><strong>ProgressionStage</strong></td><td>CANDIDATE, STRATEGIST, CONTRIBUTOR, PROJECT_ALIGNED, SECTOR_LEAD, PAID_ADVISER</td></tr>
+  <tr><td><strong>ActivityAction</strong></td><td>CREATE, UPDATE, DELETE, LOGIN, LOGOUT, JOIN_ORGANIZATION, LEAVE_ORGANIZATION, JOIN_PROJECT, LEAVE_PROJECT, PUBLISH</td></tr>
+</table>
+
+<h3>4.4 Migrations</h3>
+<table>
+  <tr><th>Migration</th><th>Purpose</th></tr>
+  <tr><td><code>202507060001_init</code></td><td>Full schema creation (415 lines SQL)</td></tr>
+  <tr><td><code>202507070001_progression_stage</code></td><td>ProgressionStage enum + stage/sector columns</td></tr>
+  <tr><td><code>202507080001_location_fields</code></td><td>Added city, country, countryCode</td></tr>
+  <tr><td><code>202507080002_global_strategist_category</code></td><td>Added category field</td></tr>
+  <tr><td><code>202507080003_work_areas</code></td><td>Created WorkArea/UserWorkArea tables with 11 defaults</td></tr>
+  <tr><td><code>202507080004_submissions</code></td><td>Created Submission table</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>5. Authentication &amp; Authorization</h2>
+
+<h3>5.1 Authentication Flow</h3>
+<div class="flow-box">
+  <strong>Credentials Provider:</strong><br>
+  1. User submits email + password via login form<br>
+  2. NextAuth validates credentials against User table<br>
+  3. Password verified using bcryptjs<br>
+  4. JWT session token created and stored in cookie<br>
+  5. User redirected to dashboard
+</div>
+
+<div class="flow-box">
+  <strong>Google Provider:</strong><br>
+  1. User clicks "Continue with Google"<br>
+  2. Redirected to Google OAuth consent screen<br>
+  3. Google returns authorization code<br>
+  4. NextAuth exchanges code for tokens<br>
+  5. User profile created/linked via PrismaAdapter<br>
+  6. JWT session token created
+</div>
+
+<h3>5.2 Authorization Rules</h3>
+<table>
+  <tr><th>Route Pattern</th><th>Requirement</th></tr>
+  <tr><td><code>/dashboard/*</code></td><td>Authenticated (any role)</td></tr>
+  <tr><td><code>/dashboard/admin/*</code></td><td>Authenticated + ADMIN role</td></tr>
+  <tr><td><code>/api/profile/*</code></td><td>Authenticated</td></tr>
+  <tr><td><code>/api/projects</code> (POST)</td><td>ADMIN role</td></tr>
+  <tr><td><code>/api/admin/*</code></td><td>ADMIN role</td></tr>
+  <tr><td><code>/api/projects</code> (GET)</td><td>Public</td></tr>
+  <tr><td><code>/api/strategists</code></td><td>Public</td></tr>
+  <tr><td><code>/login</code>, <code>/register</code></td><td>Public (redirect if already authenticated)</td></tr>
+</table>
+
+<h3>5.3 Session Strategy</h3>
+<ul>
+  <li><strong>Strategy:</strong> JWT (JSON Web Tokens)</li>
+  <li><strong>Storage:</strong> HTTP-only cookies</li>
+  <li><strong>Adapter:</strong> PrismaAdapter for session/account storage in database</li>
+  <li><strong>Trust Host:</strong> Enabled for Vercel deployment</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>6. API Architecture</h2>
+
+<h3>6.1 API Endpoints Summary</h3>
+
+<table>
+  <tr><th>Category</th><th>Endpoints</th><th>Methods</th></tr>
+  <tr><td>Authentication</td><td><code>/api/auth/[...nextauth]</code>, <code>/api/register</code>, <code>/api/seed</code></td><td>GET, POST</td></tr>
+  <tr><td>Profile</td><td><code>/api/profile</code>, <code>/api/profile/featured-project</code></td><td>GET, PATCH, PUT</td></tr>
+  <tr><td>Strategists</td><td><code>/api/strategists</code></td><td>GET</td></tr>
+  <tr><td>Projects</td><td><code>/api/projects</code>, <code>/api/projects/[id]</code>, <code>/api/projects/featured</code>, <code>/api/projects/categories</code>, <code>/api/projects/search</code></td><td>GET, POST, PATCH, DELETE</td></tr>
+  <tr><td>Project Sub-resources</td><td><code>/api/projects/[id]/milestones</code>, <code>/api/projects/[id]/media</code>, <code>/api/projects/[id]/relations</code>, <code>/api/projects/[id]/join</code>, <code>/api/projects/[id]/feature</code></td><td>GET, POST, DELETE, PATCH</td></tr>
+  <tr><td>Messages</td><td><code>/api/messages</code>, <code>/api/messages/[conversationId]</code></td><td>GET, POST, PATCH</td></tr>
+  <tr><td>Notifications</td><td><code>/api/notifications</code></td><td>GET, PATCH</td></tr>
+  <tr><td>Submissions</td><td><code>/api/submissions</code>, <code>/api/submissions/download</code></td><td>GET, POST</td></tr>
+  <tr><td>File Upload</td><td><code>/api/upload</code>, <code>/api/uploads</code></td><td>POST, GET</td></tr>
+  <tr><td>Dashboard</td><td><code>/api/dashboard/stats</code>, <code>/api/dashboard/activities</code>, <code>/api/dashboard/collaborations</code>, <code>/api/dashboard/my-projects</code></td><td>GET</td></tr>
+  <tr><td>Admin</td><td><code>/api/admin/users</code>, <code>/api/admin/users/[id]/*</code>, <code>/api/admin/work-areas</code>, <code>/api/admin/migrate-files</code></td><td>GET, POST, PATCH, DELETE</td></tr>
+</table>
+
+<h3>6.2 API Response Format</h3>
+<pre>
+// Success
+{ "data": [...], "pagination": { "page": 1, "limit": 20, "total": 100 } }
+
+// Error
+{ "error": "Error message", "status": 400 }
+
+// Authentication
+{ "user": { "id": "...", "name": "...", "email": "...", "role": "STRATEGIST" } }</pre>
+
+<h3>6.3 File Upload Flow</h3>
+<div class="flow-box">
+  1. Client sends file via multipart form to <code>/api/upload</code><br>
+  2. Server validates file type and size<br>
+  3. File uploaded to Supabase Storage bucket<br>
+  4. Public URL returned to client<br>
+  5. URL stored in database (ProjectMedia, Submission, etc.)
+</div>
+
+<div class="page-break"></div>
+
+<h2>7. Frontend Architecture</h2>
+
+<h3>7.1 State Management Strategy</h3>
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Usage</th></tr>
+  <tr><td>Server State</td><td>TanStack React Query</td><td>API data fetching, caching, optimistic updates</td></tr>
+  <tr><td>Client State</td><td>Zustand</td><td>UI state, user preferences, shopping cart (future)</td></tr>
+  <tr><td>Form State</td><td>React Hook Form</td><td>Form inputs, validation, submission</td></tr>
+  <tr><td>URL State</td><td>Next.js searchParams</td><td>Filters, pagination, search queries</td></tr>
+</table>
+
+<h3>7.2 Component Patterns</h3>
+<ul>
+  <li><strong>Server Components:</strong> Layout files, static pages, API route handlers</li>
+  <li><strong>Client Components:</strong> Interactive UI, forms, modals, real-time features (marked with "use client")</li>
+  <li><strong>Compound Components:</strong> Dialog, Sheet, DropdownMenu (shadcn/ui pattern)</li>
+  <li><strong>Render Props:</strong> Used in custom hooks for flexible component composition</li>
+</ul>
+
+<h3>7.3 Styling System</h3>
+<ul>
+  <li><strong>Tailwind CSS v4:</strong> Utility-first styling with CSS custom properties for theming</li>
+  <li><strong>Dark Mode:</strong> CSS variable-based theme switching via ThemeProvider</li>
+  <li><strong>Glass Morphism:</strong> Custom GlassCard component with backdrop-blur effects</li>
+  <li><strong>Gradients:</strong> Reusable gradient classes for cards, buttons, and backgrounds</li>
+  <li><strong>Animations:</strong> Framer Motion for page transitions, scroll animations, and micro-interactions</li>
+</ul>
+
+<h3>7.4 Key UI Components</h3>
+<table>
+  <tr><th>Component</th><th>Purpose</th><th>Lines</th></tr>
+  <tr><td><code>HeroSection</code></td><td>Landing page hero with video modal CTA</td><td>~140</td></tr>
+  <tr><td><code>DashboardLayout</code></td><td>Sidebar + header + breadcrumbs + notifications</td><td>289</td></tr>
+  <tr><td><code>VideoModal</code></td><td>Responsive Vimeo video embed modal</td><td>~70</td></tr>
+  <tr><td><code>GlassCard</code></td><td>Glass morphism card with hover effects</td><td>~30</td></tr>
+  <tr><td><code>AnimatedSection</code></td><td>Scroll-triggered animation wrapper</td><td>~25</td></tr>
+  <tr><td><code>ProgressionPathway</code></td><td>6-stage progression visualization</td><td>~200</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>8. File Storage &amp; Uploads</h2>
+
+<h3>8.1 Storage Architecture</h3>
+<table>
+  <tr><th>Aspect</th><th>Details</th></tr>
+  <tr><td>Provider</td><td>Supabase Storage</td></tr>
+  <tr><td>Access</td><td>Service role key for server-side operations</td></tr>
+  <tr><td>Public Access</td><td>Uploaded files are publicly accessible via URL</td></tr>
+  <tr><td>File Types</td><td>Images (JPEG, PNG, WebP), Documents (PDF, DOCX, PPTX, XLSX, CSV, TXT, RTF, ODT, ODS)</td></tr>
+</table>
+
+<h3>8.2 Upload Flow</h3>
+<ol>
+  <li>Client selects file via ImageUpload component or submission form</li>
+  <li>File sent to <code>/api/upload</code> endpoint</li>
+  <li>Server uploads to Supabase Storage bucket</li>
+  <li>Public URL returned and stored in database</li>
+  <li>URL used in ProjectMedia, Submission, or profile avatar</li>
+</ol>
+
+<h3>8.3 Static Assets</h3>
+<table>
+  <tr><th>Directory</th><th>Contents</th></tr>
+  <tr><td><code>public/images/</code></td><td>8 project category images (JPEG, PNG, WebP)</td></tr>
+  <tr><td><code>public/docs/</code></td><td>PDF documentation (Overview, User Guide, Technical Architecture)</td></tr>
+  <tr><td><code>public/uploads/</code></td><td>User-uploaded files</td></tr>
+</table>
+
+<h2>9. Deployment Architecture</h2>
+
+<h3>9.1 Vercel Deployment</h3>
+<table>
+  <tr><th>Setting</th><th>Value</th></tr>
+  <tr><td>Platform</td><td>Vercel</td></tr>
+  <tr><td>Build Command</td><td><code>prisma generate && next build --webpack</code></td></tr>
+  <tr><td>Framework</td><td>Next.js 16</td></tr>
+  <tr><td>Node Version</td><td>24.x</td></tr>
+  <tr><td>Region</td><td>Washington, D.C. (iad1)</td></tr>
+  <tr><td>Production URL</td><td>https://tbpglobalstrategist.vercel.app</td></tr>
+</table>
+
+<h3>9.2 Build Process</h3>
+<ol>
+  <li><code>prisma generate</code> &mdash; Generates Prisma Client from schema</li>
+  <li><code>next build --webpack</code> &mdash; Compiles TypeScript, bundles assets, generates static pages</li>
+  <li>Static pages pre-rendered at build time</li>
+  <li>Dynamic pages server-rendered on demand</li>
+  <li>API routes deployed as serverless functions</li>
+</ol>
+
+<h3>9.3 Alternative Deployments</h3>
+
+<h4>Docker</h4>
+<pre>
+# Build
+docker build -t tbpglobalstrategist .
+
+# Run
+docker run -p 3000:3000 tbpglobalstrategist</pre>
+
+<h4>PM2 (Self-Hosted)</h4>
+<pre>
+# Build
+npm run build
+
+# Start with PM2
+pm2 start npm --name "tbp" -- start</pre>
+
+<div class="page-break"></div>
+
+<h2>10. Security Considerations</h2>
+
+<h3>10.1 Authentication Security</h3>
+<ul>
+  <li>Passwords hashed with bcryptjs (salt rounds: 12)</li>
+  <li>JWT tokens stored in HTTP-only cookies</li>
+  <li>Session invalidation on logout</li>
+  <li>CSRF protection via NextAuth</li>
+</ul>
+
+<h3>10.2 API Security</h3>
+<ul>
+  <li>Route protection via NextAuth middleware</li>
+  <li>Role-based access control (RBAC) for admin routes</li>
+  <li>Input validation with Zod schemas</li>
+  <li>SQL injection prevention via Prisma ORM</li>
+</ul>
+
+<h3>10.3 Data Security</h3>
+<ul>
+  <li>Environment variables for sensitive configuration</li>
+  <li>Supabase RLS (Row Level Security) policies</li>
+  <li>No secrets committed to git repository</li>
+  <li>.gitignore excludes .env, node_modules, .next</li>
+</ul>
+
+<h3>10.4 Frontend Security</h3>
+<ul>
+  <li>Content Security Policy headers (via Vercel)</li>
+  <li>XSS prevention via React's automatic escaping</li>
+  <li>HTTPS enforced in production</li>
+  <li>Secure cookie attributes (HttpOnly, Secure, SameSite)</li>
+</ul>
+
+<h2>11. Performance &amp; Optimization</h2>
+
+<h3>11.1 Rendering Strategy</h3>
+<table>
+  <tr><th>Strategy</th><th>Usage</th></tr>
+  <tr><td>Static Generation (SSG)</td><td>Marketing pages, public profiles, project listings</td></tr>
+  <tr><td>Server-Side Rendering (SSR)</td><td>Dashboard pages, admin panels, dynamic content</td></tr>
+  <tr><td>Client-Side Rendering</td><td>Interactive components, real-time features, modals</td></tr>
+</table>
+
+<h3>11.2 Optimization Techniques</h3>
+<ul>
+  <li><strong>Code Splitting:</strong> Automatic with Next.js App Router</li>
+  <li><strong>Image Optimization:</strong> Custom image-optimize.ts for client-side optimization</li>
+  <li><strong>Tailwind Purging:</strong> Automatic unused CSS removal</li>
+  <li><strong>React Query Caching:</strong> Stale-while-revalidate strategy for API data</li>
+  <li><strong>Bundle Analysis:</strong> Next.js built-in bundle analyzer</li>
+</ul>
+
+<h3>11.3 Database Optimization</h3>
+<ul>
+  <li><strong>Connection Pooling:</strong> PgBouncer for efficient connection management</li>
+  <li><strong>Indexed Queries:</strong> Prisma indexes on frequently queried fields</li>
+  <li><strong>Selective Fields:</strong> Prisma select for fetching only needed data</li>
+  <li><strong>Pagination:</strong> Cursor-based and offset pagination for large datasets</li>
+</ul>
+
+<hr style="margin: 40px 0; border: none; border-top: 1px solid #d1d5db;">
+
+<div style="text-align: center; color: #6b7280; font-size: 9pt;">
+  TBP Global Strategist Platform &mdash; Technical Architecture Document<br>
+  Version 1.2 &mdash; July 2026 &mdash; https://tbpglobalstrategist.vercel.app
+</div>
+
+</body>
+</html>

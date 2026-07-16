@@ -24,6 +24,8 @@
   th { background: #eef2ff; color: #1a1a2e; font-weight: 600; }
   blockquote { background: #f9fafb; border-left: 4px solid #d1d5db; padding: 12px 18px; margin: 12px 0; font-style: italic; color: #4b5563; }
   strong { color: #1a1a2e; }
+  .project-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .project-card h4 { color: #4f46e5; margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -31,7 +33,8 @@
 <div class="cover">
   <h1>TBP Global Strategist</h1>
   <div class="subtitle">Project Overview &amp; Getting Started Guide</div>
-  <div class="meta">Version 1.1 &mdash; July 2026</div>
+  <div class="meta">Version 1.2 &mdash; July 2026</div>
+  <div class="meta" style="margin-top: 8px;">https://tbpglobalstrategist.vercel.app</div>
 </div>
 
 <div class="page-break"></div>
@@ -40,8 +43,11 @@
 <ol>
   <li>What is TBP Global Strategist?</li>
   <li>System Overview</li>
+  <li>Platform Architecture</li>
   <li>Progression Stages</li>
   <li>Work Areas</li>
+  <li>Strategist Categories</li>
+  <li>TBP Project Categories</li>
   <li>Getting Started</li>
   <li>Registration &amp; Onboarding</li>
   <li>Profile Setup</li>
@@ -52,82 +58,158 @@
 
 <h2>1. What is TBP Global Strategist?</h2>
 
-<p><strong>TBP Global Strategist</strong> is a digital platform designed to manage and support the TBP (The Boundless Project) Strategist Pathway. It serves as the central hub for strategists at every stage of their journey — from initial candidate onboarding through to paid advisory and implementation roles.</p>
+<p><strong>TBP Global Strategist</strong> is a digital platform designed to manage and support the TBP (The Borderless Project) Strategist Pathway. It serves as the central hub for strategists at every stage of their journey &mdash; from initial candidate onboarding through to paid advisory and implementation roles.</p>
+
+<p>The platform operates within the <strong>Neo-Polar Neutrality Global System (NPNGS)</strong> &mdash; a multi-trillion dollar framework designed to move beyond gridlocked multilateralism and enable nations, businesses, and citizens to engage through neutral trade corridors, interoperable infrastructure, and shared digital/physical protocols while preserving sovereign identity.</p>
 
 <p>The platform enables:</p>
 <ul>
-  <li><strong>Onboarding &amp; Progression</strong> — Structured stage-based pathway with clear tasks and deliverables at each level</li>
-  <li><strong>Work Area Management</strong> — Assignment of strategists to specific work areas (Capital Advisory, Engineering, Energy, etc.)</li>
-  <li><strong>Project Collaboration</strong> — Browse, contribute to, and manage TBP projects across sectors</li>
-  <li><strong>Reporting &amp; Feedback</strong> — Submit reports, reflections, and task feedback in standard document formats</li>
-  <li><strong>Administration</strong> — Admin tools for user management, stage progression, role assignment, and oversight</li>
+  <li><strong>Onboarding &amp; Progression</strong> &mdash; Structured 6-stage pathway with clear tasks and deliverables at each level</li>
+  <li><strong>Work Area Management</strong> &mdash; Assignment of strategists to 11 specialized work areas</li>
+  <li><strong>Project Collaboration</strong> &mdash; Browse, contribute to, and manage TBP projects across 6 core categories</li>
+  <li><strong>Reporting &amp; Feedback</strong> &mdash; Submit reports, reflections, and task feedback in standard document formats</li>
+  <li><strong>Messaging &amp; Communication</strong> &mdash; Direct messaging and conversation tools between strategists</li>
+  <li><strong>Administration</strong> &mdash; Admin tools for user management, stage progression, role assignment, and oversight</li>
 </ul>
 
 <h2>2. System Overview</h2>
 
 <table>
   <tr><th>Area</th><th>Description</th></tr>
+  <tr><td><strong>Marketing Site</strong></td><td>Public-facing pages: Home, About, Contact, Insights, Initiatives, Innovation, Partners, Research, Summit</td></tr>
   <tr><td><strong>Individual Dashboard</strong></td><td>Personalised home for each strategist showing stats, projects, progression pathway, activity feed, notifications, and submission tools</td></tr>
   <tr><td><strong>Projects</strong></td><td>Browse and manage TBP projects with details, milestones, media, and contributor management</td></tr>
   <tr><td><strong>Strategist Profiles</strong></td><td>Public-facing profile pages displaying expertise, work areas, current TBP projects, and stage information</td></tr>
+  <tr><td><strong>Messages</strong></td><td>Real-time messaging system with conversations and direct messages between strategists</td></tr>
   <tr><td><strong>Admin Panel</strong></td><td>User management, stage changes, work area assignments, role management, and system configuration</td></tr>
+  <tr><td><strong>Analytics</strong></td><td>Dashboard analytics with charts and metrics for platform usage</td></tr>
   <tr><td><strong>Notifications</strong></td><td>Real-time in-app notifications for stage changes, assignments, project updates, and system announcements</td></tr>
 </table>
 
-<h2>3. Progression Stages</h2>
+<h2>3. Platform Architecture</h2>
+
+<table>
+  <tr><th>Component</th><th>Technology</th></tr>
+  <tr><td><strong>Frontend</strong></td><td>Next.js 16 (App Router) + React 19 + TypeScript</td></tr>
+  <tr><td><strong>Styling</strong></td><td>Tailwind CSS v4 with custom shadcn/ui components</td></tr>
+  <tr><td><strong>State Management</strong></td><td>Zustand + TanStack React Query</td></tr>
+  <tr><td><strong>Form Handling</strong></td><td>React Hook Form + Zod validation</td></tr>
+  <tr><td><strong>Animations</strong></td><td>Framer Motion</td></tr>
+  <tr><td><strong>Backend</strong></td><td>Next.js API Routes (36 endpoints)</td></tr>
+  <tr><td><strong>Database</strong></td><td>PostgreSQL via Supabase with Prisma ORM</td></tr>
+  <tr><td><strong>Authentication</strong></td><td>NextAuth.js v5 with Credentials + Google providers</td></tr>
+  <tr><td><strong>File Storage</strong></td><td>Supabase Storage for uploads</td></tr>
+  <tr><td><strong>Email</strong></td><td>Nodemailer for transactional emails</td></tr>
+  <tr><td><strong>Deployment</strong></td><td>Vercel (primary), Docker, PM2</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>4. Progression Stages</h2>
 
 <div class="stage-box">
-  <strong>Stage 1 — Global Strategist Candidate</strong><br>
+  <strong>Stage 1 &mdash; Global Strategist Candidate</strong><br>
   <em>Onboarding &amp; Orientation.</em> Complete forms, sign agreements, review TBP materials, and identify where your expertise fits.
 </div>
 
 <div class="stage-box">
-  <strong>Stage 2 — Global Strategist</strong><br>
+  <strong>Stage 2 &mdash; Global Strategist</strong><br>
   <em>Exploratory &amp; Contribution-Based.</em> Attach to work areas, prepare research notes, project summaries, and sector opportunity maps.
 </div>
 
 <div class="stage-box">
-  <strong>Stage 3 — Strategic Contributor</strong><br>
+  <strong>Stage 3 &mdash; Strategic Contributor</strong><br>
   <em>Active Contribution.</em> Support defined workstreams with project mapping, technical research, design development, and economic analysis.
 </div>
 
 <div class="stage-box">
-  <strong>Stage 4 — Project-Aligned Strategist</strong><br>
+  <strong>Stage 4 &mdash; Project-Aligned Strategist</strong><br>
   <em>Project-Specific Work.</em> Attached to a specific TBP project or corridor, contributing to brief development, technical notes, and investor-readiness material.
 </div>
 
 <div class="stage-box">
-  <strong>Stage 5 — Sector Lead or Workstream Lead</strong><br>
+  <strong>Stage 5 &mdash; Sector Lead or Workstream Lead</strong><br>
   <em>Leadership &amp; Coordination.</em> Coordinate contributors, set research priorities, review outputs, and report progress to TBP leadership.
 </div>
 
 <div class="stage-box">
-  <strong>Stage 6 — Paid Project Adviser</strong><br>
+  <strong>Stage 6 &mdash; Paid Project Adviser</strong><br>
   <em>Paid Implementation Roles.</em> Eligible for paid advisory, research, coordination, technical, or implementation roles on active funded projects.
 </div>
 
-<h2>4. Work Areas</h2>
+<h2>5. Work Areas</h2>
 
 <table>
-  <tr><th>Work Area</th><th>Slug</th></tr>
-  <tr><td>Capital Advisory</td><td>capital-advisory</td></tr>
-  <tr><td>Engineering</td><td>engineering</td></tr>
-  <tr><td>Architecture</td><td>architecture</td></tr>
-  <tr><td>AI Automation</td><td>ai-automation</td></tr>
-  <tr><td>Software Development</td><td>software-development</td></tr>
-  <tr><td>Energy</td><td>energy</td></tr>
-  <tr><td>Maritime</td><td>maritime</td></tr>
-  <tr><td>Logistics</td><td>logistics</td></tr>
-  <tr><td>Policy</td><td>policy</td></tr>
-  <tr><td>Communications</td><td>communications</td></tr>
-  <tr><td>Regional Development</td><td>regional-development</td></tr>
+  <tr><th>Work Area</th><th>Description</th></tr>
+  <tr><td>Capital Advisory</td><td>Investment strategy, financial modeling, and capital deployment</td></tr>
+  <tr><td>Engineering</td><td>Technical design, infrastructure, and systems engineering</td></tr>
+  <tr><td>Architecture</td><td>Urban planning, building design, and spatial development</td></tr>
+  <tr><td>AI Automation</td><td>Artificial intelligence, machine learning, and automation solutions</td></tr>
+  <tr><td>Software Development</td><td>Platform development, applications, and digital tools</td></tr>
+  <tr><td>Energy</td><td>Energy systems, renewable solutions, and power infrastructure</td></tr>
+  <tr><td>Maritime</td><td>Port systems, shipping logistics, and maritime operations</td></tr>
+  <tr><td>Logistics</td><td>Supply chain, distribution networks, and trade facilitation</td></tr>
+  <tr><td>Policy</td><td>Regulatory frameworks, governance models, and policy development</td></tr>
+  <tr><td>Communications</td><td>Strategic communications, media, and stakeholder engagement</td></tr>
+  <tr><td>Regional Development</td><td>Regional planning, economic zones, and community development</td></tr>
 </table>
 
 <blockquote>Work areas are assigned by administrators. You can see your assigned areas on your individual dashboard and strategist profile page.</blockquote>
 
+<h2>6. Strategist Categories</h2>
+
+<table>
+  <tr><th>Category</th><th>Focus</th></tr>
+  <tr><td>Strategy &amp; Policy</td><td>Strategic planning, policy development, and governance frameworks</td></tr>
+  <tr><td>Technology &amp; Innovation</td><td>Digital transformation, emerging technologies, and innovation management</td></tr>
+  <tr><td>Finance &amp; Investment</td><td>Financial advisory, investment strategy, and capital markets</td></tr>
+  <tr><td>Infrastructure &amp; Energy</td><td>Physical infrastructure, energy systems, and utilities</td></tr>
+  <tr><td>Trade &amp; Logistics</td><td>International trade, supply chain, and logistics optimization</td></tr>
+  <tr><td>Research &amp; Analytics</td><td>Data analysis, market research, and strategic intelligence</td></tr>
+  <tr><td>Communications &amp; Media</td><td>Strategic communications, public relations, and media strategy</td></tr>
+  <tr><td>Legal &amp; Compliance</td><td>Regulatory compliance, legal frameworks, and governance</td></tr>
+  <tr><td>Human Capital</td><td>Talent management, organizational development, and HR strategy</td></tr>
+  <tr><td>Sustainability &amp; ESG</td><td>Environmental sustainability, social governance, and ESG compliance</td></tr>
+  <tr><td>Partnerships &amp; BD</td><td>Business development, partnership strategy, and stakeholder relations</td></tr>
+</table>
+
 <div class="page-break"></div>
 
-<h2>5. Getting Started</h2>
+<h2>7. TBP Project Categories</h2>
+
+<div class="project-card">
+  <h4>NPNGS Protocols</h4>
+  <p>Frameworks, standards, and digital governance systems that operationalize neutrality &mdash; enabling interoperable trade, finance, and collaboration across sovereign boundaries.</p>
+</div>
+
+<div class="project-card">
+  <h4>Infrastructure Systems</h4>
+  <p>Strategic, modular infrastructure assets &mdash; including energy, logistics, and digital corridors &mdash; that anchor neutral trade and collaboration networks.</p>
+</div>
+
+<div class="project-card">
+  <h4>City &amp; Regional Development</h4>
+  <p>The transformation of cities and regions into neutral innovation and trade hubs, through integrated planning, clean energy transition, and smart infrastructure.</p>
+</div>
+
+<div class="project-card">
+  <h4>Sovereign &amp; Multipolar Initiatives</h4>
+  <p>Aligning sovereign and multilateral initiatives with neutral governance models, fostering interoperability between global systems and frameworks.</p>
+</div>
+
+<div class="project-card">
+  <h4>Software &amp; Digital Platforms</h4>
+  <p>Core digital engines that power TBP operations &mdash; such as data interoperability tools, trade registries, and smart-contract systems &mdash; ensuring transparency and efficiency.</p>
+</div>
+
+<div class="project-card">
+  <h4>Event Systems &amp; Global Engagements</h4>
+  <p>Design, management, and delivery of TBP-led summits, forums, conferences, and pilot events that advance the NPNGS vision and foster global collaboration.</p>
+</div>
+
+<div class="page-break"></div>
+
+<h2>8. Getting Started</h2>
 
 <h3>Prerequisites</h3>
 <ul>
@@ -137,9 +219,9 @@
 </ul>
 
 <h3>Platform Access</h3>
-<p>The platform is accessible via web browser. Supported browsers include Chrome, Firefox, Safari, and Edge (latest versions).</p>
+<p>The platform is accessible via web browser at <strong>https://tbpglobalstrategist.vercel.app</strong>. Supported browsers include Chrome, Firefox, Safari, and Edge (latest versions).</p>
 
-<h2>6. Registration &amp; Onboarding</h2>
+<h2>9. Registration &amp; Onboarding</h2>
 
 <h3>Step 1: Create Your Account</h3>
 <ol>
@@ -147,7 +229,6 @@
   <li>Click <strong>Register</strong> to create a new account</li>
   <li>Provide your full name, email address, and create a secure password</li>
   <li>Submit the registration form</li>
-  <li>Check your email for a verification link (if required)</li>
 </ol>
 
 <h3>Step 2: Complete Your Profile</h3>
@@ -173,14 +254,14 @@
 <h3>Step 4: Submit Your Onboarding Reflection</h3>
 <p>Using the <strong>Submit Report / Task Feedback</strong> tool on your dashboard, submit a one-page reflection covering your understanding of TBP, aligned sector, project interests, expertise, and questions. Accepted formats: PDF, DOCX, PPTX, XLSX, CSV, TXT, RTF, ODT, ODS.</p>
 
-<h2>7. Profile Setup</h2>
+<h2>10. Profile Setup</h2>
 
 <table>
   <tr><th>Field</th><th>Description</th></tr>
   <tr><td>Title</td><td>Your professional title or role</td></tr>
-  <tr><td>Bio</td><td>Brief professional background and interests</td></tr>
+  <tr><td>Bio</td><td>Brief professional background and interests (up to 2000 characters)</td></tr>
   <tr><td>Sector</td><td>Primary sector of expertise</td></tr>
-  <tr><td>Category</td><td>Specialisation category</td></tr>
+  <tr><td>Category</td><td>Specialisation category from 11 available categories</td></tr>
   <tr><td>Location</td><td>City and country</td></tr>
   <tr><td>Years of Experience</td><td>Total professional experience</td></tr>
   <tr><td>Availability</td><td>Current availability status</td></tr>
@@ -188,19 +269,18 @@
   <tr><td>Website</td><td>Link to personal or professional website</td></tr>
 </table>
 
-<p><em>Note: The Hourly Rate field was previously available in the profile but has been removed as part of a platform update.</em></p>
-
 <div class="page-break"></div>
 
-<h2>8. Next Steps</h2>
+<h2>11. Next Steps</h2>
 
 <ol>
-  <li><strong>Explore Your Dashboard</strong> — Review your personal dashboard to see your current stage, stats, and active projects</li>
-  <li><strong>Check Your Work Areas</strong> — See which work areas you have been assigned to</li>
-  <li><strong>Review the Progression Pathway</strong> — Understand the tasks and outputs expected at your current stage</li>
-  <li><strong>Browse Projects</strong> — Explore available TBP projects aligned with your expertise</li>
-  <li><strong>Submit Your First Report</strong> — Use the submission tool to upload required reflections or task feedback</li>
-  <li><strong>Engage with Notifications</strong> — Stay informed about stage changes, assignments, and platform updates</li>
+  <li><strong>Explore Your Dashboard</strong> &mdash; Review your personal dashboard to see your current stage, stats, and active projects</li>
+  <li><strong>Check Your Work Areas</strong> &mdash; See which work areas you have been assigned to</li>
+  <li><strong>Review the Progression Pathway</strong> &mdash; Understand the tasks and outputs expected at your current stage</li>
+  <li><strong>Browse Projects</strong> &mdash; Explore available TBP projects aligned with your expertise</li>
+  <li><strong>Submit Your First Report</strong> &mdash; Use the submission tool to upload required reflections or task feedback</li>
+  <li><strong>Connect with Strategists</strong> &mdash; Use the messaging system to connect with other strategists</li>
+  <li><strong>Engage with Notifications</strong> &mdash; Stay informed about stage changes, assignments, and platform updates</li>
 </ol>
 
 <blockquote>
@@ -209,7 +289,7 @@
 
 <div style="text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid #d1d5db; color: #6b7280; font-size: 9pt;">
   TBP Global Strategist Platform &mdash; Project Overview &amp; Getting Started Guide<br>
-  Version 1.1 &mdash; July 2026
+  Version 1.2 &mdash; July 2026 &mdash; https://tbpglobalstrategist.vercel.app
 </div>
 
 </body>
