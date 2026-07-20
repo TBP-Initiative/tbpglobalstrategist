@@ -5,6 +5,12 @@ import { getStripe, STRIPE_PLANS } from "@/lib/stripe"
 
 export const dynamic = "force-dynamic"
 
+export async function GET() {
+  return NextResponse.json({
+    paypalClientId: process.env.PAYPAL_CLIENT_ID || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || null,
+  })
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth()

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronLeft, CreditCard, Shield, Loader2 } from "lucide-react"
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
@@ -14,9 +14,16 @@ interface StepPaymentProps {
 export function StepPayment({ data, onNext, onBack }: StepPaymentProps) {
   const [provider, setProvider] = useState<"STRIPE" | "PAYPAL" | "">("")
   const [loading, setLoading] = useState(false)
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
   const pathway = (data?.pathway as string) || "STANDARD"
   const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
-  const amountNum = pathway === "PLUS" ? 1500 : 1200
+
+  useEffect(() => {
+    fetch("/api/onboarding/payment")
+      .then((r) => r.json())
+      .then((d) => { if (d.paypalClientId) setPaypalClientId(d.paypalClientId) })
+      .catch(() => {})
+  }, [])
 
   const handleStripe = async () => {
     setLoading(true)
@@ -98,11 +105,11 @@ export function StepPayment({ data, onNext, onBack }: StepPaymentProps) {
         </div>
       )}
 
-      {provider === "PAYPAL" && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+      {provider === "PAYPAL" && paypalClientId && (
         <div className="mt-6">
           <PayPalScriptProvider
             options={{
-              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+              clientId: paypalClientId,
               currency: "USD",
               intent: "capture",
             }}
@@ -141,9 +148,9 @@ export function StepPayment({ data, onNext, onBack }: StepPaymentProps) {
         </div>
       )}
 
-      {provider === "PAYPAL" && !process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+      {provider === "PAYPAL" && !paypalClientId && (
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-          PayPal is not yet configured. Please set NEXT_PUBLIC_PAYPAL_CLIENT_ID in your environment.
+          PayPal is not yet configured. Please contact support.
         </div>
       )}
 
