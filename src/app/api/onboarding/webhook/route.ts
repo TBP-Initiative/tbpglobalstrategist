@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 
 export const dynamic = "force-dynamic"
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing signature" }, { status: 400 })
     }
 
-    const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+    const event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object

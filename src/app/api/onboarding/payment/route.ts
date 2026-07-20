@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { stripe, STRIPE_PLANS } from "@/lib/stripe"
+import { getStripe, STRIPE_PLANS } from "@/lib/stripe"
 
 export const dynamic = "force-dynamic"
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const plan = pathway === "PLUS" ? STRIPE_PLANS.PLUS : STRIPE_PLANS.STANDARD
 
     if (provider === "STRIPE") {
-      const stripeSession = await stripe.checkout.sessions.create({
+      const stripeSession = await getStripe().checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
           {
