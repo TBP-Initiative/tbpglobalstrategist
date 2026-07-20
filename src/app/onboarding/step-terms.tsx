@@ -34,6 +34,7 @@ const TERMS_SECTIONS = [
 export function StepTerms({ onNext, onBack }: StepTermsProps) {
   const [readSections, setReadSections] = useState<Set<number>>(new Set())
   const [scrolledToBottom, setScrolledToBottom] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
 
   const allRead = readSections.size === TERMS_SECTIONS.length && scrolledToBottom
 
@@ -79,15 +80,29 @@ export function StepTerms({ onNext, onBack }: StepTermsProps) {
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-400">
           {readSections.size}/{TERMS_SECTIONS.length} sections read
-          {!scrolledToBottom && " \u2022 Scroll to bottom to continue"}
+          {!scrolledToBottom && " • Scroll to bottom to continue"}
         </p>
+      </div>
+
+      <div className="mt-6 rounded-xl border border-gray-200 p-4">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <span className="text-sm text-gray-700">
+            I have read, understood and agree to all Programme Terms &amp; Conditions above.
+          </span>
+        </label>
       </div>
 
       <div className="mt-6 flex justify-between">
         <Button variant="outline" onClick={onBack} className="rounded-full px-6">
           <ChevronLeft size={16} className="mr-1" /> Back
         </Button>
-        <Button onClick={onNext} disabled={!allRead} className="rounded-full px-8">
+        <Button onClick={onNext} disabled={!confirmed} className="rounded-full px-8">
           I have read all terms <ChevronRight size={16} className="ml-1" />
         </Button>
       </div>
