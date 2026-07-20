@@ -183,6 +183,44 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
         <span>Your payment is secured with 256-bit SSL encryption</span>
       </div>
 
+      {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-semibold text-amber-700 mb-2">Test Mode</p>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true)
+              try {
+                const res = await fetch("/api/onboarding/payment/capture", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ orderId: "TEST-MOCK-" + Date.now(), testMode: true }),
+                })
+                const data = await res.json()
+                if (data.error) {
+                  setPaypalError(data.error)
+                  return
+                }
+                await fetch("/api/onboarding", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ step: 7, paymentReference: "TEST-MOCK-" + Date.now() }),
+                })
+                onNext({})
+              } catch {
+                setPaypalError("Test payment failed.")
+              } finally {
+                setLoading(false)
+              }
+            }}
+          >
+            {loading ? "Processing..." : "Skip Payment (Test Mode)"}
+          </Button>
+        </div>
+      )}
+
       <div className="mt-8 flex justify-between">
         <Button variant="outline" onClick={onBack} className="rounded-full px-6">
           <ChevronLeft size={16} className="mr-1" /> Back
