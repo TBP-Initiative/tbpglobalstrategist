@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check, ChevronRight, ChevronLeft } from "lucide-react"
+import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StepDetails } from "./step-details"
 import { StepOverview } from "./step-overview"
@@ -23,7 +23,7 @@ const STEPS = [
   { id: 7, label: "Complete" },
 ]
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const searchParams = useSearchParams()
   const initialStep = parseInt(searchParams.get("step") || "1")
   const [currentStep, setCurrentStep] = useState(initialStep)
@@ -102,7 +102,6 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
             TBP Global Strategist Fellowship
@@ -112,7 +111,6 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-10">
           <div className="flex items-center justify-between">
             {STEPS.map((step, i) => (
@@ -145,7 +143,6 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Step Content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -159,5 +156,17 @@ export default function OnboardingPage() {
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+        <div className="text-sm text-gray-500">Loading...</div>
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
   )
 }
