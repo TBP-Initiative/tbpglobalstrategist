@@ -15,17 +15,37 @@ export async function GET(req: Request) {
       where: { id: submissionId },
       select: { fileUrl: true, title: true, fileType: true },
     })
-    if (!sub) {
+    if (!sub || !sub.fileUrl) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
+    const safeName = (sub.title || "download").replace(/[^a-zA-Z0-9\s\-_.]/g, "").replace(/\s+/g, "-").slice(0, 80) || "download"
+
+    // Handle base64 data URLs (fallback storage)
+    if (sub.fileUrl.startsWith("data:")) {
+      const match = sub.fileUrl.match(/^data:[^;]+;base64,(.+)$/)
+      if (!match) {
+        return NextResponse.json({ error: "Invalid data URL" }, { status: 400 })
+      }
+      const buffer = Buffer.from(match[1], "base64")
+      const mimeType = sub.fileUrl.split(";")[0].split(":")[1] || "application/octet-stream"
+      const ext = mimeType.split("/")[1] || "bin"
+      return new NextResponse(buffer, {
+        headers: {
+          "Content-Type": mimeType,
+          "Content-Disposition": `attachment; filename="${safeName}.${ext}"`,
+          "Content-Length": String(buffer.length),
+        },
+      })
+    }
+
+    // Handle remote URLs (Supabase storage)
     const ext = sub.fileUrl.split(".").pop()?.split("?")[0] ?? "bin"
-    const safeName = sub.title.replace(/[^a-zA-Z0-9\s\-_.]/g, "").replace(/\s+/g, "-").slice(0, 80) || "download"
     const filename = `${safeName}.${ext}`
 
     const res = await fetch(sub.fileUrl)
     if (!res.ok) {
-      return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 })
+      return NextResponse.json({ error: "File not available" }, { status: 404 })
     }
 
     const buffer = Buffer.from(await res.arrayBuffer())
@@ -39,6 +59,6 @@ export async function GET(req: Request) {
     })
   } catch (err) {
     console.error("Download error:", err)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Download failed" }, { status: 500 })
   }
 }
