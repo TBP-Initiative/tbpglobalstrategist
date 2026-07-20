@@ -127,7 +127,7 @@ export function StepAgreement({ data, onNext, onBack, saving }: StepAgreementPro
           placeholder="Type your full legal name as signature"
           className="mt-3"
         />
-        <p className="mt-2 text-xs text-gray-400">Selected pathway: {data?.pathway === "PLUS" ? "Fellowship Plus \u2014 US$1,500" : "Standard Fellowship \u2014 US$1,200"}</p>
+        <p className="mt-2 text-xs text-gray-400">Selected pathway: {(data?.pathway === "PLUS" || Number(data?.pathwayAmount) === 1500) ? "Fellowship Plus \u2014 US$1,500" : "Standard Fellowship \u2014 US$1,200"}</p>
       </div>
 
       <div className="mt-8 flex justify-between">
