@@ -16,6 +16,7 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronLeft,
+  Share2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Profile", href: "/dashboard/profile", icon: User },
         { label: "My Projects", href: "/dashboard/projects", icon: FolderKanban },
         { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+        { label: "Referrals", href: "/dashboard/referrals", icon: Share2 },
       ],
     },
     {
@@ -55,6 +57,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Users", href: "/dashboard/users", icon: Users },
         { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
         { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+        { label: "Referrals", href: "/dashboard/admin/referrals", icon: Share2 },
       ],
     },
     {

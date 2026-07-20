@@ -50,6 +50,19 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      const checkRes = await fetch("/api/auth/check-active", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      })
+      const checkData = await checkRes.json()
+
+      if (checkRes.ok && checkData.inactive) {
+        toast.error("Your account is not yet active. Please complete onboarding and payment first.")
+        setIsLoading(false)
+        return
+      }
+
       await signIn("credentials", {
         email: data.email,
         password: data.password,
