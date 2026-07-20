@@ -42,6 +42,30 @@ enum ProgressionStage {
   PAID_ADVISER
 }
 
+enum OnboardingStatus {
+  IN_PROGRESS
+  PENDING_PAYMENT
+  COMPLETED
+  EXPIRED
+}
+
+enum FellowshipPathway {
+  STANDARD
+  PLUS
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 enum ActivityAction {
   CREATE
   UPDATE
@@ -81,6 +105,7 @@ model User {
   publications     Publication[]
   workAreaAssignments UserWorkArea[]
   submissions      Submission[]
+  onboarding       OnboardingSubmission?
 }
 
 model Account {
@@ -427,4 +452,52 @@ model Submission {
 
   @@index([userId])
   @@index([stage])
+}
+
+model OnboardingSubmission {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  status            OnboardingStatus  @default(IN_PROGRESS)
+  currentStep       Int               @default(1)
+
+  // Step 1: Participant Details
+  fullName          String?
+  preferredName     String?
+  phoneNumber       String?
+  city              String?
+  country           String?
+  linkedinUrl       String?
+  currentStatus     String?
+
+  // Step 3: Fellowship Pathway
+  pathway           FellowshipPathway?
+  pathwayAmount     Decimal?
+
+  // Step 5: Agreement
+  signatureName     String?
+  agreedToTerms     Boolean           @default(false)
+  agreedToConduct   Boolean           @default(false)
+  agreedToIP        Boolean           @default(false)
+  agreedToPrivacy   Boolean           @default(false)
+  agreedToNoClaim   Boolean           @default(false)
+  agreedToAccurate  Boolean           @default(false)
+  agreedToRefund    Boolean           @default(false)
+
+  // Step 6: Payment
+  paymentProvider   PaymentProvider?
+  paymentStatus     PaymentStatus     @default(PENDING)
+  paymentReference  String?
+  paymentAmount     Decimal?
+  paymentCurrency   String?           @default("USD")
+  paidAt            DateTime?
+
+  // Profile visibility preference
+  profileVisibility String?           @default("PUBLIC")
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }
