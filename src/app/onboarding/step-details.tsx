@@ -177,7 +177,7 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
             </div>
           </div>
           <div className="mt-3">
-            <Label>Referral Code <span className="text-blue-500">(optional — referrer earns USD $50)</span></Label>
+            <Label>Referral Code <span className="text-blue-500">(optional)</span></Label>
             <Input
               value={form.referralCode}
               onChange={(e) => update("referralCode", e.target.value)}

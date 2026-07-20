@@ -60,13 +60,67 @@ export async function GET() {
         id: c.id,
         userName: c.user.name,
         userEmail: c.user.email,
-        amount: c.amount,
+        amount: Number(c.amount),
         status: c.status,
         createdAt: c.createdAt,
+        paidAt: c.paidAt,
       })),
     })
   } catch (err) {
     console.error("GET /api/admin/referrals error:", err)
+    return NextResponse.json({ error: "Failed" }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    })
+
+    if (user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const body = await req.json()
+    const { creditId, status } = body
+
+    if (!creditId || !["PAID", "PENDING"].includes(status)) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    }
+
+    const update: Record<string, unknown> = { status }
+    if (status === "PAID") {
+      update.paidAt = new Date()
+    } else {
+      update.paidAt = null
+    }
+
+    const credit = await prisma.referralCredit.update({
+      where: { id: creditId },
+      data: update,
+    })
+
+    if (status === "PAID") {
+      await prisma.notification.create({
+        data: {
+          userId: credit.userId,
+          title: "Referral Payment Sent!",
+          message: `Your referral reward of $${Number(credit.amount)} has been paid out.`,
+          type: "SYSTEM",
+        },
+      })
+    }
+
+    return NextResponse.json({ success: true, credit })
+  } catch (err) {
+    console.error("PATCH /api/admin/referrals error:", err)
     return NextResponse.json({ error: "Failed" }, { status: 500 })
   }
 }

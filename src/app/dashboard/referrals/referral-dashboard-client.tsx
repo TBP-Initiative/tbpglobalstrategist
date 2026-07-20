@@ -49,7 +49,7 @@ export function ReferralDashboardClient() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">My Referrals</h1>
-        <p className="text-sm text-gray-500">Share your referral link and earn $50 for each friend who completes payment.</p>
+        <p className="text-sm text-gray-500">Share your referral link with others. When they complete payment, you receive a reward.</p>
       </div>
 
       {/* Referral Link Card */}
@@ -122,7 +122,7 @@ export function ReferralDashboardClient() {
                     <p className="text-xs text-gray-400">{r.email}</p>
                   </div>
                   <Badge variant={r.status === "COMPLETED" ? "default" : "secondary"}>
-                    {r.status === "COMPLETED" ? "$50 earned" : "Pending"}
+                    {r.status === "COMPLETED" ? "Completed" : "Pending"}
                   </Badge>
                 </div>
               ))}

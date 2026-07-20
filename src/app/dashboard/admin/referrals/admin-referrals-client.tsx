@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, DollarSign, Gift, Clock, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Users, DollarSign, Gift, Clock, CheckCircle, Loader2 } from "lucide-react"
 
 interface ReferralData {
   stats: {
@@ -30,20 +31,58 @@ interface ReferralData {
     amount: number
     status: string
     createdAt: string
+    paidAt: string | null
   }>
 }
 
 export function AdminReferralsClient() {
   const [data, setData] = useState<ReferralData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [markingPaid, setMarkingPaid] = useState<string | null>(null)
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch("/api/admin/referrals")
       .then((r) => r.json())
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [])
+
+  const markAsPaid = async (creditId: string) => {
+    setMarkingPaid(creditId)
+    try {
+      const res = await fetch("/api/admin/referrals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creditId, status: "PAID" }),
+      })
+      if (res.ok) {
+        fetchData()
+      }
+    } finally {
+      setMarkingPaid(null)
+    }
+  }
+
+  const markAsUnpaid = async (creditId: string) => {
+    setMarkingPaid(creditId)
+    try {
+      const res = await fetch("/api/admin/referrals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creditId, status: "PENDING" }),
+      })
+      if (res.ok) {
+        fetchData()
+      }
+    } finally {
+      setMarkingPaid(null)
+    }
+  }
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading referrals...</div>
   if (!data) return <div className="p-8 text-center text-gray-500">Failed to load referrals</div>
@@ -117,7 +156,7 @@ export function AdminReferralsClient() {
                         <p className="text-xs text-gray-400">{r.referrerEmail}</p>
                       </td>
                       <td className="py-3">
-                        <p className="font-medium">{r.referredName || "—"}</p>
+                        <p className="font-medium">{r.referredName || "\u2014"}</p>
                         <p className="text-xs text-gray-400">{r.referredEmail}</p>
                       </td>
                       <td className="py-3 font-mono text-xs">{r.code}</td>
@@ -140,20 +179,22 @@ export function AdminReferralsClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Credits</CardTitle>
+          <CardTitle className="text-lg">Referral Rewards</CardTitle>
         </CardHeader>
         <CardContent>
           {data.credits.length === 0 ? (
-            <p className="text-sm text-gray-500">No credits yet</p>
+            <p className="text-sm text-gray-500">No referral rewards yet</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-gray-500">
-                    <th className="pb-2">User</th>
+                    <th className="pb-2">User (Referrer)</th>
                     <th className="pb-2">Amount</th>
                     <th className="pb-2">Status</th>
-                    <th className="pb-2">Date</th>
+                    <th className="pb-2">Created</th>
+                    <th className="pb-2">Paid At</th>
+                    <th className="pb-2">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -171,6 +212,34 @@ export function AdminReferralsClient() {
                       </td>
                       <td className="py-3 text-xs text-gray-500">
                         {new Date(c.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 text-xs text-gray-500">
+                        {c.paidAt ? new Date(c.paidAt).toLocaleDateString() : "\u2014"}
+                      </td>
+                      <td className="py-3">
+                        {c.status === "PENDING" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => markAsPaid(c.id)}
+                            disabled={markingPaid === c.id}
+                          >
+                            {markingPaid === c.id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              "Mark as Paid"
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => markAsUnpaid(c.id)}
+                            disabled={markingPaid === c.id}
+                          >
+                            Revert
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}

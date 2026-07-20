@@ -41,7 +41,7 @@ export async function GET() {
 
     return NextResponse.json({
       referralCode: user.referralCode,
-      referralLink: `https://tbpglobalstrategist.vercel.app/register?ref=${user.referralCode}`,
+      referralLink: `https://tbpglobalstrategist.vercel.app/onboarding?ref=${user.referralCode}`,
       totalReferrals: referrals.length,
       completedReferrals: referrals.filter((r) => r.status === "COMPLETED").length,
       totalEarned,
