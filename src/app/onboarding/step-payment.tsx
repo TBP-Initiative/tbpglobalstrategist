@@ -7,15 +7,16 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 
 interface StepPaymentProps {
   data: Record<string, unknown> | null
+  pathway?: string
   onNext: (data: Record<string, unknown>) => void
   onBack: () => void
 }
 
-export function StepPayment({ data, onNext, onBack }: StepPaymentProps) {
+export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: StepPaymentProps) {
   const [provider, setProvider] = useState<"STRIPE" | "PAYPAL" | "">("")
   const [loading, setLoading] = useState(false)
   const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
-  const pathway = (data?.pathway as string) || "STANDARD"
+  const pathway = pathwayProp || (data?.pathway as string) || "STANDARD"
   const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
 
   useEffect(() => {

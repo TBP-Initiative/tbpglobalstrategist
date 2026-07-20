@@ -29,6 +29,7 @@ function OnboardingContent() {
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [onboarding, setOnboarding] = useState<Record<string, unknown> | null>(null)
   const [saving, setSaving] = useState(false)
+  const [pathway, setPathway] = useState<string>("")
 
   useEffect(() => {
     fetch("/api/onboarding")
@@ -36,6 +37,7 @@ function OnboardingContent() {
       .then((data) => {
         if (data && data.id) {
           setOnboarding(data)
+          if (data.pathway) setPathway(data.pathway as string)
           if (data.currentStep && data.currentStep > 1) {
             setCurrentStep(data.currentStep)
           }
@@ -78,7 +80,10 @@ function OnboardingContent() {
   }
 
   const nextStep = async (stepData?: Record<string, unknown>) => {
-    if (stepData) await saveStep(stepData)
+    if (stepData) {
+      if (stepData.pathway) setPathway(stepData.pathway as string)
+      await saveStep(stepData)
+    }
     if (currentStep < 7) setCurrentStep(currentStep + 1)
   }
 
@@ -92,8 +97,8 @@ function OnboardingContent() {
       case 2: return <StepOverview data={onboarding} onNext={nextStep} onBack={prevStep} />
       case 3: return <StepPathway data={onboarding} onNext={nextStep} onBack={prevStep} />
       case 4: return <StepTerms data={onboarding} onNext={nextStep} onBack={prevStep} />
-      case 5: return <StepAgreement data={onboarding} onNext={nextStep} onBack={prevStep} saving={saving} />
-      case 6: return <StepPayment data={onboarding} onNext={nextStep} onBack={prevStep} />
+      case 5: return <StepAgreement data={onboarding} pathway={pathway} onNext={nextStep} onBack={prevStep} saving={saving} />
+      case 6: return <StepPayment data={onboarding} pathway={pathway} onNext={nextStep} onBack={prevStep} />
       case 7: return <StepComplete data={onboarding} />
       default: return null
     }
