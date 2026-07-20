@@ -102,7 +102,7 @@ export function StepTerms({ onNext, onBack }: StepTermsProps) {
         <Button variant="outline" onClick={onBack} className="rounded-full px-6">
           <ChevronLeft size={16} className="mr-1" /> Back
         </Button>
-        <Button onClick={onNext} disabled={!confirmed} className="rounded-full px-8">
+        <Button onClick={() => onNext()} disabled={!confirmed} className="rounded-full px-8">
           I have read all terms <ChevronRight size={16} className="ml-1" />
         </Button>
       </div>
