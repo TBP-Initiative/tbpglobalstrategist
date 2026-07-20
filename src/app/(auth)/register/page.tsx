@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion, type Variants } from "framer-motion"
@@ -39,6 +39,7 @@ const registerSchema = z
     confirmPassword: z.string(),
     role: z.enum(["STRATEGIST", "RESEARCHER", "PARTNER"]),
     inviteCode: z.string().optional(),
+    referralCode: z.string().optional(),
     acceptTerms: z.literal(true, { message: "You must accept the terms" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -74,6 +75,7 @@ interface FlatFormValues {
   confirmPassword: string
   role: string
   inviteCode: string
+  referralCode: string
   acceptTerms: boolean
 }
 
@@ -84,11 +86,14 @@ const defaultValues: FlatFormValues = {
   confirmPassword: "",
   role: "",
   inviteCode: "",
+  referralCode: "",
   acceptTerms: false,
 }
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const refCode = searchParams.get("ref") || ""
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -101,7 +106,10 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema) as any,
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      referralCode: refCode,
+    },
   })
 
   const watchRole = watch("role")
@@ -297,6 +305,21 @@ export default function RegisterPage() {
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="referralCode">
+              Referral code{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional — earn $50 credit for both of you)
+              </span>
+            </Label>
+            <Input
+              id="referralCode"
+              placeholder="Enter referral code"
+              disabled={isLoading}
+              {...register("referralCode")}
+            />
+          </div>
+
           <div className="flex items-start gap-3 pt-2">
             <input
               type="checkbox"
@@ -359,5 +382,13 @@ export default function RegisterPage() {
         </p>
       </motion.div>
     </motion.div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-8 text-white/60">Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   )
 }

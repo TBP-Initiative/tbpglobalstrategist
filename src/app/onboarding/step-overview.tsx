@@ -1,15 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronLeft } from "lucide-react"
 
 interface StepOverviewProps {
   data: Record<string, unknown> | null
-  onNext: () => void
+  onNext: (data?: Record<string, unknown>) => void
   onBack: () => void
 }
 
 export function StepOverview({ onNext, onBack }: StepOverviewProps) {
+  const [confirmed, setConfirmed] = useState(false)
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h2 className="text-xl font-bold text-gray-900">Programme Flow Acknowledgement</h2>
@@ -60,11 +63,25 @@ export function StepOverview({ onNext, onBack }: StepOverviewProps) {
         </p>
       </div>
 
+      <div className="mt-6 rounded-xl border border-gray-200 p-4">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <span className="text-sm text-gray-700">
+            I have read and understood the Programme Flow, overview and important notice above.
+          </span>
+        </label>
+      </div>
+
       <div className="mt-8 flex justify-between">
         <Button variant="outline" onClick={onBack} className="rounded-full px-6">
           <ChevronLeft size={16} className="mr-1" /> Back
         </Button>
-        <Button onClick={onNext} className="rounded-full px-8">
+        <Button onClick={() => onNext({})} disabled={!confirmed} className="rounded-full px-8">
           I understand <ChevronRight size={16} className="ml-1" />
         </Button>
       </div>

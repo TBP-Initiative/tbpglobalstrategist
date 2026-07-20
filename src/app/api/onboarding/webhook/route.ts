@@ -29,7 +29,6 @@ export async function POST(req: Request) {
           },
         })
 
-        // Auto-progress user to STRATEGIST stage
         await prisma.user.update({
           where: { id: userId },
           data: { role: "STRATEGIST" },
@@ -56,6 +55,41 @@ export async function POST(req: Request) {
             type: "SYSTEM",
           },
         })
+
+        const referral = await prisma.referral.findFirst({
+          where: { referredUserId: userId },
+        })
+
+        if (referral) {
+          await prisma.referral.update({
+            where: { id: referral.id },
+            data: { status: "COMPLETED" },
+          })
+
+          const credit = await prisma.referralCredit.findFirst({
+            where: { referralId: referral.id },
+          })
+
+          if (!credit) {
+            await prisma.referralCredit.create({
+              data: {
+                userId: referral.referrerId,
+                referralId: referral.id,
+                amount: 50,
+                status: "PENDING",
+              },
+            })
+
+            await prisma.notification.create({
+              data: {
+                userId: referral.referrerId,
+                title: "Referral Bonus Pending!",
+                message: "Someone you referred has completed payment. You will receive a $50 credit once verified.",
+                type: "SYSTEM",
+              },
+            })
+          }
+        }
       }
     }
 

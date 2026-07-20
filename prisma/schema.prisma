@@ -87,6 +87,7 @@ model User {
   image         String?
   role          Role     @default(STRATEGIST)
   passwordHash  String?
+  referralCode  String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -106,6 +107,9 @@ model User {
   workAreaAssignments UserWorkArea[]
   submissions      Submission[]
   onboarding       OnboardingSubmission?
+  referralsMade    Referral[]         @relation("Referrer")
+  referralsReceived Referral[]        @relation("ReferredUser")
+  referralCredits  ReferralCredit[]
 }
 
 model Account {
@@ -468,6 +472,9 @@ model OnboardingSubmission {
   country           String?
   linkedinUrl       String?
   currentStatus     String?
+  areasOfInterest   String?           @default("[]")
+  otherArea         String?
+  referredBy        String?
 
   // Step 3: Fellowship Pathway
   pathway           FellowshipPathway?
@@ -500,4 +507,37 @@ model OnboardingSubmission {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status])
+}
+
+model Referral {
+  id              String   @id @default(cuid())
+  referrerId      String
+  referredUserId  String   @unique
+  code            String
+  status          String   @default("PENDING") // PENDING, COMPLETED, EXPIRED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  referrer     User             @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser User             @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
+  credit       ReferralCredit?
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([code])
+}
+
+model ReferralCredit {
+  id          String   @id @default(cuid())
+  userId      String
+  referralId  String   @unique
+  amount      Decimal  @default(50)
+  status      String   @default("PENDING") // PENDING, PAID, EXPIRED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

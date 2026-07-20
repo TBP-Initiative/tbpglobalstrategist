@@ -15,7 +15,16 @@ export async function GET() {
       where: { userId: session.user.id },
     })
 
-    return NextResponse.json(onboarding || { currentStep: 1, status: "IN_PROGRESS" })
+    if (!onboarding) {
+      return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS" })
+    }
+
+    const result = {
+      ...onboarding,
+      areasOfInterest: onboarding.areasOfInterest ? JSON.parse(onboarding.areasOfInterest) : [],
+    }
+
+    return NextResponse.json(result)
   } catch (err) {
     console.error("GET /api/onboarding error:", err)
     return NextResponse.json({ error: "Failed" }, { status: 500 })
@@ -38,37 +47,32 @@ export async function POST(req: Request) {
 
     let submission
 
+    const stepData = mapStepData(step, data)
+
     if (!existing) {
       submission = await prisma.onboardingSubmission.create({
         data: {
           userId: session.user.id,
           currentStep: step || 1,
-          ...mapStepData(step, data),
+          ...stepData,
         },
       })
     } else {
-      const updateData: Record<string, unknown> = {
-        currentStep: step || existing.currentStep,
-        ...mapStepData(step, data),
-      }
-
-      if (step === 2) {
-        updateData.fullName = data.fullName || existing.fullName
-        updateData.preferredName = data.preferredName || existing.preferredName
-        updateData.phoneNumber = data.phoneNumber || existing.phoneNumber
-        updateData.city = data.city || existing.city
-        updateData.country = data.country || existing.country
-        updateData.linkedinUrl = data.linkedinUrl || existing.linkedinUrl
-        updateData.currentStatus = data.currentStatus || existing.currentStatus
-      }
-
       submission = await prisma.onboardingSubmission.update({
         where: { userId: session.user.id },
-        data: updateData,
+        data: {
+          currentStep: Math.max(step || existing.currentStep, existing.currentStep),
+          ...stepData,
+        },
       })
     }
 
-    return NextResponse.json(submission)
+    const result = {
+      ...submission,
+      areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
+    }
+
+    return NextResponse.json(result)
   } catch (err) {
     console.error("POST /api/onboarding error:", err)
     return NextResponse.json({ error: "Failed" }, { status: 500 })
@@ -79,7 +83,7 @@ function mapStepData(step: number, data: Record<string, unknown>) {
   const mapped: Record<string, unknown> = {}
 
   switch (step) {
-    case 2:
+    case 1:
       mapped.fullName = data.fullName
       mapped.preferredName = data.preferredName
       mapped.phoneNumber = data.phoneNumber
@@ -87,6 +91,17 @@ function mapStepData(step: number, data: Record<string, unknown>) {
       mapped.country = data.country
       mapped.linkedinUrl = data.linkedinUrl
       mapped.currentStatus = data.currentStatus
+      if (data.areasOfInterest) {
+        mapped.areasOfInterest = JSON.stringify(data.areasOfInterest)
+      }
+      if (data.otherArea) {
+        mapped.otherArea = data.otherArea
+      }
+      if (data.referredBy) {
+        mapped.referredBy = data.referredBy
+      }
+      break
+    case 2:
       break
     case 3:
       mapped.pathway = data.pathway
