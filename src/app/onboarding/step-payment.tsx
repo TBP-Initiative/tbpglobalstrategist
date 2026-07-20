@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronLeft, CreditCard, Shield, Loader2 } from "lucide-react"
+import { ChevronLeft, CreditCard, Shield, Loader2 } from "lucide-react"
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 
 interface StepPaymentProps {
@@ -13,9 +14,11 @@ interface StepPaymentProps {
 }
 
 export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: StepPaymentProps) {
+  const router = useRouter()
   const [provider, setProvider] = useState<"STRIPE" | "PAYPAL" | "">("")
   const [loading, setLoading] = useState(false)
   const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
+  const [paypalError, setPaypalError] = useState<string | null>(null)
   const pathway = pathwayProp || (data?.pathway as string) || "STANDARD"
   const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
 
@@ -118,6 +121,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
             <PayPalButtons
               style={{ layout: "vertical", height: 50 }}
               createOrder={async () => {
+                setPaypalError(null)
                 const res = await fetch("/api/onboarding/payment", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -131,21 +135,40 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
               onApprove={async (details) => {
                 setLoading(true)
                 try {
+                  const captureRes = await fetch("/api/onboarding/payment/capture", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: details.orderID }),
+                  })
+                  const captureData = await captureRes.json()
+                  if (captureData.error) {
+                    setPaypalError(captureData.error)
+                    return
+                  }
                   await fetch("/api/onboarding", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ step: 7, paymentReference: details.orderID }),
                   })
                   onNext({})
+                } catch {
+                  setPaypalError("Payment capture failed. Please try again.")
                 } finally {
                   setLoading(false)
                 }
               }}
-              onError={() => {
+              onError={(err) => {
+                console.error("PayPal error:", err)
+                setPaypalError("PayPal encountered an error. Please try again or use a different payment method.")
                 setLoading(false)
               }}
             />
           </PayPalScriptProvider>
+          {paypalError && (
+            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {paypalError}
+            </div>
+          )}
         </div>
       )}
 

@@ -1,9 +1,9 @@
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StepDetails } from "./step-details"
 import { StepOverview } from "./step-overview"
@@ -25,26 +25,40 @@ const STEPS = [
 
 function OnboardingContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const initialStep = parseInt(searchParams.get("step") || "1")
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [onboarding, setOnboarding] = useState<Record<string, unknown> | null>(null)
   const [saving, setSaving] = useState(false)
   const [pathway, setPathway] = useState<string>("")
+  const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
     fetch("/api/onboarding")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && data.id) {
-          setOnboarding(data)
-          if (data.pathway) setPathway(data.pathway as string)
-          if (data.currentStep && data.currentStep > 1) {
-            setCurrentStep(data.currentStep)
-          }
+      .then((r) => {
+        if (r.status === 401) {
+          router.push("/login?callbackUrl=/onboarding")
+          return null
         }
+        return r.json()
       })
-      .catch(() => {})
-  }, [])
+      .then((data) => {
+        if (!data) return
+        if (data.error === "Unauthorized") {
+          router.push("/login?callbackUrl=/onboarding")
+          return
+        }
+        setOnboarding(data)
+        if (data.pathway) setPathway(data.pathway as string)
+        if (data.currentStep && data.currentStep > 1) {
+          setCurrentStep(data.currentStep)
+        }
+        setAuthChecked(true)
+      })
+      .catch(() => {
+        router.push("/login?callbackUrl=/onboarding")
+      })
+  }, [router])
 
   useEffect(() => {
     const step = searchParams.get("step")
@@ -156,7 +170,12 @@ function OnboardingContent() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {renderStep()}
+            {!authChecked ? (
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm text-center py-16">
+                <Loader2 size={24} className="mx-auto animate-spin text-gray-400" />
+                <p className="mt-3 text-sm text-gray-500">Verifying your account...</p>
+              </div>
+            ) : renderStep()}
           </motion.div>
         </AnimatePresence>
       </div>
