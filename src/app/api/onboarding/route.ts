@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { auth, signIn } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
 
 export const dynamic = "force-dynamic"
+
+function generateReferralCode(name: string): string {
+  const clean = (name || "user").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6)
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase()
+  return `TBP-${clean}-${rand}`
+}
 
 export async function GET() {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS", isLoggedIn: false })
     }
 
     const onboarding = await prisma.onboardingSubmission.findUnique({
@@ -16,12 +23,13 @@ export async function GET() {
     })
 
     if (!onboarding) {
-      return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS" })
+      return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS", isLoggedIn: true })
     }
 
     const result = {
       ...onboarding,
       areasOfInterest: onboarding.areasOfInterest ? JSON.parse(onboarding.areasOfInterest) : [],
+      isLoggedIn: true,
     }
 
     return NextResponse.json(result)
@@ -34,15 +42,95 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const body = await req.json()
     const { step, ...data } = body
 
+    let userId = session?.user?.id
+
+    // Step 1 without session → create account + sign in
+    if (step === 1 && !userId) {
+      if (!data.email || !data.password) {
+        return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
+      }
+
+      const existing = await prisma.user.findUnique({
+        where: { email: data.email },
+      })
+
+      if (existing) {
+        return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
+      }
+
+      const passwordHash = await bcrypt.hash(data.password, 12)
+      let referralCode = generateReferralCode(data.fullName || "user")
+      let attempts = 0
+      while (attempts < 10) {
+        const exists = await prisma.user.findUnique({ where: { referralCode } })
+        if (!exists) break
+        referralCode = generateReferralCode((data.fullName || "user") + attempts)
+        attempts++
+      }
+
+      const user = await prisma.user.create({
+        data: {
+          name: data.fullName,
+          email: data.email,
+          passwordHash,
+          role: "STRATEGIST",
+          referralCode,
+          strategistProfile: { create: { stage: "CANDIDATE" } },
+        },
+        select: { id: true, name: true },
+      })
+
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: "Welcome to TBP Global Strategist",
+          message: `Hi ${user.name ?? "there"}! Your account has been created. Complete your fellowship agreement to get started.`,
+          link: "/onboarding",
+        },
+      })
+
+      // Handle referral code
+      if (data.referralCode) {
+        const referrer = await prisma.user.findUnique({
+          where: { referralCode: data.referralCode },
+        })
+        if (referrer && referrer.id !== user.id) {
+          await prisma.referral.create({
+            data: {
+              referrerId: referrer.id,
+              referredUserId: user.id,
+              code: data.referralCode,
+            },
+          })
+        }
+      }
+
+      // Auto sign in
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      })
+
+      if (signInResult?.error) {
+        return NextResponse.json({
+          message: "Account created. Please log in to continue.",
+          userId: user.id,
+        })
+      }
+
+      userId = user.id
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const existing = await prisma.onboardingSubmission.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
     })
 
     let submission
@@ -52,14 +140,14 @@ export async function POST(req: Request) {
     if (!existing) {
       submission = await prisma.onboardingSubmission.create({
         data: {
-          userId: session.user.id,
+          userId,
           currentStep: step || 1,
           ...stepData,
         },
       })
     } else {
       submission = await prisma.onboardingSubmission.update({
-        where: { userId: session.user.id },
+        where: { userId },
         data: {
           currentStep: Math.max(step || existing.currentStep, existing.currentStep),
           ...stepData,
@@ -70,6 +158,7 @@ export async function POST(req: Request) {
     const result = {
       ...submission,
       areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
+      isLoggedIn: true,
     }
 
     return NextResponse.json(result)

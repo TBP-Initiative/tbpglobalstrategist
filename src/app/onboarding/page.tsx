@@ -1,7 +1,7 @@
 "use client"
 
-import { Suspense, useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -25,40 +25,33 @@ const STEPS = [
 
 function OnboardingContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const initialStep = parseInt(searchParams.get("step") || "1")
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [onboarding, setOnboarding] = useState<Record<string, unknown> | null>(null)
   const [saving, setSaving] = useState(false)
   const [pathway, setPathway] = useState<string>("")
-  const [authChecked, setAuthChecked] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const refParam = searchParams.get("ref") || ""
 
   useEffect(() => {
     fetch("/api/onboarding")
-      .then((r) => {
-        if (r.status === 401) {
-          router.push("/login?callbackUrl=/onboarding")
-          return null
-        }
-        return r.json()
-      })
+      .then((r) => r.json())
       .then((data) => {
-        if (!data) return
-        if (data.error === "Unauthorized") {
-          router.push("/login?callbackUrl=/onboarding")
-          return
+        if (data) {
+          setOnboarding(data)
+          setIsLoggedIn(data.isLoggedIn === true)
+          if (data.pathway) setPathway(data.pathway as string)
+          if (data.currentStep && data.currentStep > 1) {
+            setCurrentStep(data.currentStep)
+          }
         }
-        setOnboarding(data)
-        if (data.pathway) setPathway(data.pathway as string)
-        if (data.currentStep && data.currentStep > 1) {
-          setCurrentStep(data.currentStep)
-        }
-        setAuthChecked(true)
+        setLoaded(true)
       })
       .catch(() => {
-        router.push("/login?callbackUrl=/onboarding")
+        setLoaded(true)
       })
-  }, [router])
+  }, [])
 
   useEffect(() => {
     const step = searchParams.get("step")
@@ -78,7 +71,7 @@ function OnboardingContent() {
     })
   }
 
-  const saveStep = async (stepData: Record<string, unknown>) => {
+  const saveStep = useCallback(async (stepData: Record<string, unknown>) => {
     setSaving(true)
     try {
       const res = await fetch("/api/onboarding", {
@@ -87,11 +80,13 @@ function OnboardingContent() {
         body: JSON.stringify({ step: currentStep, ...stepData }),
       })
       const data = await res.json()
+      if (data.error) throw new Error(data.error)
       setOnboarding(data)
+      if (data.isLoggedIn !== undefined) setIsLoggedIn(data.isLoggedIn)
     } finally {
       setSaving(false)
     }
-  }
+  }, [currentStep])
 
   const nextStep = async (stepData?: Record<string, unknown>) => {
     if (stepData) {
@@ -107,7 +102,7 @@ function OnboardingContent() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <StepDetails data={onboarding} onNext={nextStep} saving={saving} />
+      case 1: return <StepDetails data={onboarding} isLoggedIn={isLoggedIn} referralCode={refParam} onNext={nextStep} saving={saving} />
       case 2: return <StepOverview data={onboarding} onNext={nextStep} onBack={prevStep} />
       case 3: return <StepPathway data={onboarding} onNext={nextStep} onBack={prevStep} />
       case 4: return <StepTerms data={onboarding} onNext={nextStep} onBack={prevStep} />
@@ -170,10 +165,10 @@ function OnboardingContent() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {!authChecked ? (
+            {!loaded ? (
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm text-center py-16">
                 <Loader2 size={24} className="mx-auto animate-spin text-gray-400" />
-                <p className="mt-3 text-sm text-gray-500">Verifying your account...</p>
+                <p className="mt-3 text-sm text-gray-500">Loading...</p>
               </div>
             ) : renderStep()}
           </motion.div>

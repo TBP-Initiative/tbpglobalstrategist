@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Eye, EyeOff } from "lucide-react"
 
 const STATUS_OPTIONS = [
   "Student",
@@ -39,11 +39,13 @@ const AREAS_OF_INTEREST = [
 
 interface StepDetailsProps {
   data: Record<string, unknown> | null
+  isLoggedIn: boolean
+  referralCode?: string
   onNext: (data: Record<string, unknown>) => void
   saving: boolean
 }
 
-export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
+export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, saving }: StepDetailsProps) {
   const savedAreas = (data?.areasOfInterest as string[]) || []
   const [form, setForm] = useState({
     fullName: (data?.fullName as string) || "",
@@ -53,9 +55,16 @@ export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
     country: (data?.country as string) || "",
     linkedinUrl: (data?.linkedinUrl as string) || "",
     currentStatus: (data?.currentStatus as string) || "",
+    email: (data?.email as string) || "",
+    password: "",
+    confirmPassword: "",
+    referralCode: refParam || (data?.referralCode as string) || "",
   })
   const [areas, setAreas] = useState<Set<string>>(new Set(savedAreas))
   const [otherArea, setOtherArea] = useState((data?.otherArea as string) || "")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const update = (field: string, value: string) => setForm({ ...form, [field]: value })
 
@@ -68,17 +77,123 @@ export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
     })
   }
 
-  const isValid = form.fullName && form.phoneNumber && form.city && form.country && form.currentStatus && areas.size > 0
+  const validate = (): boolean => {
+    const errs: Record<string, string> = {}
+
+    if (!isLoggedIn) {
+      if (!form.email) errs.email = "Email is required"
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Invalid email address"
+
+      if (!form.password) errs.password = "Password is required"
+      else if (form.password.length < 8) errs.password = "Password must be at least 8 characters"
+      else if (!/[A-Z]/.test(form.password)) errs.password = "Must contain an uppercase letter"
+      else if (!/[a-z]/.test(form.password)) errs.password = "Must contain a lowercase letter"
+      else if (!/[0-9]/.test(form.password)) errs.password = "Must contain a number"
+
+      if (!form.confirmPassword) errs.confirmPassword = "Please confirm your password"
+      else if (form.password !== form.confirmPassword) errs.confirmPassword = "Passwords do not match"
+    }
+
+    if (!form.fullName) errs.fullName = "Full name is required"
+    if (!form.phoneNumber) errs.phoneNumber = "Phone number is required"
+    if (!form.city) errs.city = "City is required"
+    if (!form.country) errs.country = "Country is required"
+    if (!form.currentStatus) errs.currentStatus = "Select your current status"
+    if (areas.size === 0) errs.areas = "Select at least one area of interest"
+
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const handleSubmit = () => {
+    if (!validate()) return
+    const selectedAreas = [...areas]
+    if (otherArea && areas.has("Other")) {
+      selectedAreas[selectedAreas.indexOf("Other")] = `Other: ${otherArea}`
+    }
+    onNext({ ...form, areasOfInterest: selectedAreas, otherArea })
+  }
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h2 className="text-xl font-bold text-gray-900">Participant Details</h2>
       <p className="mt-1 text-sm text-gray-500">Section 1 of the Agreement / Programme Terms Form</p>
 
+      {/* Account Creation (only if not logged in) */}
+      {!isLoggedIn && (
+        <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50/50 p-5">
+          <p className="text-sm font-semibold text-blue-900 mb-4">Create Your Account</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label>Email Address *</Label>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => update("email", e.target.value)}
+                placeholder="you@example.com"
+                className="mt-1"
+              />
+              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+            </div>
+            <div>
+              <Label>Password *</Label>
+              <div className="relative mt-1">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) => update("password", e.target.value)}
+                  placeholder="Min. 8 characters"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+            </div>
+            <div>
+              <Label>Confirm Password *</Label>
+              <div className="relative mt-1">
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={(e) => update("confirmPassword", e.target.value)}
+                  placeholder="Re-enter password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>}
+            </div>
+          </div>
+          <div className="mt-3">
+            <Label>Referral Code <span className="text-blue-500">(optional — earn $50 credit for both of you)</span></Label>
+            <Input
+              value={form.referralCode}
+              onChange={(e) => update("referralCode", e.target.value)}
+              placeholder="Enter referral code"
+              className="mt-1"
+            />
+          </div>
+          <p className="mt-3 text-xs text-blue-600">Your password must be at least 8 characters with an uppercase letter, lowercase letter, and number.</p>
+        </div>
+      )}
+
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Label>Full Legal Name *</Label>
           <Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Enter your full legal name" className="mt-1" />
+          {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>}
         </div>
         <div>
           <Label>Preferred Name</Label>
@@ -87,14 +202,17 @@ export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
         <div>
           <Label>Phone / WhatsApp *</Label>
           <Input value={form.phoneNumber} onChange={(e) => update("phoneNumber", e.target.value)} placeholder="+1 234 567 890" className="mt-1" />
+          {errors.phoneNumber && <p className="mt-1 text-xs text-red-600">{errors.phoneNumber}</p>}
         </div>
         <div>
           <Label>City *</Label>
           <Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="City" className="mt-1" />
+          {errors.city && <p className="mt-1 text-xs text-red-600">{errors.city}</p>}
         </div>
         <div>
           <Label>Country *</Label>
           <Input value={form.country} onChange={(e) => update("country", e.target.value)} placeholder="Country" className="mt-1" />
+          {errors.country && <p className="mt-1 text-xs text-red-600">{errors.country}</p>}
         </div>
         <div className="sm:col-span-2">
           <Label>LinkedIn Profile</Label>
@@ -118,6 +236,7 @@ export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
               </button>
             ))}
           </div>
+          {errors.currentStatus && <p className="mt-1 text-xs text-red-600">{errors.currentStatus}</p>}
         </div>
 
         {/* Areas of Interest */}
@@ -163,22 +282,17 @@ export function StepDetails({ data, onNext, saving }: StepDetailsProps) {
               />
             </div>
           </div>
+          {errors.areas && <p className="mt-1 text-xs text-red-600">{errors.areas}</p>}
         </div>
       </div>
 
       <div className="mt-8 flex justify-end">
         <Button
-          onClick={() => {
-            const selectedAreas = [...areas]
-            if (otherArea && areas.has("Other")) {
-              selectedAreas[selectedAreas.indexOf("Other")] = `Other: ${otherArea}`
-            }
-            onNext({ ...form, areasOfInterest: selectedAreas, otherArea })
-          }}
-          disabled={!isValid || saving}
+          onClick={handleSubmit}
+          disabled={saving}
           className="rounded-full px-8"
         >
-          Continue <ChevronRight size={16} className="ml-1" />
+          {saving ? "Creating Account..." : "Continue"} <ChevronRight size={16} className="ml-1" />
         </Button>
       </div>
     </div>
