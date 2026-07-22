@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-const HOLD_PERIOD_DAYS = 21
+const HOLD_PERIOD_DAYS = 14
 
 export async function autoApproveReferralCredits() {
   const cutoff = new Date()

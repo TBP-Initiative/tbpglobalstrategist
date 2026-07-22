@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { CreditCard, Plus, Trash2, CheckCircle, Building2, Loader2 } from "lucide-react"
+import { CreditCard, Plus, Trash2, CheckCircle, Building2, Loader2, DollarSign, Clock } from "lucide-react"
 
 interface PaymentMethod {
   id: string
@@ -32,6 +32,11 @@ export default function PaymentMethodsPage() {
   const [formType, setFormType] = useState<"PAYPAL" | "BANK_TRANSFER">("PAYPAL")
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [payoutHistory, setPayoutHistory] = useState<Array<{
+    id: string; amount: number; method: string; status: string; transactionRef: string | null
+    createdAt: string; processedAt: string | null; paidAt: string | null
+    paymentMethod: { type: string; label: string | null; paypalEmail: string | null; accountHolder: string | null; bankName: string | null } | null
+  }>>([])
 
   const [label, setLabel] = useState("")
   const [paypalEmail, setPaypalEmail] = useState("")
@@ -51,7 +56,14 @@ export default function PaymentMethodsPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchMethods() }, [])
+  const fetchPayoutHistory = () => {
+    fetch("/api/referrals/payout")
+      .then((r) => r.json())
+      .then((data) => { if (data?.payoutRequests) setPayoutHistory(data.payoutRequests) })
+      .catch(console.error)
+  }
+
+  useEffect(() => { fetchMethods(); fetchPayoutHistory() }, [])
 
   const resetForm = () => {
     setLabel(""); setPaypalEmail(""); setAccountHolder(""); setBankName("")
@@ -284,6 +296,72 @@ export default function PaymentMethodsPage() {
           ))}
         </div>
       )}
+
+      {/* Payout History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock size={18} className="text-gray-500" />
+            Payout History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {payoutHistory.length === 0 ? (
+            <div className="py-8 text-center text-gray-500">
+              <DollarSign size={32} className="mx-auto mb-3 text-gray-300" />
+              <p>No payout requests yet.</p>
+              <p className="text-xs text-gray-400">Request a payout from your Referrals dashboard once your balance reaches $100.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-gray-500">
+                    <th className="pb-2">Amount</th>
+                    <th className="pb-2">Method</th>
+                    <th className="pb-2">Payment Details</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2">Transaction Ref</th>
+                    <th className="pb-2">Requested</th>
+                    <th className="pb-2">Processed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payoutHistory.map((p) => (
+                    <tr key={p.id} className="border-b">
+                      <td className="py-3 font-semibold">${p.amount}</td>
+                      <td className="py-3">{p.method === "PAYPAL" ? "PayPal" : "Bank Transfer"}</td>
+                      <td className="py-3">
+                        {p.paymentMethod ? (
+                          <div className="text-xs text-gray-500">
+                            {p.paymentMethod.type === "PAYPAL" ? (
+                              <span>{p.paymentMethod.paypalEmail}</span>
+                            ) : (
+                              <span>{p.paymentMethod.accountHolder}{p.paymentMethod.bankName ? ` — ${p.paymentMethod.bankName}` : ""}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <Badge variant={p.status === "PAID" ? "default" : p.status === "PENDING" ? "secondary" : "destructive"}>
+                          {p.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 font-mono text-xs text-gray-400">{p.transactionRef || "—"}</td>
+                      <td className="py-3 text-xs text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</td>
+                      <td className="py-3 text-xs text-gray-500">
+                        {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : p.processedAt ? new Date(p.processedAt).toLocaleDateString() : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
