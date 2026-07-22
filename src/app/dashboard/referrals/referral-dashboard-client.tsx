@@ -29,7 +29,10 @@ export function ReferralDashboardClient() {
   useEffect(() => {
     fetch("/api/onboarding/referral")
       .then((r) => r.json())
-      .then(setData)
+      .then((json) => {
+        if (json.error || !json.referralCode) return
+        setData(json)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -43,7 +46,18 @@ export function ReferralDashboardClient() {
   }
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading...</div>
-  if (!data) return <div className="p-8 text-center text-gray-500">Could not load referral data</div>
+  if (!data) return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">My Referrals</h1>
+      </div>
+      <Card>
+        <CardContent className="py-12 text-center text-gray-500">
+          <p>No referral code found. Complete onboarding to get your referral link.</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
