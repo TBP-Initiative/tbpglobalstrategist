@@ -37,7 +37,7 @@ async function processPaymentComplete(userId: string, orderId: string, amount: s
 
   const referral = await prisma.referral.findFirst({ where: { referredUserId: userId } })
   if (referral) {
-    await prisma.referral.update({ where: { id: referral.id }, data: { status: "COMPLETED" } })
+    await prisma.referral.update({ where: { id: referral.id }, data: { status: "PAYMENT_RECEIVED" } })
 
     const credit = await prisma.referralCredit.findFirst({ where: { referralId: referral.id } })
     if (!credit) {
@@ -48,7 +48,7 @@ async function processPaymentComplete(userId: string, orderId: string, amount: s
         data: {
           userId: referral.referrerId,
           title: "Referral Bonus Pending!",
-          message: "Someone you referred has completed payment. You will receive a $50 reward once verified.",
+          message: "Someone you referred has completed payment. Your $50 reward is in a 21-day hold period.",
           type: "SYSTEM",
         },
       })

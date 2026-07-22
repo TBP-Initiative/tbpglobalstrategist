@@ -111,6 +111,8 @@ model User {
   referralsMade    Referral[]         @relation("Referrer")
   referralsReceived Referral[]        @relation("ReferredUser")
   referralCredits  ReferralCredit[]
+  referralWallet   ReferralWallet?
+  payoutRequests   PayoutRequest[]
 }
 
 model Account {
@@ -515,7 +517,7 @@ model Referral {
   referrerId      String
   referredUserId  String   @unique
   code            String
-  status          String   @default("PENDING") // PENDING, COMPLETED, EXPIRED
+  status          String   @default("PENDING_REGISTRATION") // PENDING_REGISTRATION, PAYMENT_RECEIVED, WAITING_APPROVAL, APPROVED, PAID, CANCELLED
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -529,17 +531,46 @@ model Referral {
 }
 
 model ReferralCredit {
-  id          String    @id @default(cuid())
-  userId      String
-  referralId  String    @unique
-  amount      Decimal   @default(50)
-  status      String    @default("PENDING") // PENDING, PAID, EXPIRED
-  paidAt      DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  userId          String
+  referralId      String    @unique
+  amount          Decimal   @default(50)
+  status          String    @default("PENDING") // PENDING, APPROVED, PAID, CANCELLED
+  approvedAt      DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model ReferralWallet {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  availableBalance Decimal @default(0)
+  paidBalance      Decimal @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PayoutRequest {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Decimal
+  method          String   // BANK_TRANSFER, PAYPAL
+  accountDetails  String   // JSON string with account info
+  status          String   @default("PENDING") // PENDING, APPROVED, PAID, REJECTED
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }

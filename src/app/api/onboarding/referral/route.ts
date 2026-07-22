@@ -48,7 +48,7 @@ export async function GET() {
       where: { referrerId: session.user.id },
       include: {
         referredUser: { select: { name: true, email: true, createdAt: true } },
-        credit: { select: { id: true, amount: true, status: true, paidAt: true, createdAt: true } },
+        credit: { select: { id: true, amount: true, status: true, paidAt: true, approvedAt: true } },
       },
       orderBy: { createdAt: "desc" },
     })
@@ -56,6 +56,10 @@ export async function GET() {
     const credits = await prisma.referralCredit.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
+    })
+
+    const wallet = await prisma.referralWallet.findUnique({
+      where: { userId: session.user.id },
     })
 
     const totalEarned = credits
@@ -66,13 +70,27 @@ export async function GET() {
       .filter((c) => c.status === "PENDING")
       .reduce((sum, c) => sum + Number(c.amount), 0)
 
+    const totalApproved = credits
+      .filter((c) => c.status === "APPROVED")
+      .reduce((sum, c) => sum + Number(c.amount), 0)
+
     return NextResponse.json({
       referralCode: user.referralCode,
       referralLink: `https://tbpglobalstrategist.vercel.app/onboarding?ref=${user.referralCode}`,
       totalReferrals: referrals.length,
-      completedReferrals: referrals.filter((r) => r.status === "COMPLETED").length,
+      completedReferrals: referrals.filter((r) => ["PAYMENT_RECEIVED", "WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
+      pendingReferrals: referrals.filter((r) => r.status === "PENDING_REGISTRATION").length,
+      qualifiedReferrals: referrals.filter((r) => ["WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
+      approvedReferrals: referrals.filter((r) => r.status === "APPROVED").length,
       totalEarned,
       totalPending,
+      totalApproved,
+      wallet: wallet
+        ? {
+            availableBalance: Number(wallet.availableBalance),
+            paidBalance: Number(wallet.paidBalance),
+          }
+        : { availableBalance: 0, paidBalance: 0 },
       referrals: referrals.map((r) => ({
         name: r.referredUser.name,
         email: r.referredUser.email,
@@ -83,6 +101,7 @@ export async function GET() {
               amount: Number(r.credit.amount),
               status: r.credit.status,
               paidAt: r.credit.paidAt,
+              approvedAt: r.credit.approvedAt,
             }
           : null,
       })),
