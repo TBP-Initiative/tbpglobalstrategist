@@ -203,6 +203,11 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
         <span>Your payment is secured with 256-bit SSL encryption</span>
       </div>
 
+      <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p className="text-xs text-gray-500">Business PayPal for direct transfers:</p>
+        <p className="mt-1 font-mono text-sm font-semibold text-gray-900">RIBI@TBPINITIATIVE.COM</p>
+      </div>
+
       {isTestMode && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-xs font-semibold text-amber-700 mb-2">Test Mode</p>
