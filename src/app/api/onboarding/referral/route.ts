@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import crypto from "crypto"
+
+function generateReferralCode(name: string): string {
+  const clean = name.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toUpperCase() || "USER"
+  const rand = crypto.randomBytes(3).toString("hex").toUpperCase()
+  return `TBP-${clean}-${rand}`
+}
 
 export const dynamic = "force-dynamic"
 
@@ -11,13 +18,30 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { referralCode: true },
+      select: { referralCode: true, name: true },
     })
 
-    if (!user?.referralCode) {
-      return NextResponse.json({ error: "No referral code" }, { status: 404 })
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Auto-generate referral code if missing (legacy users)
+    if (!user.referralCode) {
+      let code = generateReferralCode(user.name || "user")
+      let attempts = 0
+      while (attempts < 5) {
+        const exists = await prisma.user.findUnique({ where: { referralCode: code } })
+        if (!exists) break
+        code = generateReferralCode((user.name || "user") + attempts)
+        attempts++
+      }
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { referralCode: code },
+      })
+      user = { ...user, referralCode: code }
     }
 
     const referrals = await prisma.referral.findMany({
