@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { autoApproveReferralCredits } from "@/lib/referral-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -19,6 +20,8 @@ export async function GET() {
     if (user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
+
+    await autoApproveReferralCredits()
 
     const referrals = await prisma.referral.findMany({
       include: {
@@ -52,7 +55,7 @@ export async function GET() {
     return NextResponse.json({
       stats: {
         totalReferrals: referrals.length,
-        completedReferrals: referrals.filter((r) => ["PAYMENT_RECEIVED", "WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
+        completedReferrals: referrals.filter((r) => ["WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
         pendingReferrals: referrals.filter((r) => r.status === "PENDING_REGISTRATION").length,
         waitingApproval: referrals.filter((r) => r.status === "WAITING_APPROVAL").length,
         approvedReferrals: referrals.filter((r) => r.status === "APPROVED").length,
@@ -243,7 +246,7 @@ export async function PATCH(req: Request) {
       if (referral) {
         await prisma.referral.update({
           where: { id: referral.id },
-          data: { status: revertStatus === "APPROVED" ? "WAITING_APPROVAL" : "PAYMENT_RECEIVED" },
+          data: { status: revertStatus === "APPROVED" ? "WAITING_APPROVAL" : "WAITING_APPROVAL" },
         })
       }
 

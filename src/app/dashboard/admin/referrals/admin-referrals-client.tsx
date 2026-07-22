@@ -60,8 +60,7 @@ interface ReferralData {
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   PENDING_REGISTRATION: { label: "Pending Registration", color: "bg-gray-100 text-gray-600" },
-  PAYMENT_RECEIVED: { label: "Payment Received", color: "bg-blue-100 text-blue-600" },
-  WAITING_APPROVAL: { label: "Waiting Approval", color: "bg-yellow-100 text-yellow-600" },
+  WAITING_APPROVAL: { label: "In Hold (21 days)", color: "bg-yellow-100 text-yellow-600" },
   APPROVED: { label: "Approved", color: "bg-green-100 text-green-600" },
   PAID: { label: "Paid", color: "bg-emerald-100 text-emerald-600" },
   CANCELLED: { label: "Cancelled", color: "bg-red-100 text-red-600" },
@@ -325,9 +324,7 @@ export function AdminReferralsClient() {
                           {r.credit && (
                             <div className="flex gap-1">
                               {r.credit.status === "PENDING" && (
-                                <Button size="sm" variant="outline" onClick={() => doAction("approve-credit", r.credit!.id)} disabled={actionLoading === r.credit!.id} className="h-7 text-xs">
-                                  {actionLoading === r.credit!.id ? <Loader2 size={12} className="animate-spin" /> : "Approve"}
-                                </Button>
+                                <span className="text-[10px] text-gray-400 italic">Auto-approves in 21 days</span>
                               )}
                               {r.credit.status === "APPROVED" && (
                                 <Button size="sm" variant="outline" onClick={() => doAction("mark-paid", r.credit!.id)} disabled={actionLoading === r.credit!.id} className="h-7 text-xs">

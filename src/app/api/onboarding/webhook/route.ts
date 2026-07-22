@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         if (referral) {
           await prisma.referral.update({
             where: { id: referral.id },
-            data: { status: "PAYMENT_RECEIVED" },
+            data: { status: "WAITING_APPROVAL" },
           })
 
           const credit = await prisma.referralCredit.findFirst({
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
             await prisma.notification.create({
               data: {
                 userId: referral.referrerId,
-                title: "Referral Bonus Pending!",
+                title: "Referral Bonus in Hold Period",
                 message: "Someone you referred has completed payment. Your $50 reward is in a 21-day hold period.",
                 type: "SYSTEM",
               },

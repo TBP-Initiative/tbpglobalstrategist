@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { autoApproveReferralCredits } from "@/lib/referral-utils"
 import crypto from "crypto"
 
 function generateReferralCode(name: string): string {
@@ -17,6 +18,8 @@ export async function GET() {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    await autoApproveReferralCredits()
 
     let user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -78,7 +81,7 @@ export async function GET() {
       referralCode: user.referralCode,
       referralLink: `https://tbpglobalstrategist.vercel.app/onboarding?ref=${user.referralCode}`,
       totalReferrals: referrals.length,
-      completedReferrals: referrals.filter((r) => ["PAYMENT_RECEIVED", "WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
+      completedReferrals: referrals.filter((r) => ["WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
       pendingReferrals: referrals.filter((r) => r.status === "PENDING_REGISTRATION").length,
       qualifiedReferrals: referrals.filter((r) => ["WAITING_APPROVAL", "APPROVED", "PAID"].includes(r.status)).length,
       approvedReferrals: referrals.filter((r) => r.status === "APPROVED").length,
