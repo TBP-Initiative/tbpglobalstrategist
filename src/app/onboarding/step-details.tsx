@@ -65,6 +65,7 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [serverError, setServerError] = useState("")
 
   const update = (field: string, value: string) => setForm({ ...form, [field]: value })
 
@@ -105,13 +106,24 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
     return Object.keys(errs).length === 0
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return
+    setServerError("")
     const selectedAreas = [...areas]
     if (otherArea && areas.has("Other")) {
       selectedAreas[selectedAreas.indexOf("Other")] = `Other: ${otherArea}`
     }
-    onNext({ ...form, areasOfInterest: selectedAreas, otherArea })
+    try {
+      await onNext({ ...form, areasOfInterest: selectedAreas, otherArea })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : ""
+      if (msg.includes("already exists")) {
+        setErrors({ ...errors, email: msg })
+        setServerError("")
+      } else {
+        setServerError(msg || "Something went wrong. Please try again.")
+      }
+    }
   }
 
   return (
@@ -123,13 +135,18 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
       {!isLoggedIn && (
         <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50/50 p-5">
           <p className="text-sm font-semibold text-blue-900 mb-4">Create Your Account</p>
+          {serverError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {serverError}
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Label>Email Address *</Label>
               <Input
                 type="email"
                 value={form.email}
-                onChange={(e) => update("email", e.target.value)}
+                onChange={(e) => { update("email", e.target.value); if (errors.email) setErrors({ ...errors, email: "" }) }}
                 placeholder="you@example.com"
                 className="mt-1"
               />

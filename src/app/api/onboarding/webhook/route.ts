@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
         await prisma.user.update({
           where: { id: userId },
-          data: { role: "STRATEGIST" },
+          data: { role: "STRATEGIST", isActive: true },
         })
 
         await prisma.strategistProfile.upsert({

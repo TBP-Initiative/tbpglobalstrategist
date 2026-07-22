@@ -18,6 +18,11 @@ interface ReferralData {
     email: string
     status: string
     joinedAt: string
+    credit: {
+      amount: number
+      status: string
+      paidAt: string | null
+    } | null
   }>
 }
 
@@ -128,18 +133,57 @@ export function ReferralDashboardClient() {
               <p>No referrals yet. Share your link to get started!</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {data.referrals.map((r, i) => (
-                <div key={i} className="flex items-center justify-between rounded-lg border p-3">
-                  <div>
-                    <p className="font-medium">{r.name || r.email}</p>
-                    <p className="text-xs text-gray-400">{r.email}</p>
-                  </div>
-                  <Badge variant={r.status === "COMPLETED" ? "default" : "secondary"}>
-                    {r.status === "COMPLETED" ? "Completed" : "Pending"}
-                  </Badge>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-gray-500">
+                    <th className="pb-2">Referred User</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2">Reward</th>
+                    <th className="pb-2">Payment</th>
+                    <th className="pb-2">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.referrals.map((r, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="py-3">
+                        <p className="font-medium">{r.name || r.email}</p>
+                        <p className="text-xs text-gray-400">{r.email}</p>
+                      </td>
+                      <td className="py-3">
+                        <Badge variant={r.status === "COMPLETED" ? "default" : "secondary"}>
+                          {r.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3">
+                        {r.credit ? (
+                          <span className="font-semibold">${r.credit.amount}</span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        {r.credit ? (
+                          <Badge variant={r.credit.status === "PAID" ? "default" : "secondary"}>
+                            {r.credit.status === "PAID" ? "Paid" : "Pending"}
+                          </Badge>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                        {r.credit?.paidAt && (
+                          <p className="mt-0.5 text-[10px] text-gray-400">
+                            on {new Date(r.credit.paidAt).toLocaleDateString()}
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-3 text-xs text-gray-500">
+                        {new Date(r.joinedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>

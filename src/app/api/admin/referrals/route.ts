@@ -24,6 +24,7 @@ export async function GET() {
       include: {
         referrer: { select: { id: true, name: true, email: true } },
         referredUser: { select: { id: true, name: true, email: true, createdAt: true } },
+        credit: { select: { id: true, amount: true, status: true, paidAt: true } },
       },
       orderBy: { createdAt: "desc" },
     })
@@ -55,6 +56,14 @@ export async function GET() {
         status: r.status,
         code: r.code,
         createdAt: r.createdAt,
+        credit: r.credit
+          ? {
+              id: r.credit.id,
+              amount: Number(r.credit.amount),
+              status: r.credit.status,
+              paidAt: r.credit.paidAt,
+            }
+          : null,
       })),
       credits: credits.map((c) => ({
         id: c.id,

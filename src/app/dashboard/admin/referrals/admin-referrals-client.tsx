@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, DollarSign, Gift, Clock, CheckCircle, Loader2 } from "lucide-react"
+import { Users, DollarSign, Gift, Clock, CheckCircle, Loader2, KeyRound } from "lucide-react"
 
 interface ReferralData {
   stats: {
@@ -23,6 +23,12 @@ interface ReferralData {
     status: string
     code: string
     createdAt: string
+    credit: {
+      id: string
+      amount: number
+      status: string
+      paidAt: string | null
+    } | null
   }>
   credits: Array<{
     id: string
@@ -39,6 +45,7 @@ export function AdminReferralsClient() {
   const [data, setData] = useState<ReferralData | null>(null)
   const [loading, setLoading] = useState(true)
   const [markingPaid, setMarkingPaid] = useState<string | null>(null)
+  const [generating, setGenerating] = useState(false)
 
   const fetchData = () => {
     fetch("/api/admin/referrals")
@@ -51,6 +58,22 @@ export function AdminReferralsClient() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  const generateAllCodes = async () => {
+    setGenerating(true)
+    try {
+      const res = await fetch("/api/admin/referrals/generate-codes", { method: "POST" })
+      const result = await res.json()
+      if (result.success) {
+        alert(`Generated ${result.generated} referral codes for ${result.total} users.`)
+        fetchData()
+      }
+    } catch {
+      alert("Failed to generate codes")
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   const markAsPaid = async (creditId: string) => {
     setMarkingPaid(creditId)
@@ -89,7 +112,13 @@ export function AdminReferralsClient() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Referral Management</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Referral Management</h1>
+        <Button onClick={generateAllCodes} disabled={generating} variant="outline" className="gap-2">
+          {generating ? <Loader2 size={14} className="animate-spin" /> : <KeyRound size={14} />}
+          Generate Missing Codes
+        </Button>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Card>
@@ -145,6 +174,8 @@ export function AdminReferralsClient() {
                     <th className="pb-2">Referred User</th>
                     <th className="pb-2">Code</th>
                     <th className="pb-2">Status</th>
+                    <th className="pb-2">Reward</th>
+                    <th className="pb-2">Payment</th>
                     <th className="pb-2">Date</th>
                   </tr>
                 </thead>
@@ -164,6 +195,54 @@ export function AdminReferralsClient() {
                         <Badge variant={r.status === "COMPLETED" ? "default" : "secondary"}>
                           {r.status}
                         </Badge>
+                      </td>
+                      <td className="py-3">
+                        {r.credit ? (
+                          <span className="font-semibold">${r.credit.amount}</span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        {r.credit ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant={r.credit.status === "PAID" ? "default" : "secondary"}>
+                              {r.credit.status === "PAID" ? "Paid" : "Pending"}
+                            </Badge>
+                            {r.credit.status === "PENDING" ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => markAsPaid(r.credit!.id)}
+                                disabled={markingPaid === r.credit!.id}
+                                className="h-6 text-[10px] px-2"
+                              >
+                                {markingPaid === r.credit!.id ? (
+                                  <Loader2 size={10} className="animate-spin" />
+                                ) : (
+                                  "Mark Paid"
+                                )}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => markAsUnpaid(r.credit!.id)}
+                                disabled={markingPaid === r.credit!.id}
+                                className="h-6 text-[10px] px-2"
+                              >
+                                Revert
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                        {r.credit?.paidAt && (
+                          <p className="mt-0.5 text-[10px] text-gray-400">
+                            on {new Date(r.credit.paidAt).toLocaleDateString()}
+                          </p>
+                        )}
                       </td>
                       <td className="py-3 text-xs text-gray-500">
                         {new Date(r.createdAt).toLocaleDateString()}

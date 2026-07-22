@@ -46,7 +46,10 @@ export async function GET() {
 
     const referrals = await prisma.referral.findMany({
       where: { referrerId: session.user.id },
-      include: { referredUser: { select: { name: true, email: true, createdAt: true } } },
+      include: {
+        referredUser: { select: { name: true, email: true, createdAt: true } },
+        credit: { select: { id: true, amount: true, status: true, paidAt: true, createdAt: true } },
+      },
       orderBy: { createdAt: "desc" },
     })
 
@@ -75,6 +78,13 @@ export async function GET() {
         email: r.referredUser.email,
         status: r.status,
         joinedAt: r.referredUser.createdAt,
+        credit: r.credit
+          ? {
+              amount: Number(r.credit.amount),
+              status: r.credit.status,
+              paidAt: r.credit.paidAt,
+            }
+          : null,
       })),
     })
   } catch (err) {

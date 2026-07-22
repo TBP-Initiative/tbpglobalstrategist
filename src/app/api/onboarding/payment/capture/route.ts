@@ -17,7 +17,7 @@ async function processPaymentComplete(userId: string, orderId: string, amount: s
 
   await prisma.user.update({
     where: { id: userId },
-    data: { role: "STRATEGIST" },
+    data: { role: "STRATEGIST", isActive: true },
   })
 
   await prisma.strategistProfile.upsert({

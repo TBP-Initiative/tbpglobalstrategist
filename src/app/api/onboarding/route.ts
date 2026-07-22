@@ -77,6 +77,7 @@ export async function POST(req: Request) {
           email: data.email,
           passwordHash,
           role: "STRATEGIST",
+          isActive: false,
           referralCode,
           strategistProfile: { create: { stage: "CANDIDATE" } },
         },
