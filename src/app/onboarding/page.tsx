@@ -67,7 +67,7 @@ function OnboardingContent() {
     await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ step: 7 }),
+      body: JSON.stringify({ step: 7, paymentProvider: "STRIPE" }),
     })
   }
 

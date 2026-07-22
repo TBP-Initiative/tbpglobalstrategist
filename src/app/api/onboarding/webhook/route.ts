@@ -25,6 +25,7 @@ export async function POST(req: Request) {
           data: {
             status: "COMPLETED",
             paymentStatus: "COMPLETED",
+            paymentReference: session.id,
             paidAt: new Date(),
           },
         })
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
               data: {
                 userId: referral.referrerId,
                 title: "Referral Bonus in Hold Period",
-                message: "Someone you referred has completed payment. Your $50 reward is in a 21-day hold period.",
+                message: "Someone you referred has completed payment. Your $50 reward is in a 14-day hold period.",
                 type: "SYSTEM",
               },
             })

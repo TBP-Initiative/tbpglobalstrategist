@@ -48,7 +48,7 @@ async function processPaymentComplete(userId: string, orderId: string, amount: s
         data: {
           userId: referral.referrerId,
           title: "Referral Bonus in Hold Period",
-          message: "Someone you referred has completed payment. Your $50 reward is in a 21-day hold period before it becomes available.",
+          message: "Someone you referred has completed payment. Your $50 reward is in a 14-day hold period before it becomes available.",
           type: "SYSTEM",
         },
       })

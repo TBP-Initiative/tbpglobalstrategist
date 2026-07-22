@@ -210,9 +210,16 @@ function mapStepData(step: number, data: Record<string, unknown>) {
       break
     case 6:
       mapped.status = "PENDING_PAYMENT"
+      if (data.paymentProvider) mapped.paymentProvider = data.paymentProvider
+      if (data.paymentReference) mapped.paymentReference = data.paymentReference
+      if (data.paymentAmount) mapped.paymentAmount = data.paymentAmount
       break
     case 7:
       mapped.status = "COMPLETED"
+      if (data.paymentReference) mapped.paymentReference = data.paymentReference
+      if (data.paymentAmount) mapped.paymentAmount = data.paymentAmount
+      if (data.paymentProvider) mapped.paymentProvider = data.paymentProvider
+      mapped.paidAt = new Date()
       break
   }
 

@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, CreditCard, Shield, Loader2 } from "lucide-react"
+import { ChevronLeft, CreditCard, Shield, Loader2, AlertCircle } from "lucide-react"
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 
 interface StepPaymentProps {
@@ -15,12 +15,22 @@ interface StepPaymentProps {
 
 export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: StepPaymentProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [provider, setProvider] = useState<"STRIPE" | "PAYPAL" | "">("")
   const [loading, setLoading] = useState(false)
   const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
   const [paypalError, setPaypalError] = useState<string | null>(null)
+  const [cancelled, setCancelled] = useState(false)
   const pathway = pathwayProp || (data?.pathway as string) || "STANDARD"
   const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
+  const isTestMode = process.env.NODE_ENV !== "production" || !!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+
+  useEffect(() => {
+    if (searchParams.get("cancelled") === "true") {
+      setCancelled(true)
+      router.replace("/onboarding?step=6")
+    }
+  }, [searchParams, router])
 
   useEffect(() => {
     fetch("/api/onboarding/payment")
@@ -31,15 +41,18 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
 
   const handleStripe = async () => {
     setLoading(true)
+    setCancelled(false)
     try {
       const res = await fetch("/api/onboarding/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider: "STRIPE", pathway }),
       })
-      const { url } = await res.json()
+      const { url, error } = await res.json()
       if (url) window.location.href = url
-    } finally {
+      else if (error) { setPaypalError(error); setLoading(false) }
+    } catch {
+      setPaypalError("Failed to initiate payment. Please try again.")
       setLoading(false)
     }
   }
@@ -48,6 +61,13 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h2 className="text-xl font-bold text-gray-900">Payment</h2>
       <p className="mt-1 text-sm text-gray-500">Section 6 of the Agreement / Programme Terms Form</p>
+
+      {cancelled && (
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+          <AlertCircle size={18} />
+          <span>Payment was cancelled. Please try again or choose a different method.</span>
+        </div>
+      )}
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50/50 p-5">
         <div className="flex items-center justify-between">
@@ -66,7 +86,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
 
         <button
           type="button"
-          onClick={() => setProvider("STRIPE")}
+          onClick={() => { setProvider("STRIPE"); setPaypalError(null); setCancelled(false) }}
           className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
             provider === "STRIPE" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-gray-300"
           }`}
@@ -82,7 +102,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
 
         <button
           type="button"
-          onClick={() => setProvider("PAYPAL")}
+          onClick={() => { setProvider("PAYPAL"); setPaypalError(null); setCancelled(false) }}
           className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
             provider === "PAYPAL" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-gray-300"
           }`}
@@ -143,17 +163,17 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
                   const captureData = await captureRes.json()
                   if (captureData.error) {
                     setPaypalError(captureData.error)
+                    setLoading(false)
                     return
                   }
                   await fetch("/api/onboarding", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ step: 7, paymentReference: details.orderID }),
+                    body: JSON.stringify({ step: 7, paymentReference: details.orderID, paymentAmount: amount, paymentProvider: "PAYPAL" }),
                   })
-                  onNext({})
+                  onNext({ paymentReference: details.orderID, paymentAmount: amount, paymentProvider: "PAYPAL" })
                 } catch {
                   setPaypalError("Payment capture failed. Please try again.")
-                } finally {
                   setLoading(false)
                 }
               }}
@@ -183,9 +203,10 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
         <span>Your payment is secured with 256-bit SSL encryption</span>
       </div>
 
-      {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+      {isTestMode && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-xs font-semibold text-amber-700 mb-2">Test Mode</p>
+          <p className="text-xs text-amber-600 mb-3">Skip payment to test the onboarding flow without real charges.</p>
           <Button
             variant="outline"
             size="sm"
@@ -201,17 +222,17 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
                 const data = await res.json()
                 if (data.error) {
                   setPaypalError(data.error)
+                  setLoading(false)
                   return
                 }
                 await fetch("/api/onboarding", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ step: 7, paymentReference: "TEST-MOCK-" + Date.now() }),
+                  body: JSON.stringify({ step: 7, paymentReference: "TEST-MOCK-" + Date.now(), paymentAmount: amount, paymentProvider: "TEST" }),
                 })
-                onNext({})
+                onNext({ paymentReference: "TEST-MOCK-" + Date.now(), paymentAmount: amount, paymentProvider: "TEST" })
               } catch {
                 setPaypalError("Test payment failed.")
-              } finally {
                 setLoading(false)
               }
             }}
