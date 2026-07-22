@@ -44,7 +44,11 @@ export async function GET() {
     })
 
     const payoutRequests = await prisma.payoutRequest.findMany({
-      include: { user: { select: { name: true, email: true } } },
+      include: {
+        user: { select: { name: true, email: true } },
+        paymentMethod: true,
+        auditLogs: { include: { user: { select: { name: true, email: true } } }, orderBy: { createdAt: "desc" } },
+      },
       orderBy: { createdAt: "desc" },
     })
 
@@ -107,8 +111,28 @@ export async function GET() {
         method: p.method,
         accountDetails: p.accountDetails,
         status: p.status,
+        transactionRef: p.transactionRef,
         createdAt: p.createdAt,
         processedAt: p.processedAt,
+        paidAt: p.paidAt,
+        paymentMethod: p.paymentMethod
+          ? {
+              type: p.paymentMethod.type,
+              label: p.paymentMethod.label,
+              paypalEmail: p.paymentMethod.paypalEmail,
+              accountHolder: p.paymentMethod.accountHolder,
+              bankName: p.paymentMethod.bankName,
+            }
+          : null,
+        auditLogs: p.auditLogs.map((log) => ({
+          id: log.id,
+          action: log.action,
+          details: log.details,
+          transactionRef: log.transactionRef,
+          userName: log.user.name,
+          userEmail: log.user.email,
+          createdAt: log.createdAt,
+        })),
       })),
     })
   } catch (err) {
@@ -255,6 +279,7 @@ export async function PATCH(req: Request) {
 
     // Process payout request
     if (action === "process-payout" && payoutRequestId) {
+      const { transactionRef } = body
       const payout = await prisma.payoutRequest.findUnique({ where: { id: payoutRequestId } })
       if (!payout || payout.status !== "PENDING") {
         return NextResponse.json({ error: "Invalid payout request" }, { status: 400 })
@@ -262,10 +287,9 @@ export async function PATCH(req: Request) {
 
       await prisma.payoutRequest.update({
         where: { id: payoutRequestId },
-        data: { status: "PAID", processedAt: new Date() },
+        data: { status: "PAID", processedAt: new Date(), paidAt: new Date(), processedById: session.user.id, transactionRef: transactionRef || null },
       })
 
-      // Deduct from wallet
       await prisma.referralWallet.update({
         where: { userId: payout.userId },
         data: {
@@ -274,11 +298,21 @@ export async function PATCH(req: Request) {
         },
       })
 
+      await prisma.payoutAuditLog.create({
+        data: {
+          payoutRequestId,
+          userId: session.user.id,
+          action: "PAID",
+          details: JSON.stringify({ amount: Number(payout.amount), method: payout.method }),
+          transactionRef: transactionRef || null,
+        },
+      })
+
       await prisma.notification.create({
         data: {
           userId: payout.userId,
           title: "Payout Processed!",
-          message: `Your payout of $${Number(payout.amount)} via ${payout.method} has been processed.`,
+          message: `Your payout of $${Number(payout.amount)} via ${payout.method} has been processed.${transactionRef ? ` Transaction ref: ${transactionRef}` : ""}`,
           type: "SYSTEM",
         },
       })
@@ -288,6 +322,7 @@ export async function PATCH(req: Request) {
 
     // Reject payout request
     if (action === "reject-payout" && payoutRequestId) {
+      const { reason } = body
       const payout = await prisma.payoutRequest.findUnique({ where: { id: payoutRequestId } })
       if (!payout || payout.status !== "PENDING") {
         return NextResponse.json({ error: "Invalid payout request" }, { status: 400 })
@@ -295,20 +330,28 @@ export async function PATCH(req: Request) {
 
       await prisma.payoutRequest.update({
         where: { id: payoutRequestId },
-        data: { status: "REJECTED", processedAt: new Date() },
+        data: { status: "REJECTED", processedAt: new Date(), processedById: session.user.id },
       })
 
-      // Return funds to wallet
       await prisma.referralWallet.update({
         where: { userId: payout.userId },
         data: { availableBalance: { increment: Number(payout.amount) } },
+      })
+
+      await prisma.payoutAuditLog.create({
+        data: {
+          payoutRequestId,
+          userId: session.user.id,
+          action: "REJECTED",
+          details: JSON.stringify({ reason: reason || "No reason provided", amount: Number(payout.amount) }),
+        },
       })
 
       await prisma.notification.create({
         data: {
           userId: payout.userId,
           title: "Payout Request Rejected",
-          message: `Your payout request of $${Number(payout.amount)} has been rejected. Funds returned to your wallet.`,
+          message: `Your payout request of $${Number(payout.amount)} has been rejected.${reason ? ` Reason: ${reason}` : ""} Funds returned to your wallet.`,
           type: "SYSTEM",
         },
       })

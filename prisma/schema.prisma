@@ -113,6 +113,8 @@ model User {
   referralCredits  ReferralCredit[]
   referralWallet   ReferralWallet?
   payoutRequests   PayoutRequest[]
+  paymentMethods   PaymentMethod[]
+  payoutAuditLogs  PayoutAuditLog[]
 }
 
 model Account {
@@ -559,18 +561,69 @@ model ReferralWallet {
 }
 
 model PayoutRequest {
-  id              String   @id @default(cuid())
-  userId          String
-  amount          Decimal
-  method          String   // BANK_TRANSFER, PAYPAL
-  accountDetails  String   // JSON string with account info
-  status          String   @default("PENDING") // PENDING, APPROVED, PAID, REJECTED
-  processedAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String    @id @default(cuid())
+  userId            String
+  paymentMethodId   String?
+  amount            Decimal
+  method            String   // BANK_TRANSFER, PAYPAL
+  accountDetails    String   // JSON string with account info
+  status            String   @default("PENDING") // PENDING, APPROVED, PAID, REJECTED
+  transactionRef    String?  // Transaction reference after payment
+  processedAt       DateTime?
+  paidAt            DateTime?
+  processedById     String?  // Admin who approved/processed
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  auditLogs     PayoutAuditLog[]
 
   @@index([userId])
   @@index([status])
+}
+
+model PaymentMethod {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   // BANK_TRANSFER, PAYPAL
+  isDefault     Boolean  @default(false)
+  label         String?  // e.g. "My PayPal", "Business Account"
+  
+  // PayPal fields
+  paypalEmail   String?
+  
+  // Bank Transfer fields
+  accountHolder String?
+  bankName      String?
+  accountNumber String?
+  routingNumber String?
+  swiftCode     String?
+  iban          String?
+  country       String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payoutRequests PayoutRequest[]
+
+  @@index([userId])
+}
+
+model PayoutAuditLog {
+  id              String   @id @default(cuid())
+  payoutRequestId String
+  userId          String   // Who performed the action
+  action          String   // CREATED, APPROVED, REJECTED, PAID, REVERTED
+  details         String?  // JSON with additional details
+  transactionRef  String?  // Transaction reference
+  createdAt       DateTime @default(now())
+
+  payoutRequest PayoutRequest @relation(fields: [payoutRequestId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([payoutRequestId])
+  @@index([userId])
+  @@index([action])
 }
