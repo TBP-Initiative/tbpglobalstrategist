@@ -50,8 +50,6 @@ export function StepAgreement({ data, pathway, onNext, onBack, saving }: StepAgr
     agreedToAccurate: (data?.agreedToAccurate as boolean) || false,
     agreedToRefund: (data?.agreedToRefund as boolean) || false,
   })
-  const [visibility, setVisibility] = useState((data?.profileVisibility as string) || "PUBLIC")
-
   const allChecked = Object.values(checks).every(Boolean)
   const isValid = signature.length >= 2 && allChecked
 
@@ -62,34 +60,7 @@ export function StepAgreement({ data, pathway, onNext, onBack, saving }: StepAgr
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h2 className="text-xl font-bold text-gray-900">Agreement Confirmation</h2>
-      <p className="mt-1 text-sm text-gray-500">Sections 12, 24 &amp; 25 of the Agreement / Programme Terms Form</p>
-
-      {/* Profile Visibility */}
-      <div className="mt-6 rounded-xl border border-gray-200 p-5">
-        <Label className="text-sm font-semibold">Profile Visibility Preference</Label>
-        <p className="mt-1 text-xs text-gray-500">Section 12: Choose whether your profile should be public, private, or approved before going public.</p>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {[
-            { value: "PUBLIC", label: "Public" },
-            { value: "PRIVATE", label: "Private only" },
-            { value: "APPROVAL", label: "Public after approval" },
-            { value: "TBD", label: "To be decided" },
-          ].map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setVisibility(opt.value)}
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                visibility === opt.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <p className="mt-1 text-sm text-gray-500">Sections 24 &amp; 25 of the Agreement / Programme Terms Form</p>
 
       {/* Acknowledgements */}
       <div className="mt-6 space-y-3">
@@ -145,7 +116,6 @@ export function StepAgreement({ data, pathway, onNext, onBack, saving }: StepAgr
             agreedToNoClaim: checks.agreedToNoClaim,
             agreedToAccurate: checks.agreedToAccurate,
             agreedToRefund: checks.agreedToRefund,
-            profileVisibility: visibility,
           })}
           disabled={!isValid || saving}
           className="rounded-full px-8"
