@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     const plan = pathway === "PLUS" ? PLANS.PLUS : PLANS.STANDARD
 
-    const paypalRes = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+    const paypalRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

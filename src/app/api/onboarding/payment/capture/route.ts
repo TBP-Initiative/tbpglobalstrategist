@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ...result, captureId: "TEST-MOCK" })
     }
 
-    const captureRes = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+    const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
