@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -66,6 +66,28 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
   const [showConfirm, setShowConfirm] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState("")
+
+  useEffect(() => {
+    if (!data) return
+    setForm((prev) => ({
+      ...prev,
+      fullName: (data.fullName as string) || prev.fullName,
+      preferredName: (data.preferredName as string) || prev.preferredName,
+      phoneNumber: (data.phoneNumber as string) || prev.phoneNumber,
+      city: (data.city as string) || prev.city,
+      country: (data.country as string) || prev.country,
+      linkedinUrl: (data.linkedinUrl as string) || prev.linkedinUrl,
+      currentStatus: (data.currentStatus as string) || prev.currentStatus,
+      email: (data.email as string) || prev.email,
+      referralCode: refParam || (data.referralCode as string) || prev.referralCode,
+    }))
+    if (data.areasOfInterest) {
+      setAreas(new Set(data.areasOfInterest as string[]))
+    }
+    if (data.otherArea) {
+      setOtherArea(data.otherArea as string)
+    }
+  }, [data, refParam])
 
   const update = (field: string, value: string) => setForm({ ...form, [field]: value })
 

@@ -75,16 +75,16 @@ export async function POST(req: Request) {
     try {
       const existing = await prisma.user.findUnique({
         where: { email: data.email },
-        include: { onboardingSubmission: true },
+        include: { onboarding: true },
       })
 
       if (existing) {
-        if (existing.onboardingSubmission && existing.onboardingSubmission.status !== "COMPLETED") {
+        if (existing.onboarding && existing.onboarding.status !== "COMPLETED") {
           const passwordValid = await bcrypt.compare(data.password, existing.passwordHash || "")
           if (!passwordValid) {
             return NextResponse.json({ error: "Password does not match. Please use the correct password to continue your onboarding.", needsSignIn: false }, { status: 401 })
           }
-          return NextResponse.json({ userId: existing.id, needsSignIn: true, email: data.email, currentStep: existing.onboardingSubmission.currentStep || 1 })
+          return NextResponse.json({ userId: existing.id, needsSignIn: true, email: data.email, currentStep: existing.onboarding.currentStep || 1 })
         } else {
           return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
         }

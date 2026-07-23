@@ -94,6 +94,16 @@ function OnboardingContent() {
           throw new Error("Sign in failed. Please try again.")
         }
         setIsLoggedIn(true)
+        // Refetch onboarding data to get saved fields for returning user
+        const refetchRes = await fetch("/api/onboarding")
+        const refetchData = await refetchRes.json()
+        if (refetchData && !refetchData.error) {
+          setOnboarding(refetchData)
+          if (refetchData.currentStep && refetchData.currentStep > 1) {
+            setCurrentStep(refetchData.currentStep)
+          }
+          return
+        }
       }
 
       setOnboarding(data)
