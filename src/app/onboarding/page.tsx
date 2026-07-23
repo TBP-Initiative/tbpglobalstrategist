@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { signIn } from "next-auth/react"
 import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StepDetails } from "./step-details"
@@ -81,6 +82,20 @@ function OnboardingContent() {
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
+
+      // Step 1 returns needsSignIn — authenticate client-side
+      if (data.needsSignIn && stepData.email && stepData.password) {
+        const signInResult = await signIn("credentials", {
+          email: stepData.email as string,
+          password: stepData.password as string,
+          redirect: false,
+        })
+        if (signInResult?.error) {
+          throw new Error("Sign in failed. Please try again.")
+        }
+        setIsLoggedIn(true)
+      }
+
       setOnboarding(data)
       if (data.isLoggedIn !== undefined) setIsLoggedIn(data.isLoggedIn)
     } finally {

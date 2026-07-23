@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth, signIn } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
@@ -35,7 +35,7 @@ export async function GET() {
     return NextResponse.json(result)
   } catch (err) {
     console.error("GET /api/onboarding error:", err)
-    return NextResponse.json({ error: "Failed" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to load onboarding" }, { status: 500 })
   }
 }
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     let userId = session?.user?.id
 
-    // Step 1 without session → create account + sign in
+    // Step 1 without session → create account (NO server-side signIn)
     if (step === 1 && !userId) {
       if (!data.email || !data.password) {
         return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
@@ -60,86 +60,86 @@ export async function POST(req: Request) {
 
       if (existing) {
         if (existing.onboardingSubmission && existing.onboardingSubmission.status !== "COMPLETED") {
-          // User exists with incomplete onboarding — sign them in to continue
-          try {
-            const signInResult = await signIn("credentials", {
-              email: data.email,
-              password: data.password,
-              redirect: false,
-            })
-            if (signInResult?.error) {
-              return NextResponse.json({ error: "Password does not match. Please use the correct password to continue your onboarding." }, { status: 401 })
-            }
-          } catch {
-            // signIn may throw — user exists, that's what matters
+          // User exists with incomplete onboarding — verify password matches
+          const passwordValid = await bcrypt.compare(data.password, existing.passwordHash || "")
+          if (!passwordValid) {
+            return NextResponse.json({ error: "Password does not match. Please use the correct password to continue your onboarding.", needsSignIn: false }, { status: 401 })
           }
-          userId = existing.id
+          // Return success with flag so client knows to sign in
+          return NextResponse.json({ userId: existing.id, needsSignIn: true, email: data.email, currentStep: existing.onboardingSubmission.currentStep || 1 })
         } else {
           return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
         }
-      } else {
-        // New user — create account
-        const passwordHash = await bcrypt.hash(data.password, 12)
-        let referralCode = generateReferralCode(data.fullName || "user")
-        let attempts = 0
-        while (attempts < 10) {
-          const exists = await prisma.user.findUnique({ where: { referralCode } })
-          if (!exists) break
-          referralCode = generateReferralCode((data.fullName || "user") + attempts)
-          attempts++
-        }
-
-        const user = await prisma.user.create({
-          data: {
-            name: data.fullName,
-            email: data.email,
-            passwordHash,
-            role: "STRATEGIST",
-            isActive: false,
-            referralCode,
-            strategistProfile: { create: { stage: "CANDIDATE" } },
-          },
-          select: { id: true, name: true },
-        })
-
-        await prisma.notification.create({
-          data: {
-            userId: user.id,
-            title: "Welcome to TBP Global Strategist",
-            message: `Hi ${user.name ?? "there"}! Your account has been created. Complete your fellowship agreement to get started.`,
-            link: "/onboarding",
-          },
-        })
-
-        // Handle referral code
-        if (data.referralCode) {
-          const referrer = await prisma.user.findUnique({
-            where: { referralCode: data.referralCode },
-          })
-          if (referrer && referrer.id !== user.id) {
-            await prisma.referral.create({
-              data: {
-                referrerId: referrer.id,
-                referredUserId: user.id,
-                code: data.referralCode,
-              },
-            })
-          }
-        }
-
-        // Auto sign in
-        try {
-          await signIn("credentials", {
-            email: data.email,
-            password: data.password,
-            redirect: false,
-          })
-        } catch {
-          // signIn may throw — user was created, that's what matters
-        }
-
-        userId = user.id
       }
+
+      // New user — create account
+      const passwordHash = await bcrypt.hash(data.password, 12)
+      let referralCode = generateReferralCode(data.fullName || "user")
+      let attempts = 0
+      while (attempts < 10) {
+        const exists = await prisma.user.findUnique({ where: { referralCode } })
+        if (!exists) break
+        referralCode = generateReferralCode((data.fullName || "user") + attempts)
+        attempts++
+      }
+
+      const user = await prisma.user.create({
+        data: {
+          name: data.fullName,
+          email: data.email,
+          passwordHash,
+          role: "STRATEGIST",
+          isActive: false,
+          referralCode,
+          strategistProfile: { create: { stage: "CANDIDATE" } },
+        },
+        select: { id: true, name: true },
+      })
+
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: "Welcome to TBP Global Strategist",
+          message: `Hi ${user.name ?? "there"}! Your account has been created. Complete your fellowship agreement to get started.`,
+          link: "/onboarding",
+        },
+      })
+
+      // Handle referral code
+      if (data.referralCode) {
+        const referrer = await prisma.user.findUnique({
+          where: { referralCode: data.referralCode },
+        })
+        if (referrer && referrer.id !== user.id) {
+          await prisma.referral.create({
+            data: {
+              referrerId: referrer.id,
+              referredUserId: user.id,
+              code: data.referralCode,
+            },
+          })
+        }
+      }
+
+      // Create onboarding submission
+      const stepData = mapStepData(step, data)
+      const submission = await prisma.onboardingSubmission.create({
+        data: {
+          userId: user.id,
+          currentStep: step || 1,
+          ...stepData,
+        },
+      })
+
+      // Return success with needsSignIn flag — client handles authentication
+      return NextResponse.json({
+        userId: user.id,
+        needsSignIn: true,
+        email: data.email,
+        ...submission,
+        areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
+        isLoggedIn: false,
+      })
     }
 
     if (!userId) {
@@ -181,7 +181,7 @@ export async function POST(req: Request) {
     return NextResponse.json(result)
   } catch (err) {
     console.error("POST /api/onboarding error:", err)
-    return NextResponse.json({ error: "Failed" }, { status: 500 })
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 })
   }
 }
 

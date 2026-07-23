@@ -9,12 +9,14 @@ export default async function AdminUsersPage() {
 
   const [users, totalUsers] = await Promise.all([
     prisma.user.findMany({
+      where: { isActive: true },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
         image: true,
+        isActive: true,
         createdAt: true,
         strategistProfile: { select: { stage: true } },
         workAreaAssignments: {
@@ -24,7 +26,7 @@ export default async function AdminUsersPage() {
       },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.user.count(),
+    prisma.user.count({ where: { isActive: true } }),
   ])
 
   const serialized = users.map((u) => ({

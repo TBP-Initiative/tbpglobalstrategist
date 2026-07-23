@@ -8,12 +8,13 @@ export default async function AdminDashboardPage() {
   if (!session?.user || session.user.role !== "ADMIN") redirect("/dashboard")
 
   const [userCount, projectCount, orgCount, messages, activityLogs, recentUsers, recentProjects, queueItems] = await Promise.all([
-    prisma.user.count(),
+    prisma.user.count({ where: { isActive: true } }),
     prisma.project.count(),
     prisma.organization.count(),
     prisma.message.count(),
     prisma.activityLog.count(),
     prisma.user.findMany({
+      where: { isActive: true },
       take: 8,
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { createdProjects: true } } },
@@ -24,14 +25,14 @@ export default async function AdminDashboardPage() {
       select: { id: true, title: true, status: true, budget: true, createdAt: true, createdBy: { select: { name: true } }, organization: { select: { name: true } } },
     }),
     prisma.user.findMany({
-      where: { role: "STRATEGIST" },
+      where: { role: "STRATEGIST", isActive: true },
       take: 4,
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, role: true, createdAt: true, strategistProfile: { select: { title: true } } },
     }),
   ])
 
-  const strategistCount = await prisma.user.count({ where: { role: "STRATEGIST" } })
+  const strategistCount = await prisma.user.count({ where: { role: "STRATEGIST", isActive: true } })
   const activeProjects = await prisma.project.count({ where: { status: "ACTIVE" } })
   const completedProjects = await prisma.project.count({ where: { status: "COMPLETED" } })
 
