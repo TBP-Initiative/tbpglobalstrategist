@@ -120,6 +120,9 @@ export function StepDetails({ data, isLoggedIn, referralCode: refParam, onNext, 
       if (msg.includes("already exists")) {
         setErrors({ ...errors, email: msg })
         setServerError("")
+      } else if (msg.includes("Password does not match")) {
+        setErrors({ ...errors, password: msg })
+        setServerError("")
       } else {
         setServerError(msg || "Something went wrong. Please try again.")
       }

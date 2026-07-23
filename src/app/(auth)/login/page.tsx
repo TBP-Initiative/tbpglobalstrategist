@@ -58,8 +58,8 @@ export default function LoginPage() {
       const checkData = await checkRes.json()
 
       if (checkRes.ok && checkData.inactive) {
-        toast.error("Your account is not yet active. Please complete onboarding and payment first.")
-        setIsLoading(false)
+        toast.info("Please complete your onboarding and payment to activate your account.")
+        router.push("/onboarding")
         return
       }
 

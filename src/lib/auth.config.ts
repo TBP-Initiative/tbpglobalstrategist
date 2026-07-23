@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export const authConfig: NextAuthConfig = {
   pages: {
@@ -18,7 +19,13 @@ export const authConfig: NextAuthConfig = {
       }
 
       if (isOnDashboard || isOnAdmin) {
-        if (isLoggedIn) return true;
+        if (isLoggedIn) {
+          const isActive = (auth?.user as Record<string, unknown>)?.isActive;
+          if (!isActive) {
+            return NextResponse.redirect(new URL("/onboarding", nextUrl));
+          }
+          return true;
+        }
         return false;
       }
 
@@ -28,10 +35,23 @@ export const authConfig: NextAuthConfig = {
 
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.isActive = (user as Record<string, unknown>).isActive as boolean;
+      }
+      // If token says inactive, check DB (handles post-payment activation)
+      if (!token.isActive && token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { isActive: true },
+          });
+          if (dbUser?.isActive) {
+            token.isActive = true;
+          }
+        } catch {}
       }
       return token;
     },
@@ -39,6 +59,7 @@ export const authConfig: NextAuthConfig = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        (session.user as Record<string, unknown>).isActive = token.isActive as boolean;
       }
       return session;
     },

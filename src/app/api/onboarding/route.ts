@@ -55,75 +55,91 @@ export async function POST(req: Request) {
 
       const existing = await prisma.user.findUnique({
         where: { email: data.email },
+        include: { onboardingSubmission: true },
       })
 
       if (existing) {
-        return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
-      }
-
-      const passwordHash = await bcrypt.hash(data.password, 12)
-      let referralCode = generateReferralCode(data.fullName || "user")
-      let attempts = 0
-      while (attempts < 10) {
-        const exists = await prisma.user.findUnique({ where: { referralCode } })
-        if (!exists) break
-        referralCode = generateReferralCode((data.fullName || "user") + attempts)
-        attempts++
-      }
-
-      const user = await prisma.user.create({
-        data: {
-          name: data.fullName,
-          email: data.email,
-          passwordHash,
-          role: "STRATEGIST",
-          isActive: false,
-          referralCode,
-          strategistProfile: { create: { stage: "CANDIDATE" } },
-        },
-        select: { id: true, name: true },
-      })
-
-      await prisma.notification.create({
-        data: {
-          userId: user.id,
-          title: "Welcome to TBP Global Strategist",
-          message: `Hi ${user.name ?? "there"}! Your account has been created. Complete your fellowship agreement to get started.`,
-          link: "/onboarding",
-        },
-      })
-
-      // Handle referral code
-      if (data.referralCode) {
-        const referrer = await prisma.user.findUnique({
-          where: { referralCode: data.referralCode },
-        })
-        if (referrer && referrer.id !== user.id) {
-          await prisma.referral.create({
-            data: {
-              referrerId: referrer.id,
-              referredUserId: user.id,
-              code: data.referralCode,
-            },
-          })
+        if (existing.onboardingSubmission && existing.onboardingSubmission.status !== "COMPLETED") {
+          // User exists with incomplete onboarding — sign them in to continue
+          try {
+            const signInResult = await signIn("credentials", {
+              email: data.email,
+              password: data.password,
+              redirect: false,
+            })
+            if (signInResult?.error) {
+              return NextResponse.json({ error: "Password does not match. Please use the correct password to continue your onboarding." }, { status: 401 })
+            }
+          } catch {
+            // signIn may throw — user exists, that's what matters
+          }
+          userId = existing.id
+        } else {
+          return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
         }
-      }
+      } else {
+        // New user — create account
+        const passwordHash = await bcrypt.hash(data.password, 12)
+        let referralCode = generateReferralCode(data.fullName || "user")
+        let attempts = 0
+        while (attempts < 10) {
+          const exists = await prisma.user.findUnique({ where: { referralCode } })
+          if (!exists) break
+          referralCode = generateReferralCode((data.fullName || "user") + attempts)
+          attempts++
+        }
 
-      // Auto sign in
-      const signInResult = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      })
-
-      if (signInResult?.error) {
-        return NextResponse.json({
-          message: "Account created. Please log in to continue.",
-          userId: user.id,
+        const user = await prisma.user.create({
+          data: {
+            name: data.fullName,
+            email: data.email,
+            passwordHash,
+            role: "STRATEGIST",
+            isActive: false,
+            referralCode,
+            strategistProfile: { create: { stage: "CANDIDATE" } },
+          },
+          select: { id: true, name: true },
         })
-      }
 
-      userId = user.id
+        await prisma.notification.create({
+          data: {
+            userId: user.id,
+            title: "Welcome to TBP Global Strategist",
+            message: `Hi ${user.name ?? "there"}! Your account has been created. Complete your fellowship agreement to get started.`,
+            link: "/onboarding",
+          },
+        })
+
+        // Handle referral code
+        if (data.referralCode) {
+          const referrer = await prisma.user.findUnique({
+            where: { referralCode: data.referralCode },
+          })
+          if (referrer && referrer.id !== user.id) {
+            await prisma.referral.create({
+              data: {
+                referrerId: referrer.id,
+                referredUserId: user.id,
+                code: data.referralCode,
+              },
+            })
+          }
+        }
+
+        // Auto sign in
+        try {
+          await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false,
+          })
+        } catch {
+          // signIn may throw — user was created, that's what matters
+        }
+
+        userId = user.id
+      }
     }
 
     if (!userId) {

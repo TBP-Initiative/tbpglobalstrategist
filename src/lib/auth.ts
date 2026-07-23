@@ -38,8 +38,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
         if (!user || !user.passwordHash) return null;
 
-        if (!user.isActive) return null;
-
         const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
 
@@ -49,6 +47,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           name: user.name,
           role: user.role,
           image: user.image,
+          isActive: user.isActive,
         };
       },
     }),
