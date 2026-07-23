@@ -19,13 +19,6 @@ export function StepOverview({ onNext, onBack }: StepOverviewProps) {
       <p className="mt-1 text-sm text-gray-500">Section 2 of the Agreement / Programme Terms Form</p>
 
       <div className="mt-6 space-y-6 text-sm leading-relaxed text-gray-700">
-        <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-5">
-          <p className="font-semibold text-gray-900">Programme Flow:</p>
-          <p className="mt-2 text-gray-600">
-            Apply / Register &rarr; Review &rarr; Conditional Acceptance &rarr; Onboarding &amp; Pathway Alignment Session &rarr; Agreement / Programme Terms &rarr; Payment &rarr; Portal Access &rarr; Self-Onboarding Pack &rarr; Assignments and Contribution Tracking
-          </p>
-        </div>
-
         <p>
           The participant understands that the TBP Global Strategist Fellowship Programme is an educational and professional-development programme developed by The Borderless Project.
         </p>
