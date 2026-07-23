@@ -19,7 +19,29 @@ const TERMS_SECTIONS = [
   { id: 9, title: "Portal Access", content: "The TBP Global Strategist Portal is the exclusive working and portfolio platform for participants. Portal access is personal to the participant and must not be shared. Participants must not upload unlawful, confidential, misleading, offensive, infringing or unauthorised material. TBP may suspend or remove portal access where there is misuse, non-payment, breach of programme terms, misconduct, or other reasonable concern." },
   { id: 10, title: "Self-Onboarding Pack", content: "After programme activation, the participant may receive access to the TBP Global Strategist Fellowship Self-Onboarding Pack. The participant agrees to review the Self-Onboarding Pack and complete any required introductory reflection, learning tasks or onboarding assignments." },
   { id: 11, title: "Assignments and Contribution Tracking", content: "Participants may be assigned learning tasks, research tasks, project-based exercises, design briefs, technical notes, strategic memos, sector mapping activities, portfolio-development tasks or other contribution assignments. Assignments are designed for learning, development and portfolio-building purposes. Submission of work does not guarantee public publication, certificate completion, paid work, project appointment or future engagement." },
-  { id: 14, title: "Refunds, Cancellations and Withdrawal", content: "Any refund, cancellation or withdrawal request will be reviewed in line with TBP\u2019s applicable programme policy and any relevant legal or consumer protection requirements. TBP may decline a refund where programme access has been activated, materials have been released, portal access has been provided, assignments have been issued, or substantial onboarding support has already been delivered." },
+  { id: 14, title: "Refunds, Cancellations and Withdrawal", content: null, children: (
+    <>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600">The participant understands that the programme involves administrative onboarding, pathway alignment, portal activation, learning pathway setup, assignment allocation, access to programme materials and review preparation.</p>
+      <p className="mt-3 text-sm font-semibold text-gray-900">14-Day Cancellation Period</p>
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">Participants may cancel their participation in the TBP Global Strategist Fellowship Programme within 14 calendar days from the date of payment and acceptance of the Programme Terms.</p>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600">Where cancellation is requested within this 14-day period before portal access has been activated, onboarding materials have been released, programme services have commenced, or assignments have been issued, the participant may be eligible for a full refund, subject to applicable law and TBP&#8217;s administrative review.</p>
+      <p className="mt-3 text-sm font-semibold text-gray-900">Cancellation After Programme Access Has Started</p>
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">Where the participant requests or receives access to the TBP Global Strategist Portal, Self-Onboarding Pack, digital materials, onboarding session, pathway alignment support, assignments or other programme services within the 14-day cancellation period, the participant acknowledges that programme access and services may begin immediately.</p>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600">If the participant cancels after programme access or services have started, TBP may deduct a reasonable amount for any programme access, digital materials, onboarding support, administrative setup, pathway alignment, assignments or services already provided, subject to applicable law.</p>
+      <p className="mt-3 text-sm font-semibold text-gray-900">After the 14-Day Cancellation Period</p>
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">After the 14-day cancellation period has expired, programme fees are generally non-refundable, except where required by law or where TBP approves a refund, deferral, transfer or credit at its discretion.</p>
+      <p className="mt-3 text-sm font-semibold text-gray-900">Withdrawal from the Programme</p>
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">Participants who wish to withdraw from the programme should notify TBP in writing by email.</p>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600">Withdrawal from the programme may result in the suspension of portal access, cancellation of assignments, removal of public profile visibility and non-issuance of any certificate or contribution record where programme requirements have not been completed.</p>
+      <p className="mt-3 text-sm font-semibold text-gray-900">Participant Acknowledgement</p>
+      <ul className="mt-2 ml-5 list-disc space-y-2 text-sm leading-relaxed text-gray-600">
+        <li>I understand that I may cancel my participation within 14 calendar days from the date of payment and acceptance of the Programme Terms, subject to the conditions set out above.</li>
+        <li>I understand that if I request or receive immediate access to the TBP Global Strategist Portal, Self-Onboarding Pack, digital materials, onboarding support, assignments or programme services within the 14-day cancellation period, TBP may deduct a reasonable amount for access, materials or services already provided, subject to applicable law.</li>
+        <li>I understand that after the 14-day cancellation period has expired, programme fees are generally non-refundable, except where required by law or where TBP approves a refund, deferral, transfer or credit at its discretion.</li>
+        <li>I understand that refund, cancellation and withdrawal requests are subject to TBP review, programme status and applicable legal requirements.</li>
+      </ul>
+    </>
+  ) },
   { id: 15, title: "Participant Conduct", content: "Participants are expected to act professionally, respectfully and responsibly. Participants must not: misrepresent their relationship with TBP, claim to be employed by TBP without written approval, contact investors or partners on behalf of TBP without approval, use TBP materials for unauthorised purposes, submit plagiarised work, make investment or employment claims on behalf of TBP." },
   { id: 16, title: "Confidentiality", content: "During the programme, participants may receive access to TBP materials, concepts, documents, frameworks, project descriptions, strategic notes, portal content or other information not intended for public circulation. Participants agree not to disclose, copy, publish, distribute, reproduce or misuse confidential TBP materials without written approval. This obligation applies during and after programme participation." },
   { id: 17, title: "Intellectual Property", content: "TBP retains ownership of its name, brand, visual identity, logos, frameworks, documents, platform concepts, training materials, project materials, DESQUELET\u00AE methodology references, programme content, portal structure and TBP ecosystem materials. Participants retain ownership of their pre-existing personal work, knowledge, skills and background materials." },
@@ -72,7 +94,7 @@ export function StepTerms({ onNext, onBack }: StepTermsProps) {
                 <span className="ml-2 text-xs text-green-600">✓ Read</span>
               )}
             </h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-600">{section.content}</p>
+            {section.children ? section.children : <p className="mt-2 text-sm leading-relaxed text-gray-600">{section.content}</p>}
           </div>
         ))}
       </div>
