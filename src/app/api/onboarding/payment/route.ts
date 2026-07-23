@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { getStripe, STRIPE_PLANS } from "@/lib/stripe"
 
 export const dynamic = "force-dynamic"
+
+const PLANS = {
+  STANDARD: {
+    amount: 1200,
+    name: "Standard Fellowship",
+    description: "TBP Global Strategist Fellowship - Standard Pathway",
+  },
+  PLUS: {
+    amount: 1500,
+    name: "Fellowship Plus",
+    description: "TBP Global Strategist Fellowship - Plus Pathway",
+  },
+}
 
 export async function GET() {
   return NextResponse.json({
@@ -19,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { provider, pathway } = body
+    const { pathway } = body
 
     const onboarding = await prisma.onboardingSubmission.findUnique({
       where: { userId: session.user.id },
@@ -29,106 +41,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Complete onboarding first" }, { status: 400 })
     }
 
-    const plan = pathway === "PLUS" ? STRIPE_PLANS.PLUS : STRIPE_PLANS.STANDARD
+    const plan = pathway === "PLUS" ? PLANS.PLUS : PLANS.STANDARD
 
-    if (provider === "STRIPE") {
-      const stripeSession = await getStripe().checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
+    const paypalRes = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from(
+          `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+        ).toString("base64")}`,
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [
           {
-            price_data: {
-              currency: plan.currency,
-              product_data: {
-                name: plan.name,
-                description: plan.description,
-              },
-              unit_amount: plan.amount,
+            description: plan.description,
+            amount: {
+              currency_code: "USD",
+              value: String(plan.amount),
             },
-            quantity: 1,
           },
         ],
-        mode: "payment",
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=7&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=6&cancelled=true`,
-        metadata: {
-          userId: session.user.id,
-          onboardingId: onboarding.id,
-          pathway: pathway || "STANDARD",
+        application_context: {
+          return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=7&provider=paypal`,
+          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=6&cancelled=true`,
         },
-      })
+      }),
+    })
 
-      await prisma.onboardingSubmission.update({
-        where: { userId: session.user.id },
-        data: {
-          paymentProvider: "STRIPE",
-          paymentReference: stripeSession.id,
-          paymentAmount: plan.amount / 100,
-          paymentCurrency: "USD",
-          status: "PENDING_PAYMENT",
-        },
-      })
+    const paypalData = await paypalRes.json()
 
-      return NextResponse.json({ url: stripeSession.url })
+    if (!paypalData.id) {
+      console.error("PayPal order creation failed:", paypalData)
+      return NextResponse.json({ error: "PayPal order creation failed. Please try again." }, { status: 500 })
     }
 
-    if (provider === "PAYPAL") {
-      const paypalRes = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${Buffer.from(
-            `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
-          ).toString("base64")}`,
-        },
-        body: JSON.stringify({
-          intent: "CAPTURE",
-          purchase_units: [
-            {
-              description: plan.description,
-              amount: {
-                currency_code: "USD",
-                value: String(plan.amount / 100),
-              },
-            },
-          ],
-          application_context: {
-            return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=7&provider=paypal`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tbpglobalstrategist.vercel.app"}/onboarding?step=6&cancelled=true`,
-          },
-        }),
-      })
+    await prisma.onboardingSubmission.update({
+      where: { userId: session.user.id },
+      data: {
+        paymentProvider: "PAYPAL",
+        paymentReference: paypalData.id,
+        paymentAmount: plan.amount,
+        paymentCurrency: "USD",
+        status: "PENDING_PAYMENT",
+      },
+    })
 
-      const paypalData = await paypalRes.json()
-
-      if (!paypalData.id) {
-        console.error("PayPal order creation failed:", paypalData)
-        return NextResponse.json({ error: "PayPal order creation failed" }, { status: 500 })
-      }
-
-      await prisma.onboardingSubmission.update({
-        where: { userId: session.user.id },
-        data: {
-          paymentProvider: "PAYPAL",
-          paymentReference: paypalData.id,
-          paymentAmount: plan.amount / 100,
-          paymentCurrency: "USD",
-          status: "PENDING_PAYMENT",
-        },
-      })
-
-      const approveUrl = paypalData.links?.find((l: { rel: string }) => l.rel === "approve")?.href
-
-      return NextResponse.json({
-        paypalOrderId: paypalData.id,
-        paypalClientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-        approveUrl,
-        amount: plan.amount / 100,
-      })
-    }
-
-    return NextResponse.json({ error: "Invalid provider" }, { status: 400 })
+    return NextResponse.json({
+      paypalOrderId: paypalData.id,
+      paypalClientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+      amount: plan.amount,
+    })
   } catch (err) {
     console.error("POST /api/onboarding/payment error:", err)
-    return NextResponse.json({ error: "Payment failed" }, { status: 500 })
+    return NextResponse.json({ error: "Payment failed. Please try again." }, { status: 500 })
   }
 }
