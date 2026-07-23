@@ -13,7 +13,14 @@ function generateReferralCode(name: string): string {
 
 export async function GET() {
   try {
-    const session = await auth()
+    let session
+    try {
+      session = await auth()
+    } catch (authErr) {
+      console.error("GET /api/onboarding auth() error:", authErr)
+      return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS", isLoggedIn: false })
+    }
+
     if (!session?.user?.id) {
       return NextResponse.json({ currentStep: 1, status: "IN_PROGRESS", isLoggedIn: false })
     }
@@ -40,19 +47,32 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  let session
   try {
-    const session = await auth()
-    const body = await req.json()
-    const { step, ...data } = body
+    session = await auth()
+  } catch (authErr) {
+    console.error("POST /api/onboarding auth() error:", authErr)
+    return NextResponse.json({ error: "Authentication failed. Please refresh the page and try again." }, { status: 500 })
+  }
 
-    let userId = session?.user?.id
+  let body
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+  }
 
-    // Step 1 without session → create account (NO server-side signIn)
-    if (step === 1 && !userId) {
-      if (!data.email || !data.password) {
-        return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
-      }
+  const { step, ...data } = body
 
+  let userId = session?.user?.id
+
+  // Step 1 without session → create account (NO server-side signIn)
+  if (step === 1 && !userId) {
+    if (!data.email || !data.password) {
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
+    }
+
+    try {
       const existing = await prisma.user.findUnique({
         where: { email: data.email },
         include: { onboardingSubmission: true },
@@ -60,19 +80,16 @@ export async function POST(req: Request) {
 
       if (existing) {
         if (existing.onboardingSubmission && existing.onboardingSubmission.status !== "COMPLETED") {
-          // User exists with incomplete onboarding — verify password matches
           const passwordValid = await bcrypt.compare(data.password, existing.passwordHash || "")
           if (!passwordValid) {
             return NextResponse.json({ error: "Password does not match. Please use the correct password to continue your onboarding.", needsSignIn: false }, { status: 401 })
           }
-          // Return success with flag so client knows to sign in
           return NextResponse.json({ userId: existing.id, needsSignIn: true, email: data.email, currentStep: existing.onboardingSubmission.currentStep || 1 })
         } else {
           return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 })
         }
       }
 
-      // New user — create account
       const passwordHash = await bcrypt.hash(data.password, 12)
       let referralCode = generateReferralCode(data.fullName || "user")
       let attempts = 0
@@ -105,7 +122,6 @@ export async function POST(req: Request) {
         },
       })
 
-      // Handle referral code
       if (data.referralCode) {
         const referrer = await prisma.user.findUnique({
           where: { referralCode: data.referralCode },
@@ -121,7 +137,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Create onboarding submission
       const stepData = mapStepData(step, data)
       const submission = await prisma.onboardingSubmission.create({
         data: {
@@ -131,7 +146,6 @@ export async function POST(req: Request) {
         },
       })
 
-      // Return success with needsSignIn flag — client handles authentication
       return NextResponse.json({
         userId: user.id,
         needsSignIn: true,
@@ -140,12 +154,17 @@ export async function POST(req: Request) {
         areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
         isLoggedIn: false,
       })
+    } catch (dbErr) {
+      console.error("POST /api/onboarding step1 DB error:", dbErr)
+      return NextResponse.json({ error: "Failed to create account. Please try again." }, { status: 500 })
     }
+  }
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
+  try {
     const existing = await prisma.onboardingSubmission.findUnique({
       where: { userId },
     })
@@ -172,6 +191,10 @@ export async function POST(req: Request) {
       })
     }
 
+    if (step === 7) {
+      await prisma.user.update({ where: { id: userId }, data: { isActive: true } })
+    }
+
     const result = {
       ...submission,
       areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
@@ -179,9 +202,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(result)
-  } catch (err) {
-    console.error("POST /api/onboarding error:", err)
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 })
+  } catch (dbErr) {
+    console.error("POST /api/onboarding DB error:", dbErr)
+    return NextResponse.json({ error: "Failed to save progress. Please try again." }, { status: 500 })
   }
 }
 
