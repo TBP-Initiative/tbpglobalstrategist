@@ -40,8 +40,9 @@ export async function POST(request: Request) {
     }
 
     const data = parsed.data
+    const normalizedEmail = data.email.toLowerCase()
 
-    const existing = await prisma.user.findUnique({ where: { email: data.email } })
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
       return NextResponse.json(
         { message: "A user with this email already exists" },
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(data.password, 12)
 
     const user = await prisma.user.create({
-      data: { name: data.name, email: data.email, passwordHash, role: data.role },
+      data: { name: data.name, email: normalizedEmail, passwordHash, role: data.role },
       select: { id: true, name: true, email: true, role: true },
     })
 

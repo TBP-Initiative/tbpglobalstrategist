@@ -11,6 +11,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user?.email) {
+        user.email = user.email.toLowerCase()
+      }
+      return true
+    },
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -22,9 +30,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
+        const normalizedEmail = email.toLowerCase();
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: normalizedEmail },
           select: {
             id: true,
             email: true,
