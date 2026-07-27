@@ -83,16 +83,18 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
                     body: JSON.stringify({ provider: "PAYPAL", pathway }),
                   })
                   const result = await res.json()
+                  setLoading(false)
                   if (result.paypalOrderId) {
-                    setLoading(false)
                     return result.paypalOrderId
                   }
-                  if (result.error) throw new Error(result.error)
-                  return ""
+                  const errMsg = result.error || "Failed to create PayPal order."
+                  setPaypalError(errMsg)
+                  throw new Error(errMsg)
                 } catch (err) {
-                  setPaypalError(err instanceof Error ? err.message : "Failed to initiate payment.")
+                  const msg = err instanceof Error ? err.message : "Failed to initiate payment."
+                  setPaypalError(msg)
                   setLoading(false)
-                  return ""
+                  throw err
                 }
               }}
               onApprove={async (details) => {
