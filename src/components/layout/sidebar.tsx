@@ -43,6 +43,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
         { label: "Referrals", href: "/dashboard/referrals", icon: Share2 },
         { label: "Payment Methods", href: "/dashboard/payment-methods", icon: CreditCard },
+        { label: "Fellowship Payment", href: "/dashboard/payment", icon: CreditCard },
       ],
     },
     {

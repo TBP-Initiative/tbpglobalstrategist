@@ -37,8 +37,8 @@
 <div class="cover">
   <h1>TBP Global Strategist</h1>
   <div class="subtitle">Technical Architecture Document</div>
-  <div class="meta">Version 1.2 &mdash; July 2026</div>
-  <div class="meta" style="margin-top: 8px;">https://tbpglobalstrategist.vercel.app</div>
+  <div class="meta">Version 1.3 &mdash; July 2026</div>
+  <div class="meta" style="margin-top: 8px;">https://www.tbpglobalstrategist.com</div>
 </div>
 
 <div class="page-break"></div>
@@ -52,6 +52,8 @@
   <li>Authentication &amp; Authorization</li>
   <li>API Architecture</li>
   <li>Frontend Architecture</li>
+  <li>Onboarding &amp; Payment Architecture</li>
+  <li>Referral System Architecture</li>
   <li>File Storage &amp; Uploads</li>
   <li>Deployment Architecture</li>
   <li>Security Considerations</li>
@@ -81,7 +83,7 @@
 │              NEXT.JS APPLICATION SERVER                   │
 │  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
 │  │  Page Routes │  │  API Routes  │  │   Middleware    │  │
-│  │  (SSR/SSG)   │  │  (36 endpoints)│ │  (Auth guard)  │  │
+│  │  (SSR/SSG)   │  │  (44 endpoints)│ │  (Auth guard)  │  │
 │  └─────────────┘  └──────────────┘  └────────────────┘  │
 └──────┬───────────────┬──────────────┬───────────────────┘
        │               │              │
@@ -117,7 +119,7 @@
 <h3>2.3 Backend</h3>
 <table>
   <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
-  <tr><td>Next.js API Routes</td><td>16.x</td><td>36 API endpoints under /api/*</td></tr>
+  <tr><td>Next.js API Routes</td><td>16.x</td><td>44 API endpoints under /api/*</td></tr>
   <tr><td>Prisma</td><td>7.8.0</td><td>Type-safe database ORM</td></tr>
   <tr><td>PostgreSQL</td><td>15+</td><td>Primary database (via Supabase)</td></tr>
   <tr><td>NextAuth.js</td><td>5.0.0-beta.31</td><td>Authentication (Credentials + Google)</td></tr>
@@ -146,7 +148,7 @@
   <tr><td><code>(marketing)</code></td><td>/about, /contact, /insights, etc.</td><td>Public marketing pages with shared navbar/footer layout</td></tr>
   <tr><td><code>(auth)</code></td><td>/login, /register</td><td>Authentication pages with split-screen layout</td></tr>
   <tr><td><code>dashboard</code></td><td>/dashboard/*</td><td>Protected dashboard pages with sidebar layout</td></tr>
-  <tr><td><code>api</code></td><td>/api/*</td><td>36 REST API endpoints</td></tr>
+  <tr><td><code>api</code></td><td>/api/*</td><td>44 REST API endpoints</td></tr>
 </table>
 
 <h3>3.2 Layout Hierarchy</h3>
@@ -195,16 +197,16 @@ RootLayout (src/app/layout.tsx)
   <tr><td>Client</td><td>Singleton pattern for development hot reload</td></tr>
 </table>
 
-<h3>4.2 Data Models (20 models)</h3>
+<h3>4.2 Data Models (31 models)</h3>
 
 <table>
   <tr><th>Model</th><th>Purpose</th><th>Key Relationships</th></tr>
-  <tr><td><strong>User</strong></td><td>Core user entity with role, stage, and profile data</td><td>Has one StrategistProfile, many Projects, Messages, Notifications</td></tr>
+  <tr><td><strong>User</strong></td><td>Core user entity with role, stage, and profile data</td><td>Has one StrategistProfile, many Projects, Messages, Notifications, Referrals</td></tr>
   <tr><td><strong>Account</strong></td><td>NextAuth OAuth account linking</td><td>Belongs to User</td></tr>
   <tr><td><strong>Session</strong></td><td>Active user sessions</td><td>Belongs to User</td></tr>
   <tr><td><strong>VerificationToken</strong></td><td>Email verification tokens</td><td>&mdash;</td></tr>
-  <tr><td><strong>StrategistProfile</strong></td><td>Extended profile with bio, stage, sector, category, location</td><td>Belongs to User, has many ExpertiseTags, UserWorkAreas</td></tr>
-  <tr><td><strong>Organization</strong></td><td>Company or organization entity</td><td>Has many OrganizationMembers</td></tr>
+  <tr><td><strong>StrategistProfile</strong></td><td>Extended profile with bio, stage, sector, category, location</td><td>Belongs to User, has many ExpertiseTags</td></tr>
+  <tr><td><strong>Organization</strong></td><td>Company or organization entity</td><td>Has many OrganizationMembers, Projects</td></tr>
   <tr><td><strong>OrganizationMember</strong></td><td>User-org membership with role</td><td>Belongs to User and Organization</td></tr>
   <tr><td><strong>Project</strong></td><td>Core project with status, budget, dates, categories</td><td>Has many Milestones, Media, Contributors, Relations</td></tr>
   <tr><td><strong>Milestone</strong></td><td>Project milestones with weight-based progress</td><td>Belongs to Project</td></tr>
@@ -223,19 +225,30 @@ RootLayout (src/app/layout.tsx)
   <tr><td><strong>WorkArea</strong></td><td>Work specialization areas (11 defaults)</td><td>Many-to-many with Users via UserWorkArea</td></tr>
   <tr><td><strong>UserWorkArea</strong></td><td>User-work area assignments</td><td>Belongs to User and WorkArea</td></tr>
   <tr><td><strong>Submission</strong></td><td>Document submissions for progression</td><td>Belongs to User</td></tr>
+  <tr><td><strong>OnboardingSubmission</strong></td><td>7-step onboarding data with payment and agreement details</td><td>Belongs to User</td></tr>
+  <tr><td><strong>Referral</strong></td><td>Referral tracking between referrer and referred user</td><td>Belongs to two Users, has one ReferralCredit</td></tr>
+  <tr><td><strong>ReferralCredit</strong></td><td>Commission credits earned from referrals</td><td>Belongs to User and Referral</td></tr>
+  <tr><td><strong>ReferralWallet</strong></td><td>Wallet with available and paid referral balances</td><td>Belongs to User</td></tr>
+  <tr><td><strong>PayoutRequest</strong></td><td>Payout requests for referral earnings</td><td>Belongs to User, has many PayoutAuditLogs</td></tr>
+  <tr><td><strong>PaymentMethod</strong></td><td>Stored payment methods (Bank Transfer, PayPal)</td><td>Belongs to User, has many PayoutRequests</td></tr>
+  <tr><td><strong>PayoutAuditLog</strong></td><td>Audit trail for payout processing actions</td><td>Belongs to PayoutRequest and User</td></tr>
 </table>
 
-<h3>4.3 Enums</h3>
+<h3>4.3 Enums (9 enums)</h3>
 <table>
   <tr><th>Enum</th><th>Values</th></tr>
   <tr><td><strong>Role</strong></td><td>ADMIN, STRATEGIST, CORPORATE, ORGANIZATION_ADMIN, RESEARCHER, MODERATOR, PARTNER</td></tr>
   <tr><td><strong>ProjectStatus</strong></td><td>DRAFT, ACTIVE, COMPLETED, CANCELLED</td></tr>
   <tr><td><strong>NotificationType</strong></td><td>MESSAGE, PROJECT_INVITE, ORGANIZATION_INVITE, ACHIEVEMENT_UNLOCKED, PUBLICATION_APPROVED, SYSTEM</td></tr>
   <tr><td><strong>ProgressionStage</strong></td><td>CANDIDATE, STRATEGIST, CONTRIBUTOR, PROJECT_ALIGNED, SECTOR_LEAD, PAID_ADVISER</td></tr>
+  <tr><td><strong>OnboardingStatus</strong></td><td>IN_PROGRESS, PENDING_PAYMENT, COMPLETED, EXPIRED</td></tr>
+  <tr><td><strong>FellowshipPathway</strong></td><td>STANDARD, PLUS</td></tr>
+  <tr><td><strong>PaymentProvider</strong></td><td>STRIPE, PAYPAL</td></tr>
+  <tr><td><strong>PaymentStatus</strong></td><td>PENDING, COMPLETED, FAILED, REFUNDED</td></tr>
   <tr><td><strong>ActivityAction</strong></td><td>CREATE, UPDATE, DELETE, LOGIN, LOGOUT, JOIN_ORGANIZATION, LEAVE_ORGANIZATION, JOIN_PROJECT, LEAVE_PROJECT, PUBLISH</td></tr>
 </table>
 
-<h3>4.4 Migrations</h3>
+<h3>4.4 Migrations (12 migrations)</h3>
 <table>
   <tr><th>Migration</th><th>Purpose</th></tr>
   <tr><td><code>202507060001_init</code></td><td>Full schema creation (415 lines SQL)</td></tr>
@@ -244,6 +257,12 @@ RootLayout (src/app/layout.tsx)
   <tr><td><code>202507080002_global_strategist_category</code></td><td>Added category field</td></tr>
   <tr><td><code>202507080003_work_areas</code></td><td>Created WorkArea/UserWorkArea tables with 11 defaults</td></tr>
   <tr><td><code>202507080004_submissions</code></td><td>Created Submission table</td></tr>
+  <tr><td><code>202507160001_onboarding_submission</code></td><td>Created OnboardingSubmission table for 7-step onboarding flow</td></tr>
+  <tr><td><code>202507160002_areas_interest_and_referrals</code></td><td>Added areas of interest, referral tracking, and OnboardingSubmission fields</td></tr>
+  <tr><td><code>202507200003_add_referral_credit_paid_at</code></td><td>Added paidAt timestamp to ReferralCredit model</td></tr>
+  <tr><td><code>202507200004_add_user_is_active</code></td><td>Added isActive flag to User model for account activation</td></tr>
+  <tr><td><code>202507220001_referral_workflow_v2</code></td><td>Created Referral, ReferralCredit, ReferralWallet, and PayoutRequest models</td></tr>
+  <tr><td><code>202507220002_payment_methods_audit</code></td><td>Created PaymentMethod and PayoutAuditLog models for payment processing</td></tr>
 </table>
 
 <div class="page-break"></div>
@@ -299,17 +318,19 @@ RootLayout (src/app/layout.tsx)
 
 <table>
   <tr><th>Category</th><th>Endpoints</th><th>Methods</th></tr>
-  <tr><td>Authentication</td><td><code>/api/auth/[...nextauth]</code>, <code>/api/register</code>, <code>/api/seed</code></td><td>GET, POST</td></tr>
+  <tr><td>Authentication</td><td><code>/api/auth/[...nextauth]</code>, <code>/api/auth/check-active</code>, <code>/api/register</code>, <code>/api/seed</code></td><td>GET, POST</td></tr>
   <tr><td>Profile</td><td><code>/api/profile</code>, <code>/api/profile/featured-project</code></td><td>GET, PATCH, PUT</td></tr>
   <tr><td>Strategists</td><td><code>/api/strategists</code></td><td>GET</td></tr>
   <tr><td>Projects</td><td><code>/api/projects</code>, <code>/api/projects/[id]</code>, <code>/api/projects/featured</code>, <code>/api/projects/categories</code>, <code>/api/projects/search</code></td><td>GET, POST, PATCH, DELETE</td></tr>
-  <tr><td>Project Sub-resources</td><td><code>/api/projects/[id]/milestones</code>, <code>/api/projects/[id]/media</code>, <code>/api/projects/[id]/relations</code>, <code>/api/projects/[id]/join</code>, <code>/api/projects/[id]/feature</code></td><td>GET, POST, DELETE, PATCH</td></tr>
+  <tr><td>Project Sub-resources</td><td><code>/api/projects/[id]/milestones</code>, <code>/api/projects/[id]/milestones/[milestoneId]</code>, <code>/api/projects/[id]/media</code>, <code>/api/projects/[id]/relations</code>, <code>/api/projects/[id]/join</code>, <code>/api/projects/[id]/feature</code></td><td>GET, POST, DELETE, PATCH</td></tr>
+  <tr><td>Onboarding</td><td><code>/api/onboarding</code>, <code>/api/onboarding/payment</code>, <code>/api/onboarding/payment/capture</code>, <code>/api/onboarding/webhook</code>, <code>/api/onboarding/referral</code></td><td>GET, POST</td></tr>
   <tr><td>Messages</td><td><code>/api/messages</code>, <code>/api/messages/[conversationId]</code></td><td>GET, POST, PATCH</td></tr>
   <tr><td>Notifications</td><td><code>/api/notifications</code></td><td>GET, PATCH</td></tr>
   <tr><td>Submissions</td><td><code>/api/submissions</code>, <code>/api/submissions/download</code></td><td>GET, POST</td></tr>
   <tr><td>File Upload</td><td><code>/api/upload</code>, <code>/api/uploads</code></td><td>POST, GET</td></tr>
+  <tr><td>Payments</td><td><code>/api/payment-methods</code>, <code>/api/referrals/payout</code></td><td>GET, POST, DELETE</td></tr>
   <tr><td>Dashboard</td><td><code>/api/dashboard/stats</code>, <code>/api/dashboard/activities</code>, <code>/api/dashboard/collaborations</code>, <code>/api/dashboard/my-projects</code></td><td>GET</td></tr>
-  <tr><td>Admin</td><td><code>/api/admin/users</code>, <code>/api/admin/users/[id]/*</code>, <code>/api/admin/work-areas</code>, <code>/api/admin/migrate-files</code></td><td>GET, POST, PATCH, DELETE</td></tr>
+  <tr><td>Admin</td><td><code>/api/admin/users</code>, <code>/api/admin/users/[id]/*</code>, <code>/api/admin/work-areas</code>, <code>/api/admin/referrals</code>, <code>/api/admin/referrals/generate-codes</code>, <code>/api/admin/migrate-files</code></td><td>GET, POST, PATCH, DELETE</td></tr>
 </table>
 
 <h3>6.2 API Response Format</h3>
@@ -375,7 +396,138 @@ RootLayout (src/app/layout.tsx)
 
 <div class="page-break"></div>
 
-<h2>8. File Storage &amp; Uploads</h2>
+<h2>8. Onboarding &amp; Payment Architecture</h2>
+
+<h3>8.1 Onboarding Flow</h3>
+<div class="flow-box">
+  <strong>7-Step Onboarding Process:</strong><br>
+  1. <strong>Step 1 (Details):</strong> Account creation + personal information collection<br>
+  2. <strong>Step 2 (Overview):</strong> Review and confirm submitted information<br>
+  3. <strong>Step 3 (Pathway):</strong> Fellowship pathway selection (Standard $1,200 / Plus $1,500)<br>
+  4. <strong>Step 4 (Agreement):</strong> Legal agreement review<br>
+  5. <strong>Step 5 (Terms):</strong> Accept 7 required terms (checkboxes)<br>
+  6. <strong>Step 6 (Payment):</strong> Process payment via PayPal<br>
+  7. <strong>Step 7 (Complete):</strong> Onboarding confirmation and next steps
+</div>
+
+<h3>8.2 Payment Processing</h3>
+<table>
+  <tr><th>Component</th><th>Technology</th><th>Purpose</th></tr>
+  <tr><td><strong>PayPal Integration</strong></td><td>@paypal/react-paypal-js (10.x)</td><td>PayPal checkout with multiple payment options</td></tr>
+  <tr><td><strong>Payment Webhooks</strong></td><td>Next.js API Routes</td><td>Handle payment confirmations and status updates</td></tr>
+  <tr><td><strong>Payment Capture</strong></td><td>Next.js API Routes</td><td>Capture authorized payments after verification</td></tr>
+</table>
+
+<h3>8.3 Onboarding API Endpoints</h3>
+<table>
+  <tr><th>Endpoint</th><th>Methods</th><th>Purpose</th></tr>
+  <tr><td><code>/api/onboarding</code></td><td>GET, POST</td><td>Get/update onboarding submission data across steps</td></tr>
+  <tr><td><code>/api/onboarding/payment</code></td><td>POST</td><td>Initialize payment session (PayPal)</td></tr>
+  <tr><td><code>/api/onboarding/payment/capture</code></td><td>POST</td><td>Capture authorized payment</td></tr>
+  <tr><td><code>/api/onboarding/webhook</code></td><td>POST</td><td>Handle payment provider webhooks</td></tr>
+  <tr><td><code>/api/onboarding/referral</code></td><td>POST</td><td>Track and apply referral codes during onboarding</td></tr>
+  <tr><td><code>/api/auth/check-active</code></td><td>GET</td><td>Check if user has completed onboarding and is active</td></tr>
+</table>
+
+<h3>8.4 Payment Data Model</h3>
+<pre>
+OnboardingSubmission {
+  pathway: FellowshipPathway?    // STANDARD or PLUS
+  pathwayAmount: Decimal?        // 1200 or 1500
+  paymentProvider: PaymentProvider? // PAYPAL
+  paymentStatus: PaymentStatus   // PENDING, COMPLETED, FAILED, REFUNDED
+  paymentReference: String?      // Transaction reference
+  paymentAmount: Decimal?        // Actual amount paid
+  paymentCurrency: String?       // Default: "USD"
+  paidAt: DateTime?              // Payment completion timestamp
+}</pre>
+
+<h2>9. Referral System Architecture</h2>
+
+<h3>9.1 Referral Workflow</h3>
+<div class="flow-box">
+  <strong>Referral Lifecycle:</strong><br>
+  1. <strong>Code Generation:</strong> Unique referral codes generated for activated users<br>
+  2. <strong>Registration:</strong> New user registers with referral code, creates Referral record (PENDING_REGISTRATION)<br>
+  3. <strong>Payment:</strong> Referred user completes payment, status updates to PAYMENT_RECEIVED<br>
+  4. <strong>Hold Period:</strong> 30-day hold period begins, status changes to WAITING_APPROVAL<br>
+  5. <strong>Auto-Approval:</strong> After 30 days, ReferralCredit created and approved automatically<br>
+  6. <strong>Wallet Credit:</strong> Approved credit added to ReferralWallet available balance<br>
+  7. <strong>Payout:</strong> User requests payout, admin processes, funds transferred
+</div>
+
+<h3>9.2 Referral API Endpoints</h3>
+<table>
+  <tr><th>Endpoint</th><th>Methods</th><th>Purpose</th></tr>
+  <tr><td><code>/api/referrals/payout</code></td><td>GET, POST</td><td>Get payout history, request new payout</td></tr>
+  <tr><td><code>/api/admin/referrals</code></td><td>GET</td><td>Admin view of all referrals</td></tr>
+  <tr><td><code>/api/admin/referrals/generate-codes</code></td><td>POST</td><td>Generate referral codes for users</td></tr>
+  <tr><td><code>/api/payment-methods</code></td><td>GET, POST, DELETE</td><td>Manage payment methods (Bank Transfer, PayPal)</td></tr>
+</table>
+
+<h3>9.3 Referral Data Models</h3>
+<pre>
+Referral {
+  referrerId: String           // User who made the referral
+  referredUserId: String       // User who was referred
+  code: String                 // Referral code used
+  status: String               // PENDING_REGISTRATION → PAYMENT_RECEIVED → WAITING_APPROVAL → APPROVED → PAID
+}
+
+ReferralCredit {
+  userId: String               // User receiving the credit
+  referralId: String           // Associated referral
+  amount: Decimal              // Credit amount (default: $50)
+  status: String               // PENDING → APPROVED → PAID → CANCELLED
+  approvedAt: DateTime?        // When credit was approved
+  paidAt: DateTime?            // When credit was paid out
+}
+
+ReferralWallet {
+  userId: String               // Wallet owner
+  availableBalance: Decimal    // Balance available for payout
+  paidBalance: Decimal         // Total amount already paid out
+}
+
+PayoutRequest {
+  userId: String               // Requesting user
+  paymentMethodId: String?     // Associated payment method
+  amount: Decimal              // Payout amount
+  method: String               // BANK_TRANSFER or PAYPAL
+  accountDetails: String       // JSON with account information
+  status: String               // PENDING → APPROVED → PAID → REJECTED
+  transactionRef: String?      // Transaction reference after payment
+  processedById: String?       // Admin who processed the payout
+}
+
+PaymentMethod {
+  userId: String               // Method owner
+  type: String                 // BANK_TRANSFER or PAYPAL
+  isDefault: Boolean           // Default payment method flag
+  label: String?               // User-friendly label
+  // PayPal fields
+  paypalEmail: String?
+  // Bank Transfer fields
+  accountHolder: String?
+  bankName: String?
+  accountNumber: String?
+  routingNumber: String?
+  swiftCode: String?
+  iban: String?
+  country: String?
+}
+
+PayoutAuditLog {
+  payoutRequestId: String      // Associated payout request
+  userId: String               // Who performed the action
+  action: String               // CREATED, APPROVED, REJECTED, PAID, REVERTED
+  details: String?             // JSON with additional details
+  transactionRef: String?      // Transaction reference
+}</pre>
+
+<div class="page-break"></div>
+
+<h2>10. File Storage &amp; Uploads</h2>
 
 <h3>8.1 Storage Architecture</h3>
 <table>
@@ -403,7 +555,7 @@ RootLayout (src/app/layout.tsx)
   <tr><td><code>public/uploads/</code></td><td>User-uploaded files</td></tr>
 </table>
 
-<h2>9. Deployment Architecture</h2>
+<h2>11. Deployment Architecture</h2>
 
 <h3>9.1 Vercel Deployment</h3>
 <table>
@@ -413,7 +565,7 @@ RootLayout (src/app/layout.tsx)
   <tr><td>Framework</td><td>Next.js 16</td></tr>
   <tr><td>Node Version</td><td>24.x</td></tr>
   <tr><td>Region</td><td>Washington, D.C. (iad1)</td></tr>
-  <tr><td>Production URL</td><td>https://tbpglobalstrategist.vercel.app</td></tr>
+  <tr><td>Production URL</td><td>https://www.tbpglobalstrategist.com</td></tr>
 </table>
 
 <h3>9.2 Build Process</h3>
@@ -445,7 +597,7 @@ pm2 start npm --name "tbp" -- start</pre>
 
 <div class="page-break"></div>
 
-<h2>10. Security Considerations</h2>
+<h2>12. Security Considerations</h2>
 
 <h3>10.1 Authentication Security</h3>
 <ul>
@@ -479,7 +631,7 @@ pm2 start npm --name "tbp" -- start</pre>
   <li>Secure cookie attributes (HttpOnly, Secure, SameSite)</li>
 </ul>
 
-<h2>11. Performance &amp; Optimization</h2>
+<h2>13. Performance &amp; Optimization</h2>
 
 <h3>11.1 Rendering Strategy</h3>
 <table>
@@ -510,7 +662,7 @@ pm2 start npm --name "tbp" -- start</pre>
 
 <div style="text-align: center; color: #6b7280; font-size: 9pt;">
   TBP Global Strategist Platform &mdash; Technical Architecture Document<br>
-  Version 1.2 &mdash; July 2026 &mdash; https://tbpglobalstrategist.vercel.app
+  Version 1.3 &mdash; July 2026 &mdash; https://www.tbpglobalstrategist.com
 </div>
 
 </body>

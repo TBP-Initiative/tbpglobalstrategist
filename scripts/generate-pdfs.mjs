@@ -18,6 +18,10 @@ const docs = [
     html: path.join(__dirname, 'technical-architecture.html'),
     pdf: path.join(__dirname, '..', 'public', 'docs', 'TBP_Global_Strategist_Technical_Architecture.pdf'),
   },
+  {
+    html: path.join(__dirname, 'board-briefing.html'),
+    pdf: path.join(__dirname, '..', 'public', 'docs', 'TBP_Global_Strategist_Version_2_Board_Briefing.pdf'),
+  },
 ];
 
 const browser = await puppeteer.launch({

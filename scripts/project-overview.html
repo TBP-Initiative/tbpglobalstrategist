@@ -33,8 +33,8 @@
 <div class="cover">
   <h1>TBP Global Strategist</h1>
   <div class="subtitle">Project Overview &amp; Getting Started Guide</div>
-  <div class="meta">Version 1.2 &mdash; July 2026</div>
-  <div class="meta" style="margin-top: 8px;">https://tbpglobalstrategist.vercel.app</div>
+  <div class="meta">Version 1.3 &mdash; July 2026</div>
+  <div class="meta" style="margin-top: 8px;">https://www.tbpglobalstrategist.com</div>
 </div>
 
 <div class="page-break"></div>
@@ -48,8 +48,9 @@
   <li>Work Areas</li>
   <li>Strategist Categories</li>
   <li>TBP Project Categories</li>
+  <li>Onboarding &amp; Fellowship</li>
+  <li>Referral System</li>
   <li>Getting Started</li>
-  <li>Registration &amp; Onboarding</li>
   <li>Profile Setup</li>
   <li>Next Steps</li>
 </ol>
@@ -64,12 +65,14 @@
 
 <p>The platform enables:</p>
 <ul>
-  <li><strong>Onboarding &amp; Progression</strong> &mdash; Structured 6-stage pathway with clear tasks and deliverables at each level</li>
+  <li><strong>Onboarding &amp; Progression</strong> &mdash; Structured 7-step onboarding with fellowship payment processing, and a 6-stage career pathway with clear tasks and deliverables at each level</li>
   <li><strong>Work Area Management</strong> &mdash; Assignment of strategists to 11 specialized work areas</li>
   <li><strong>Project Collaboration</strong> &mdash; Browse, contribute to, and manage TBP projects across 6 core categories</li>
   <li><strong>Reporting &amp; Feedback</strong> &mdash; Submit reports, reflections, and task feedback in standard document formats</li>
   <li><strong>Messaging &amp; Communication</strong> &mdash; Direct messaging and conversation tools between strategists</li>
-  <li><strong>Administration</strong> &mdash; Admin tools for user management, stage progression, role assignment, and oversight</li>
+  <li><strong>Referral System</strong> &mdash; Unique referral codes, commission tracking, wallet system, and payout requests</li>
+  <li><strong>Payment Processing</strong> &mdash; PayPal payment processing for onboarding fees and referral payouts</li>
+  <li><strong>Administration</strong> &mdash; Admin tools for user management, stage progression, role assignment, referral management, and oversight</li>
 </ul>
 
 <h2>2. System Overview</h2>
@@ -95,7 +98,7 @@
   <tr><td><strong>State Management</strong></td><td>Zustand + TanStack React Query</td></tr>
   <tr><td><strong>Form Handling</strong></td><td>React Hook Form + Zod validation</td></tr>
   <tr><td><strong>Animations</strong></td><td>Framer Motion</td></tr>
-  <tr><td><strong>Backend</strong></td><td>Next.js API Routes (36 endpoints)</td></tr>
+  <tr><td><strong>Backend</strong></td><td>Next.js API Routes (44 endpoints)</td></tr>
   <tr><td><strong>Database</strong></td><td>PostgreSQL via Supabase with Prisma ORM</td></tr>
   <tr><td><strong>Authentication</strong></td><td>NextAuth.js v5 with Credentials + Google providers</td></tr>
   <tr><td><strong>File Storage</strong></td><td>Supabase Storage for uploads</td></tr>
@@ -209,7 +212,98 @@
 
 <div class="page-break"></div>
 
-<h2>8. Getting Started</h2>
+<h2>8. Onboarding &amp; Fellowship</h2>
+
+<p>The TBP Global Strategist platform features a comprehensive 7-step onboarding process designed to collect participant information, establish legal agreements, and process fellowship payments.</p>
+
+<h3>Onboarding Steps</h3>
+
+<div class="stage-box">
+  <strong>Step 1 &mdash; Participant Details</strong><br>
+  <em>Account Creation &amp; Personal Information.</em> Create your account with email and password, then provide your full name, preferred name, phone number, city, country, LinkedIn URL, current status, areas of interest, and referral code (if applicable).
+</div>
+
+<div class="stage-box">
+  <strong>Step 2 &mdash; Overview</strong><br>
+  <em>Review &amp; Confirmation.</em> Review your submitted information and confirm accuracy before proceeding.
+</div>
+
+<div class="stage-box">
+  <strong>Step 3 &mdash; Fellowship Pathway</strong><br>
+  <em>Payment Plan Selection.</em> Choose between Standard Fellowship ($1,200) or Plus Fellowship ($1,500) pathways with different benefit tiers.
+</div>
+
+<div class="stage-box">
+  <strong>Step 4 &mdash; Agreement</strong><br>
+  <em>Legal Agreement Review.</em> Review the TBP fellowship agreement terms and conditions.
+</div>
+
+<div class="stage-box">
+  <strong>Step 5 &mdash; Terms Signing</strong><br>
+  <em>Terms Acceptance.</em> Accept 7 required terms covering code of conduct, intellectual property, privacy policy, refund policy, and accuracy declarations by checking each checkbox.
+</div>
+
+<div class="stage-box">
+  <strong>Step 6 &mdash; Payment</strong><br>
+  <em>Fellowship Payment Processing.</em> Complete your fellowship payment via PayPal. Payment is processed securely through our integrated payment provider.
+</div>
+
+<div class="stage-box">
+  <strong>Step 7 &mdash; Completion</strong><br>
+  <em>Onboarding Complete.</em> Confirmation of successful onboarding with next steps and pathway information.
+</div>
+
+<h3>Fellowship Pathways</h3>
+<table>
+  <tr><th>Pathway</th><th>Amount</th><th>Description</th></tr>
+  <tr><td><strong>Standard</strong></td><td>$1,200</td><td>Core fellowship benefits including platform access, work area assignment, and progression pathway</td></tr>
+  <tr><td><strong>Plus</strong></td><td>$1,500</td><td>Enhanced fellowship with additional benefits, priority project assignment, and extended support</td></tr>
+</table>
+
+<h3>Payment Provider</h3>
+<table>
+  <tr><th>Provider</th><th>Methods</th><th>Description</th></tr>
+  <tr><td><strong>PayPal</strong></td><td>PayPal Balance, Cards, Bank</td><td>PayPal checkout with multiple payment options</td></tr>
+</table>
+
+<blockquote>Fellowship payments are processed securely through PayPal. All payment information is encrypted and never stored on our servers.</blockquote>
+
+<h2>9. Referral System</h2>
+
+<p>The TBP Global Strategist platform includes a comprehensive referral system that rewards strategists for bringing new members into the network.</p>
+
+<h3>How Referrals Work</h3>
+<ol>
+  <li><strong>Generate Referral Code</strong> &mdash; Each strategist receives a unique referral code upon activation</li>
+  <li><strong>Share Code</strong> &mdash; Share your code with potential new strategists</li>
+  <li><strong>Registration Tracking</strong> &mdash; When someone registers using your code, they are linked to your account</li>
+  <li><strong>Payment Verification</strong> &mdash; Once the referred user completes their fellowship payment, the referral status updates</li>
+  <li><strong>Credit Processing</strong> &mdash; After a 30-day hold period, referral credits are automatically approved</li>
+  <li><strong>Wallet Balance</strong> &mdash; Approved credits appear in your referral wallet with available and paid balances</li>
+  <li><strong>Payout Request</strong> &mdash; Request payout of your available balance via bank transfer or PayPal</li>
+</ol>
+
+<h3>Referral Statuses</h3>
+<table>
+  <tr><th>Status</th><th>Description</th></tr>
+  <tr><td><strong>PENDING_REGISTRATION</strong></td><td>Referral link used, awaiting user registration</td></tr>
+  <tr><td><strong>PAYMENT_RECEIVED</strong></td><td>Referred user has completed fellowship payment</td></tr>
+  <tr><td><strong>WAITING_APPROVAL</strong></td><td>30-day hold period in progress</td></tr>
+  <tr><td><strong>APPROVED</strong></td><td>Referral credit approved and added to wallet</td></tr>
+  <tr><td><strong>PAID</strong></td><td>Payout processed and completed</td></tr>
+  <tr><td><strong>CANCELLED</strong></td><td>Referral cancelled or invalidated</td></tr>
+</table>
+
+<h3>Referral Wallet</h3>
+<table>
+  <tr><th>Field</th><th>Description</th></tr>
+  <tr><td><strong>Available Balance</strong></td><td>Credits approved and available for payout</td></tr>
+  <tr><td><strong>Paid Balance</strong></td><td>Total amount already paid out</td></tr>
+</table>
+
+<blockquote>Referral credits are processed automatically after a 30-day hold period to ensure payment validity. You can request payout once you have available balance in your wallet.</blockquote>
+
+<h2>10. Getting Started</h2>
 
 <h3>Prerequisites</h3>
 <ul>
@@ -219,7 +313,7 @@
 </ul>
 
 <h3>Platform Access</h3>
-<p>The platform is accessible via web browser at <strong>https://tbpglobalstrategist.vercel.app</strong>. Supported browsers include Chrome, Firefox, Safari, and Edge (latest versions).</p>
+<p>The platform is accessible via web browser at <strong>https://www.tbpglobalstrategist.com</strong>. Supported browsers include Chrome, Firefox, Safari, and Edge (latest versions).</p>
 
 <h2>9. Registration &amp; Onboarding</h2>
 
@@ -254,7 +348,7 @@
 <h3>Step 4: Submit Your Onboarding Reflection</h3>
 <p>Using the <strong>Submit Report / Task Feedback</strong> tool on your dashboard, submit a one-page reflection covering your understanding of TBP, aligned sector, project interests, expertise, and questions. Accepted formats: PDF, DOCX, PPTX, XLSX, CSV, TXT, RTF, ODT, ODS.</p>
 
-<h2>10. Profile Setup</h2>
+<h2>11. Profile Setup</h2>
 
 <table>
   <tr><th>Field</th><th>Description</th></tr>
@@ -271,7 +365,7 @@
 
 <div class="page-break"></div>
 
-<h2>11. Next Steps</h2>
+<h2>12. Next Steps</h2>
 
 <ol>
   <li><strong>Explore Your Dashboard</strong> &mdash; Review your personal dashboard to see your current stage, stats, and active projects</li>
@@ -280,6 +374,7 @@
   <li><strong>Browse Projects</strong> &mdash; Explore available TBP projects aligned with your expertise</li>
   <li><strong>Submit Your First Report</strong> &mdash; Use the submission tool to upload required reflections or task feedback</li>
   <li><strong>Connect with Strategists</strong> &mdash; Use the messaging system to connect with other strategists</li>
+  <li><strong>Share Your Referral Code</strong> &mdash; Invite new strategists using your unique referral code to earn commissions</li>
   <li><strong>Engage with Notifications</strong> &mdash; Stay informed about stage changes, assignments, and platform updates</li>
 </ol>
 
@@ -289,7 +384,7 @@
 
 <div style="text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid #d1d5db; color: #6b7280; font-size: 9pt;">
   TBP Global Strategist Platform &mdash; Project Overview &amp; Getting Started Guide<br>
-  Version 1.2 &mdash; July 2026 &mdash; https://tbpglobalstrategist.vercel.app
+  Version 1.3 &mdash; July 2026 &mdash; https://www.tbpglobalstrategist.com
 </div>
 
 </body>
