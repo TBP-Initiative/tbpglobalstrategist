@@ -11,8 +11,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ inactive: false })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
       select: { isActive: true },
     })
 

@@ -73,9 +73,8 @@ export async function POST(req: Request) {
     }
 
     try {
-      const normalizedEmail = data.email.toLowerCase()
-      const existing = await prisma.user.findUnique({
-        where: { email: normalizedEmail },
+      const existing = await prisma.user.findFirst({
+        where: { email: { equals: data.email, mode: "insensitive" } },
         include: { onboarding: true },
       })
 
@@ -104,7 +103,7 @@ export async function POST(req: Request) {
       const user = await prisma.user.create({
         data: {
           name: data.fullName,
-          email: normalizedEmail,
+          email: data.email.toLowerCase(),
           passwordHash,
           role: "STRATEGIST",
           isActive: false,

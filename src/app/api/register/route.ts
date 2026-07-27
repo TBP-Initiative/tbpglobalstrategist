@@ -40,7 +40,6 @@ export async function POST(request: Request) {
     }
 
     const data = parsed.data
-    const normalizedEmail = data.email.toLowerCase()
 
     if (!VALID_ROLES.includes(data.role as typeof VALID_ROLES[number])) {
       return NextResponse.json(
@@ -49,8 +48,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const existingUser = await prisma.user.findFirst({
+      where: { email: { equals: data.email, mode: "insensitive" } },
     })
 
     if (existingUser) {
@@ -75,7 +74,7 @@ export async function POST(request: Request) {
     const user = await prisma.user.create({
       data: {
         name: data.name,
-        email: normalizedEmail,
+        email: data.email.toLowerCase(),
         passwordHash,
         role: data.role as any,
         referralCode,
