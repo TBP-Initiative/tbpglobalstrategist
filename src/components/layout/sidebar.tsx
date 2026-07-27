@@ -98,10 +98,15 @@ export default function Sidebar({
   const [hasPaid, setHasPaid] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/payment-status")
-      .then((r) => r.json())
-      .then((d) => setHasPaid(d.hasPaid))
-      .catch(() => setHasPaid(false))
+    const checkPayment = () =>
+      fetch("/api/auth/payment-status")
+        .then((r) => r.json())
+        .then((d) => setHasPaid(d.hasPaid))
+        .catch(() => setHasPaid(false))
+
+    checkPayment()
+    window.addEventListener("payment-completed", checkPayment)
+    return () => window.removeEventListener("payment-completed", checkPayment)
   }, [])
 
   const sections = (navConfig[role] || navConfig.individual).map((section) => ({

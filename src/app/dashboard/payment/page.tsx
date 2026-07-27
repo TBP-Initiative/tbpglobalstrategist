@@ -203,6 +203,7 @@ export default function PaymentPage() {
                           return
                         }
                         setPaymentSuccess(true)
+                        window.dispatchEvent(new Event("payment-completed"))
                       } catch {
                         setPaypalError("Payment capture failed. Please try again.")
                         setLoading(false)
@@ -268,6 +269,7 @@ export default function PaymentPage() {
                           return
                         }
                         setPaymentSuccess(true)
+                        window.dispatchEvent(new Event("payment-completed"))
                       } catch {
                         setPaypalError("Test payment failed.")
                         setLoading(false)
