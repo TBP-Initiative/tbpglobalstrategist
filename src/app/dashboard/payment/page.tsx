@@ -213,7 +213,8 @@ export default function PaymentPage() {
                     }}
                     onError={(err) => {
                       console.error("PayPal error:", err)
-                      setPaypalError("PayPal encountered an error. Please try again.")
+                      const detail = typeof err === "object" && err !== null ? JSON.stringify(err) : String(err)
+                      setPaypalError("PayPal encountered an error: " + detail)
                       setLoading(false)
                     }}
                   />
