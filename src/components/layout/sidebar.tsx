@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -95,8 +95,21 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [hasPaid, setHasPaid] = useState<boolean | null>(null);
 
-  const sections = navConfig[role] || navConfig.individual;
+  useEffect(() => {
+    fetch("/api/auth/payment-status")
+      .then((r) => r.json())
+      .then((d) => setHasPaid(d.hasPaid))
+      .catch(() => setHasPaid(false))
+  }, [])
+
+  const sections = (navConfig[role] || navConfig.individual).map((section) => ({
+    ...section,
+    items: section.items.filter(
+      (item) => !(hasPaid && item.href === "/dashboard/payment")
+    ),
+  }));
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => ({ ...prev, [title]: !prev[title] }));
