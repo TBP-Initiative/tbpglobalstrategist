@@ -84,7 +84,7 @@ export default function PaymentPage() {
   }, [])
 
   useEffect(() => {
-    if (!sdkReady || !selectedPlan || !paypalRef.current || loading) return
+    if (!sdkReady || !selectedPlan || !paypalRef.current) return
 
     if (buttonsRef.current) {
       try { buttonsRef.current.close() } catch {}
@@ -156,7 +156,7 @@ export default function PaymentPage() {
     return () => {
       try { buttons.close() } catch {}
     }
-  }, [sdkReady, selectedPlan, loading])
+  }, [sdkReady, selectedPlan])
 
   if (paymentSuccess) {
     return (
