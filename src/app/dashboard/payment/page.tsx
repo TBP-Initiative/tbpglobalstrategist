@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
-import { Shield, Loader2, AlertCircle, CheckCircle2, CreditCard, Star, Zap } from "lucide-react"
+import { Shield, Loader2, CheckCircle2, Star, Zap } from "lucide-react"
 
 const PLANS = {
   STANDARD: {
@@ -38,14 +37,24 @@ const PLANS = {
   },
 }
 
+declare global {
+  interface Window {
+    paypal?: {
+      Buttons: (config: Record<string, unknown>) => { render: (el: HTMLElement) => void; close: () => void }
+    }
+  }
+}
+
 export default function PaymentPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedPlan, setSelectedPlan] = useState<"STANDARD" | "PLUS" | null>(null)
   const [loading, setLoading] = useState(false)
-  const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [sdkReady, setSdkReady] = useState(false)
+  const paypalRef = useRef<HTMLDivElement>(null)
+  const buttonsRef = useRef<{ close: () => void } | null>(null)
   const isTestMode = process.env.NODE_ENV !== "production"
 
   useEffect(() => {
@@ -58,10 +67,96 @@ export default function PaymentPage() {
     fetch("/api/payment")
       .then((r) => r.json())
       .then((d) => {
-        if (d.paypalClientId) setPaypalClientId(d.paypalClientId)
+        if (d.paypalClientId) {
+          if (window.paypal) {
+            setSdkReady(true)
+            return
+          }
+          const script = document.createElement("script")
+          script.src = `https://www.paypal.com/sdk/js?client-id=${d.paypalClientId}&currency=USD&intent=capture`
+          script.async = true
+          script.onload = () => setSdkReady(true)
+          script.onerror = () => setPaypalError("Failed to load PayPal SDK. Please refresh and try again.")
+          document.body.appendChild(script)
+        }
       })
-      .catch(() => {})
+      .catch(() => setPaypalError("Failed to load PayPal configuration."))
   }, [])
+
+  useEffect(() => {
+    if (!sdkReady || !selectedPlan || !paypalRef.current || loading) return
+
+    if (buttonsRef.current) {
+      try { buttonsRef.current.close() } catch {}
+      buttonsRef.current = null
+    }
+
+    paypalRef.current.innerHTML = ""
+
+    if (!window.paypal) return
+
+    const buttons = window.paypal.Buttons({
+      style: { layout: "vertical", height: 50, color: "blue", shape: "rect", label: "paypal" },
+      createOrder: async () => {
+        setPaypalError(null)
+        setLoading(true)
+        try {
+          const res = await fetch("/api/payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pathway: selectedPlan }),
+          })
+          const result = await res.json()
+          if (result.paypalOrderId) {
+            setLoading(false)
+            return result.paypalOrderId
+          }
+          const errMsg = result.error || "Failed to create PayPal order."
+          setPaypalError(errMsg)
+          setLoading(false)
+          throw new Error(errMsg)
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Failed to initiate payment."
+          setPaypalError(msg)
+          setLoading(false)
+          throw err
+        }
+      },
+      onApprove: async (details: { orderID: string }) => {
+        setLoading(true)
+        try {
+          const captureRes = await fetch("/api/payment/capture", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: details.orderID }),
+          })
+          const captureData = await captureRes.json()
+          if (captureData.error) {
+            setPaypalError(captureData.error)
+            setLoading(false)
+            return
+          }
+          setPaymentSuccess(true)
+          window.dispatchEvent(new Event("payment-completed"))
+        } catch {
+          setPaypalError("Payment capture failed. Please try again.")
+          setLoading(false)
+        }
+      },
+      onError: (err: unknown) => {
+        console.error("PayPal error:", err)
+        setPaypalError("Payment error occurred. Please try again.")
+        setLoading(false)
+      },
+    })
+
+    buttons.render(paypalRef.current)
+    buttonsRef.current = buttons
+
+    return () => {
+      try { buttons.close() } catch {}
+    }
+  }, [sdkReady, selectedPlan, loading])
 
   if (paymentSuccess) {
     return (
@@ -75,10 +170,7 @@ export default function PaymentPage() {
             <p className="mt-2 text-gray-600">
               Welcome to the TBP Global Strategist Fellowship. Your payment has been confirmed.
             </p>
-            <Button
-              className="mt-6"
-              onClick={() => router.push("/dashboard")}
-            >
+            <Button className="mt-6" onClick={() => router.push("/dashboard")}>
               Go to Dashboard
             </Button>
           </CardContent>
@@ -100,25 +192,16 @@ export default function PaymentPage() {
         {(["STANDARD", "PLUS"] as const).map((planKey) => {
           const plan = PLANS[planKey]
           const isSelected = selectedPlan === planKey
-
           return (
             <Card
               key={planKey}
-              className={`cursor-pointer transition-all ${
-                isSelected
-                  ? "ring-2 ring-indigo-600 shadow-lg"
-                  : "hover:shadow-md"
-              }`}
+              className={`cursor-pointer transition-all ${isSelected ? "ring-2 ring-indigo-600 shadow-lg" : "hover:shadow-md"}`}
               onClick={() => setSelectedPlan(planKey)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    {planKey === "PLUS" ? (
-                      <Star className="h-5 w-5 text-indigo-600" />
-                    ) : (
-                      <Zap className="h-5 w-5 text-gray-600" />
-                    )}
+                    {planKey === "PLUS" ? <Star className="h-5 w-5 text-indigo-600" /> : <Zap className="h-5 w-5 text-gray-600" />}
                     {plan.name}
                   </CardTitle>
                   <span className="text-2xl font-bold text-gray-900">{plan.display}</span>
@@ -146,79 +229,14 @@ export default function PaymentPage() {
             <CardContent className="p-6">
               <div className="mb-4 flex items-center justify-between rounded-lg bg-gray-50 p-4">
                 <div>
-                  <p className="font-semibold text-gray-900">
-                    {PLANS[selectedPlan].name}
-                  </p>
+                  <p className="font-semibold text-gray-900">{PLANS[selectedPlan].name}</p>
                   <p className="text-sm text-gray-500">Programme Fee</p>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {PLANS[selectedPlan].display}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{PLANS[selectedPlan].display}</p>
               </div>
 
-              {paypalClientId ? (
-                <PayPalScriptProvider
-                  options={{
-                    clientId: paypalClientId,
-                    currency: "USD",
-                    intent: "capture",
-                  }}
-                >
-                  <PayPalButtons
-                    style={{ layout: "vertical", height: 50 }}
-                    createOrder={async () => {
-                      setPaypalError(null)
-                      setLoading(true)
-                      try {
-                        const res = await fetch("/api/payment", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ pathway: selectedPlan }),
-                        })
-                        const result = await res.json()
-                        setLoading(false)
-                        if (result.paypalOrderId) {
-                          return result.paypalOrderId
-                        }
-                        const errMsg = result.error || "Failed to create PayPal order."
-                        setPaypalError(errMsg)
-                        throw new Error(errMsg)
-                      } catch (err) {
-                        const msg = err instanceof Error ? err.message : "Failed to initiate payment."
-                        setPaypalError(msg)
-                        setLoading(false)
-                        throw err
-                      }
-                    }}
-                    onApprove={async (details) => {
-                      setLoading(true)
-                      try {
-                        const captureRes = await fetch("/api/payment/capture", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ orderId: details.orderID }),
-                        })
-                        const captureData = await captureRes.json()
-                        if (captureData.error) {
-                          setPaypalError(captureData.error)
-                          setLoading(false)
-                          return
-                        }
-                        setPaymentSuccess(true)
-                        window.dispatchEvent(new Event("payment-completed"))
-                      } catch {
-                        setPaypalError("Payment capture failed. Please try again.")
-                        setLoading(false)
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal error:", err)
-                      const detail = typeof err === "object" && err !== null ? JSON.stringify(err) : String(err)
-                      setPaypalError("PayPal encountered an error: " + detail)
-                      setLoading(false)
-                    }}
-                  />
-                </PayPalScriptProvider>
+              {sdkReady ? (
+                <div ref={paypalRef} />
               ) : (
                 <div className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
                   <Loader2 size={16} className="animate-spin" />
@@ -247,9 +265,7 @@ export default function PaymentPage() {
               {isTestMode && (
                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                   <p className="mb-2 text-xs font-semibold text-amber-700">Test Mode</p>
-                  <p className="mb-3 text-xs text-amber-600">
-                    Skip payment to test without real charges.
-                  </p>
+                  <p className="mb-3 text-xs text-amber-600">Skip payment to test without real charges.</p>
                   <Button
                     variant="outline"
                     size="sm"
@@ -260,10 +276,7 @@ export default function PaymentPage() {
                         const res = await fetch("/api/payment/capture", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            orderId: "TEST-MOCK-" + Date.now(),
-                            testMode: true,
-                          }),
+                          body: JSON.stringify({ orderId: "TEST-MOCK-" + Date.now(), testMode: true }),
                         })
                         const d = await res.json()
                         if (d.error) {
