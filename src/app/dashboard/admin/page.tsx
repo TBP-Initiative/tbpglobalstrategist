@@ -9,34 +9,44 @@ export default async function AdminDashboardPage() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/dashboard")
 
-  const [userCount, projectCount, orgCount, messages, activityLogs, recentUsers, recentProjects, queueItems] = await Promise.all([
-    prisma.user.count({ where: { isActive: true } }),
-    prisma.project.count(),
-    prisma.organization.count(),
-    prisma.message.count(),
-    prisma.activityLog.count(),
-    prisma.user.findMany({
-      where: { isActive: true },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { createdProjects: true } } },
-    }),
-    prisma.project.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, status: true, budget: true, createdAt: true, createdBy: { select: { name: true } }, organization: { select: { name: true } } },
-    }),
-    prisma.user.findMany({
-      where: { role: "STRATEGIST", isActive: true },
-      take: 4,
-      orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, email: true, role: true, createdAt: true, strategistProfile: { select: { title: true } } },
-    }),
-  ])
+  let userCount = 0, projectCount = 0, orgCount = 0, messages = 0, activityLogs = 0
+  let strategistCount = 0, activeProjects = 0, completedProjects = 0
+  let recentUsers: any[] = [], recentProjects: any[] = [], queueItems: any[] = []
 
-  const strategistCount = await prisma.user.count({ where: { role: "STRATEGIST", isActive: true } })
-  const activeProjects = await prisma.project.count({ where: { status: "ACTIVE" } })
-  const completedProjects = await prisma.project.count({ where: { status: "COMPLETED" } })
+  try {
+    const [uc, pc, oc, mc, alc, ru, rp, qi, sc, ap, cp] = await Promise.all([
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.project.count(),
+      prisma.organization.count(),
+      prisma.message.count(),
+      prisma.activityLog.count(),
+      prisma.user.findMany({
+        where: { isActive: true },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { createdProjects: true } } },
+      }),
+      prisma.project.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, title: true, status: true, budget: true, createdAt: true, createdBy: { select: { name: true } }, organization: { select: { name: true } } },
+      }),
+      prisma.user.findMany({
+        where: { role: "STRATEGIST", isActive: true },
+        take: 4,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, name: true, email: true, role: true, createdAt: true, strategistProfile: { select: { title: true } } },
+      }),
+      prisma.user.count({ where: { role: "STRATEGIST", isActive: true } }),
+      prisma.project.count({ where: { status: "ACTIVE" } }),
+      prisma.project.count({ where: { status: "COMPLETED" } }),
+    ])
+    userCount = uc; projectCount = pc; orgCount = oc; messages = mc; activityLogs = alc
+    recentUsers = ru; recentProjects = rp; queueItems = qi
+    strategistCount = sc; activeProjects = ap; completedProjects = cp
+  } catch (err) {
+    console.error("Admin dashboard data fetch error:", err)
+  }
 
   const serializedUsers = recentUsers.map((u) => ({
     id: u.id,
