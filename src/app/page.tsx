@@ -590,7 +590,7 @@ function StrategistsSection() {
 
 function FellowshipCTASection() {
   return (
-    <section className="relative py-20">
+    <section className="relative py-20 mb-24">
       <div className="absolute inset-0 gradient-hero" />
       <div className="absolute inset-0">
         <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-[96px]" />
