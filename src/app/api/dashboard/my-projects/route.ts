@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { stripHtml } from "@/lib/project-utils"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     const session = await auth()

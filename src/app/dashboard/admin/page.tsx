@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { AdminDashboardClient } from "./admin-client"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminDashboardPage() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/dashboard")
