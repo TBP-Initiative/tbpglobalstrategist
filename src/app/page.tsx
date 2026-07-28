@@ -32,6 +32,7 @@ import {
   ScrollText,
   Blocks,
   Orbit,
+  Download,
 } from "lucide-react"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
@@ -587,6 +588,52 @@ function StrategistsSection() {
   )
 }
 
+function FellowshipCTASection() {
+  return (
+    <section className="relative py-20">
+      <div className="absolute inset-0 gradient-hero" />
+      <div className="absolute inset-0">
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-[96px]" />
+        <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-purple-500/20 rounded-full blur-[96px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-5xl px-0 text-center">
+        <AnimatedSection>
+          <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary backdrop-blur-sm">
+            Fellowship Program
+          </Badge>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <GradientText from="from-white" via="via-blue-200" to="to-cyan-200">
+              TBP Global Strategist Fellowship
+            </GradientText>
+          </h2>
+          <p className="mx-auto mt-4 max-w-4xl text-lg leading-loose tracking-wide text-white/60">
+            Discover the full scope of the Fellowship — eligibility criteria, programme structure, strategic pathways, and the impact you can make. Download the prospectus to get started.
+          </p>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.2} className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a href="/docs/TBP_Global_Strategist_Fellowship.pdf" download>
+            <Button className="h-12 rounded-full bg-primary px-8 text-base font-medium text-primary-fg shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105">
+              <Download size={16} className="mr-2" />
+              Download Prospectus
+            </Button>
+          </a>
+          <Link href="/register">
+            <Button
+              variant="outline"
+              className="h-12 rounded-full border-white/20 bg-white/5 px-8 text-base font-medium text-white backdrop-blur-sm transition-all hover:bg-white/10 hover:border-white/30 hover:scale-105"
+            >
+              Apply Now
+              <ArrowUpRight size={16} className="ml-2" />
+            </Button>
+          </Link>
+        </AnimatedSection>
+      </div>
+    </section>
+  )
+}
+
 function ProjectsSection() {
   return (
     <section className="relative pb-24">
@@ -842,6 +889,7 @@ export default function Home() {
         <HeroSection />
         <FeaturesSection />
         <StrategistsSection />
+        <FellowshipCTASection />
         <ProjectsSection />
         <InnovationSection />
         <InitiativesSection />
