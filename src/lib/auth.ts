@@ -10,7 +10,7 @@ import { authConfig } from "@/lib/auth.config";
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account }) {

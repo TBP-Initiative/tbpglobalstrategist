@@ -28,11 +28,22 @@ export const authConfig: NextAuthConfig = {
 
       return true;
     },
-    jwt({ token, user }) {
+    jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
+      // Strip adapter-injected OAuth fields to keep JWT small
+      delete (token as any).picture
+      delete (token as any).provider
+      delete (token as any).providerAccountId
+      delete (token as any).access_token
+      delete (token as any).refresh_token
+      delete (token as any).expires_at
+      delete (token as any).token_type
+      delete (token as any).scope
+      delete (token as any).id_token
+      delete (token as any).session_state
       return token;
     },
     session({ session, token }) {
