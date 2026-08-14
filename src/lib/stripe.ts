@@ -13,15 +13,15 @@ export function getStripe(): Stripe {
 
 export const STRIPE_PLANS = {
   STANDARD: {
-    amount: 120000,
-    currency: "usd",
-    name: "Standard Fellowship",
-    description: "TBP Global Strategist Fellowship - Standard Pathway",
-  },
-  PLUS: {
     amount: 150000,
     currency: "usd",
-    name: "Fellowship Plus",
-    description: "TBP Global Strategist Fellowship - Plus Pathway",
+    name: "TBP Global Strategist Fellowship",
+    description: "TBP Global Strategist Fellowship",
+  },
+  PLUS: {
+    amount: 750000,
+    currency: "usd",
+    name: "Applied R&D & Technology Development",
+    description: "Applied R&D & Technology Development",
   },
 } as const

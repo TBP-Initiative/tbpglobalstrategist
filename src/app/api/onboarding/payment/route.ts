@@ -6,14 +6,14 @@ export const dynamic = "force-dynamic"
 
 const PLANS = {
   STANDARD: {
-    amount: 1200,
-    name: "Standard Fellowship",
-    description: "TBP Global Strategist Fellowship - Standard Pathway",
+    amount: 1500,
+    name: "TBP Global Strategist Fellowship",
+    description: "TBP Global Strategist Fellowship",
   },
   PLUS: {
-    amount: 1500,
-    name: "Fellowship Plus",
-    description: "TBP Global Strategist Fellowship - Plus Pathway",
+    amount: 7500,
+    name: "Applied R&D & Technology Development",
+    description: "Applied R&D & Technology Development",
   },
 }
 

@@ -10,7 +10,7 @@ interface StepCompleteProps {
 
 export function StepComplete({ data }: StepCompleteProps) {
   const pathway = (data?.pathway as string) || "STANDARD"
-  const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
+  const amount = pathway === "PLUS" ? "$7,500" : "$1,500"
   const paymentRef = (data?.paymentReference as string) || null
   const paymentProvider = (data?.paymentProvider as string) || null
   const paidAt = data?.paidAt ? new Date(data.paidAt as string) : new Date()
@@ -39,7 +39,7 @@ export function StepComplete({ data }: StepCompleteProps) {
           <div className="flex justify-between">
             <span className="text-gray-500">Programme</span>
             <span className="font-medium text-gray-900">
-              {pathway === "PLUS" ? "Fellowship Plus" : "Standard Fellowship"}
+              {pathway === "PLUS" ? "Applied R&D & Technology Development" : "TBP Global Strategist Fellowship"}
             </span>
           </div>
           <div className="flex justify-between">

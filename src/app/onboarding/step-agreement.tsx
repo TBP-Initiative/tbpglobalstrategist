@@ -99,7 +99,7 @@ export function StepAgreement({ data, pathway, onNext, onBack, saving }: StepAgr
           placeholder="Type your full legal name as signature"
           className="mt-3"
         />
-        <p className="mt-2 text-xs text-gray-400">Selected pathway: {pathway === "PLUS" ? "Fellowship Plus \u2014 US$1,500" : "Standard Fellowship \u2014 US$1,200"}</p>
+        <p className="mt-2 text-xs text-gray-400">Selected pathway: {pathway === "PLUS" ? "Applied R&D & Technology Development \u2014 US$7,500" : "TBP Global Strategist Fellowship \u2014 US$1,500"}</p>
       </div>
 
       <div className="mt-8 flex justify-between">

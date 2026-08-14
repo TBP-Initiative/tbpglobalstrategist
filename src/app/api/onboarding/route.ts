@@ -234,7 +234,7 @@ function mapStepData(step: number, data: Record<string, unknown>) {
       break
     case 3:
       mapped.pathway = data.pathway
-      mapped.pathwayAmount = data.pathway === "PLUS" ? 1500 : 1200
+      mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 1500
       break
     case 5:
       mapped.signatureName = data.signatureName

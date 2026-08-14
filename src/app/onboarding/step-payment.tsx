@@ -21,7 +21,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [cancelled, setCancelled] = useState(false)
   const pathway = pathwayProp || (data?.pathway as string) || "STANDARD"
-  const amount = pathway === "PLUS" ? "$1,500" : "$1,200"
+  const amount = pathway === "PLUS" ? "$7,500" : "$1,500"
   const isTestMode = process.env.NODE_ENV !== "production"
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-gray-900">
-              {pathway === "PLUS" ? "Fellowship Plus" : "Standard Fellowship"}
+              {pathway === "PLUS" ? "Applied R&D & Technology Development" : "TBP Global Strategist Fellowship"}
             </p>
             <p className="text-xs text-gray-500">Programme Fee</p>
           </div>
