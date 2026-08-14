@@ -4,7 +4,7 @@ import { getApplication, postApplication } from "@/lib/application-service"
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  return getApplication("ONBOARDING")
+  return getApplication("INSTITUTE_APPLICATION")
 }
 
 export async function POST(req: Request) {
@@ -16,5 +16,5 @@ export async function POST(req: Request) {
   }
 
   const { step, ...data } = body
-  return postApplication("ONBOARDING", step, data)
+  return postApplication("INSTITUTE_APPLICATION", step, data)
 }

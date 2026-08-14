@@ -58,8 +58,8 @@ export default function LoginPage() {
       const checkData = await checkRes.json()
 
       if (checkRes.ok && checkData.inactive) {
-        toast.info("Please complete your onboarding and payment to activate your account.")
-        router.push("/onboarding")
+        toast.info("Please complete your application and payment to activate your account.")
+        router.push(checkData.source === "INSTITUTE_APPLICATION" ? "/apply" : "/onboarding")
         return
       }
 

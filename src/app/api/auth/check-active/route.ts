@@ -13,11 +13,11 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findFirst({
       where: { email: { equals: email, mode: "insensitive" } },
-      select: { isActive: true },
+      select: { isActive: true, onboarding: { select: { source: true } } },
     })
 
     if (user && !user.isActive) {
-      return NextResponse.json({ inactive: true })
+      return NextResponse.json({ inactive: true, source: user.onboarding?.source || "ONBOARDING" })
     }
 
     return NextResponse.json({ inactive: false })

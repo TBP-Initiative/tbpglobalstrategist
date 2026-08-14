@@ -468,6 +468,7 @@ model OnboardingSubmission {
   userId            String            @unique
   status            OnboardingStatus  @default(IN_PROGRESS)
   currentStep       Int               @default(1)
+  source            String            @default("ONBOARDING")
 
   // Step 1: Participant Details
   fullName          String?
@@ -480,6 +481,20 @@ model OnboardingSubmission {
   areasOfInterest   String?           @default("[]")
   otherArea         String?
   referredBy        String?
+
+  // Institute Application: Personal Details
+  dateOfBirth       String?
+  nationality       String?
+
+  // Institute Application: Professional Background
+  highestQualification String?
+  institution       String?
+  fieldOfStudy      String?
+  yearsOfExperience Int?
+
+  // Institute Application: Tentative Project & Objectives
+  tentativeProject  String?
+  fellowshipObjectives String?
 
   // Step 3: Fellowship Pathway
   pathway           FellowshipPathway?

@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       .then((r) => r.json())
       .then((data) => {
         if (data.inactive) {
-          router.push("/onboarding")
+          router.push(data.source === "INSTITUTE_APPLICATION" ? "/apply" : "/onboarding")
         } else {
           setIsActive(true)
         }
