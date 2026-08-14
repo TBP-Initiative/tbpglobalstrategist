@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       return new NextResponse(buffer, {
         headers: {
           "Content-Type": mimeType,
-          "Content-Disposition": `attachment; filename="${safeName}.${ext}"`,
+          "Content-Disposition": `inline; filename="${safeName}.${ext}"`,
           "Content-Length": String(buffer.length),
         },
       })
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": sub.fileType || "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `inline; filename="${filename}"`,
         "Content-Length": String(buffer.length),
       },
     })

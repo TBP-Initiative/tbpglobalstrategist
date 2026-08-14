@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { FileText, Trophy, GitBranch, Users, Clock, Download } from "lucide-react"
+import { FileText, Trophy, GitBranch, Users, Clock, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ActivityTimelineProps {
@@ -104,12 +104,12 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
                   </div>
                   {activity.fileUrl && (
                     <a
-                      href={`/api/submissions/download?id=${activity.id}`}
+                      href={activity.fileUrl.startsWith("data:") ? `/api/submissions/download?id=${activity.id}` : activity.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                     >
-                      <Download className="h-3 w-3" />
+                      <ExternalLink className="h-3 w-3" />
                       {activity.title}
                       {activity.fileSize ? ` · ${(activity.fileSize / 1024).toFixed(0)} KB` : ""}
                     </a>

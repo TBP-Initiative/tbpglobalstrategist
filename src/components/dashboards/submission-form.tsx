@@ -189,7 +189,7 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
               {stageSubmissions.map((sub) => (
                 <a
                   key={sub.id}
-                  href={sub.fileUrl}
+                  href={sub.fileUrl.startsWith("data:") ? `/api/submissions/download?id=${sub.id}` : sub.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-xl border border-border p-3 transition-colors hover:bg-muted/30"
