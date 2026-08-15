@@ -494,6 +494,8 @@ model OnboardingSubmission {
 
   // Institute Application: Tentative Project & Objectives
   tentativeProject  String?
+  tentativeProjectId String?
+  secondaryProjectIds String?        @default("[]")
   fellowshipObjectives String?
 
   // Step 3: Fellowship Pathway

@@ -138,7 +138,7 @@ function ApplicationContent() {
       case 3: return <StepProfessionalBackground data={application} onNext={nextStep} onBack={prevStep} />
       case 4: return <StepFieldOfInterest data={application} onNext={nextStep} onBack={prevStep} />
       case 5: return <StepPathway data={application} onNext={nextStep} onBack={prevStep} />
-      case 6: return <StepTentativeProject data={application} onNext={nextStep} onBack={prevStep} />
+      case 6: return <StepTentativeProject data={application} pathway={pathway} onNext={nextStep} onBack={prevStep} />
       case 7: return <StepObjectives data={application} onNext={nextStep} onBack={prevStep} />
       case 8: return <StepTerms data={application} pathway={pathway} onNext={nextStep} onBack={prevStep} saving={saving} />
       case 9: return <StepPayment data={application} pathway={pathway} onNext={nextStep} onBack={prevStep} />

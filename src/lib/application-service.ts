@@ -135,7 +135,13 @@ function mapApplicationStep(step: number, data: StepData) {
       mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 1500
       break
     case 6:
-      mapped.tentativeProject = data.tentativeProject
+      mapped.tentativeProjectId = data.tentativeProjectId
+      if (Array.isArray(data.secondaryProjectIds) && data.secondaryProjectIds.length > 0) {
+        mapped.secondaryProjectIds = JSON.stringify(data.secondaryProjectIds)
+      } else {
+        mapped.secondaryProjectIds = "[]"
+      }
+      if (data.tentativeProject) mapped.tentativeProject = data.tentativeProject
       break
     case 7:
       mapped.fellowshipObjectives = data.fellowshipObjectives
@@ -203,6 +209,7 @@ export async function getApplication(source: ApplicationSource) {
     const result = {
       ...submission,
       areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
+      secondaryProjectIds: submission.secondaryProjectIds ? JSON.parse(submission.secondaryProjectIds) : [],
       isLoggedIn: true,
       source,
     }
@@ -363,6 +370,7 @@ export async function postApplication(source: ApplicationSource, step: number, d
     const result = {
       ...submission,
       areasOfInterest: submission.areasOfInterest ? JSON.parse(submission.areasOfInterest) : [],
+      secondaryProjectIds: submission.secondaryProjectIds ? JSON.parse(submission.secondaryProjectIds) : [],
       isLoggedIn: true,
       source,
     }
