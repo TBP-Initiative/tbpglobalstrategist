@@ -51,7 +51,7 @@ export function ImageUpload({ value, onChange, label = "Featured Image" }: Image
       if (!res.ok) throw new Error("Upload failed")
       const data = await res.json()
       onChange(data.url)
-      toast.success("Image uploaded")
+      toast.success("Image uploaded & optimized to WebP")
     } catch {
       toast.error("Failed to upload image")
     } finally {

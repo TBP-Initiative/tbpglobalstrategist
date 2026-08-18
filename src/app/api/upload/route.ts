@@ -1,5 +1,25 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import sharp from "sharp"
+
+const IMAGE_MAX_WIDTH = 1600
+const IMAGE_MAX_HEIGHT = 1600
+const IMAGE_QUALITY = 80
+
+async function optimizeImage(buffer: Buffer, mimeType: string): Promise<{ buffer: Buffer; mimeType: string; ext: string }> {
+  if (!mimeType.startsWith("image/") || mimeType === "image/gif") {
+    return { buffer, mimeType, ext: mimeType === "image/gif" ? "gif" : "bin" }
+  }
+  try {
+    const optimized = await sharp(buffer)
+      .resize(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: IMAGE_QUALITY })
+      .toBuffer()
+    return { buffer: optimized, mimeType: "image/webp", ext: "webp" }
+  } catch {
+    return { buffer, mimeType, ext: mimeType.split("/")[1]?.replace("jpeg", "jpg") || "jpg" }
+  }
+}
 
 async function supabaseFetch(url: string, options: RequestInit = {}) {
   const supabaseUrl = process.env.SUPABASE_URL!
@@ -47,17 +67,26 @@ export async function POST(request: Request) {
     // Try Supabase Storage first
     try {
       await ensureBucket()
-      const ext = file.name.split(".").pop() ?? "jpg"
-      const rawName = (formData.get("filename") as string)?.trim() || file.name.replace(/\.[^.]+$/, "")
-      const safeName = rawName.replace(/[^a-zA-Z0-9\s\-_.]/g, "").replace(/\s+/g, "-").slice(0, 80) || `upload-${Date.now()}`
+      const safeName = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9\s\-_.]/g, "").replace(/\s+/g, "-").slice(0, 80) || `upload-${Date.now()}`
+
+      let buffer = Buffer.from(await file.arrayBuffer())
+      let mimeType = file.type || "application/octet-stream"
+      let ext = file.name.split(".").pop() ?? "bin"
+
+      if (mimeType.startsWith("image/")) {
+        const optimized = await optimizeImage(buffer, mimeType)
+        buffer = optimized.buffer
+        mimeType = optimized.mimeType
+        ext = optimized.ext
+      }
+
       const filename = `projects/${Date.now()}-${safeName}.${ext}`
-      const buffer = Buffer.from(await file.arrayBuffer())
 
       const res = await fetch(`${supabaseUrl}/storage/v1/object/projects/${filename}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": file.type || "application/octet-stream",
+          "Content-Type": mimeType,
         },
         body: buffer,
       })
