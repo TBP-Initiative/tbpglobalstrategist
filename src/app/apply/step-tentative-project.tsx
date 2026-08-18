@@ -36,14 +36,15 @@ export function StepTentativeProject({ data, pathway, onNext, onBack }: StepTent
   }, [data])
 
   useEffect(() => {
-    fetch("/api/apply/projects")
+    const qs = pathway ? `?pathway=${pathway}` : ""
+    fetch(`/api/apply/projects${qs}`)
       .then((r) => r.json())
       .then((list) => {
         if (Array.isArray(list)) setProjects(list)
       })
       .catch(() => setProjects([]))
       .finally(() => setLoading(false))
-  }, [])
+  }, [pathway])
 
   const toggleSecondary = (id: string) => {
     setError("")
@@ -121,7 +122,7 @@ export function StepTentativeProject({ data, pathway, onNext, onBack }: StepTent
         <Info size={16} className="mt-0.5 shrink-0 text-blue-600" />
         <p className="text-xs leading-relaxed text-blue-900">
           Select a tentative TBP project below. Your selection can be changed after your admission is approved &mdash;
-          approval is typically confirmed within 24 hours of successful payment.
+          approval is typically confirmed within 24 hours.
         </p>
       </div>
 

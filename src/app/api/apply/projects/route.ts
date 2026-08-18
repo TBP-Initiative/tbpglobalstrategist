@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 function parseFirstCategory(cat: string | null): string {
@@ -15,10 +15,24 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&#x2F;/g, "/")
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const pathway = request.nextUrl.searchParams.get("pathway")
+
+  const eligibleValues: string[] =
+    pathway === "PLUS"
+      ? ["BOTH", "APPLIED_RD"]
+      : pathway === "STANDARD"
+        ? ["BOTH", "FELLOWSHIP"]
+        : []
+
   try {
     const projects = await prisma.project.findMany({
-      where: { status: "ACTIVE" },
+      where: {
+        status: "ACTIVE",
+        ...(eligibleValues.length > 0
+          ? { eligiblePathways: { in: eligibleValues } }
+          : {}),
+      },
       select: {
         id: true,
         title: true,
