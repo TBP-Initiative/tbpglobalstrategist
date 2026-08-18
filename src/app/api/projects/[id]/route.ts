@@ -84,7 +84,7 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories } = body
+    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories, eligiblePathways } = body
 
     const data: Record<string, unknown> = {}
 
@@ -116,6 +116,7 @@ export async function PATCH(
     if (organizationId !== undefined) data.organizationId = organizationId ?? null
     if (startDate !== undefined) data.startDate = startDate ? new Date(startDate) : null
     if (endDate !== undefined) data.endDate = endDate ? new Date(endDate) : null
+    if (eligiblePathways !== undefined) data.eligiblePathways = eligiblePathways
 
     const updated = await prisma.project.update({
       where: { id },
@@ -132,6 +133,7 @@ export async function PATCH(
         image: true,
         category: true,
         description: true,
+        eligiblePathways: true,
         shortDescription: true,
         objectives: true,
         strategicRelevance: true,

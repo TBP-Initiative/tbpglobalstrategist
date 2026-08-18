@@ -87,6 +87,7 @@ type ProjectData = {
   organization: { id?: string; name: string; slug: string } | null
   createdBy: { id?: string; name: string | null; email: string }
   contributors: number
+  eligiblePathways?: string
 }
 
 type OrganizationData = {
@@ -129,6 +130,7 @@ function NewProjectDialog({
   const [objectives, setObjectives] = useState("")
   const [strategicRelevance, setStrategicRelevance] = useState("")
   const [status, setStatus] = useState("DRAFT")
+  const [eligiblePathways, setEligiblePathways] = useState("BOTH")
   const [budget, setBudget] = useState("")
   const [organizationId, setOrganizationId] = useState("")
   const [newOrgName, setNewOrgName] = useState("")
@@ -188,6 +190,7 @@ function NewProjectDialog({
           image: image.trim() || undefined,
           categories: categories.length > 0 ? categories : undefined,
           status,
+          eligiblePathways,
           budget: budget ? Number(budget) : undefined,
           organizationId: organizationId || undefined,
           newOrganizationName: newOrgName.trim() || undefined,
@@ -246,6 +249,7 @@ function NewProjectDialog({
     setStrategicRelevance("")
     setImage("")
     setStatus("DRAFT")
+    setEligiblePathways("BOTH")
     setBudget("")
     setOrganizationId("")
     setStartDate("")
@@ -370,6 +374,18 @@ function NewProjectDialog({
               <Label htmlFor="budget">Budget ($)</Label>
               <Input id="budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="250000" />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="eligiblePathways">Eligible Pathways</Label>
+            <Select value={eligiblePathways} onValueChange={setEligiblePathways}>
+              <SelectTrigger id="eligiblePathways" placeholder="Select pathway...">
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BOTH">Both (Fellowship + R&D)</SelectItem>
+                <SelectItem value="FELLOWSHIP">Fellowship Only</SelectItem>
+                <SelectItem value="APPLIED_RD">Applied R&D Only</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="org">Organization</Label>
@@ -550,6 +566,7 @@ function EditProjectDialog({
   const [objectives, setObjectives] = useState("")
   const [strategicRelevance, setStrategicRelevance] = useState("")
   const [status, setStatus] = useState("DRAFT")
+  const [eligiblePathways, setEligiblePathways] = useState("BOTH")
   const [budget, setBudget] = useState("")
   const [organizationId, setOrganizationId] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -583,6 +600,7 @@ function EditProjectDialog({
       setObjectives(project.objectives ?? "")
       setStrategicRelevance(project.strategicRelevance ?? "")
       setStatus(project.status)
+      setEligiblePathways(project.eligiblePathways ?? "BOTH")
       setBudget(project.budget ?? "")
       setOrganizationId(project.organization?.id ?? "")
       setStartDate(project.startDate ? project.startDate.slice(0, 10) : "")
@@ -666,6 +684,7 @@ function EditProjectDialog({
           strategicRelevance: strategicRelevance.trim() || undefined,
           categories: categories.length > 0 ? categories : undefined,
           status,
+          eligiblePathways,
           budget: budget ? Number(budget) : undefined,
           organizationId: organizationId || undefined,
           startDate: startDate || undefined,
@@ -820,6 +839,18 @@ function EditProjectDialog({
               <Label htmlFor="edit-budget">Budget ($)</Label>
               <Input id="edit-budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="250000" />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-eligiblePathways">Eligible Pathways</Label>
+            <Select value={eligiblePathways} onValueChange={setEligiblePathways}>
+              <SelectTrigger id="edit-eligiblePathways" placeholder="Select pathway...">
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BOTH">Both (Fellowship + R&D)</SelectItem>
+                <SelectItem value="FELLOWSHIP">Fellowship Only</SelectItem>
+                <SelectItem value="APPLIED_RD">Applied R&D Only</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-org">Organization</Label>
