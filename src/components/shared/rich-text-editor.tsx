@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useCallback } from "react"
+import { useRef, useCallback, useEffect } from "react"
 
 interface RichTextEditorProps {
   value: string
@@ -12,8 +12,21 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, placeholder, minHeight = "120px" }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isUserEdit = useRef(false)
+
+  useEffect(() => {
+    if (!editorRef.current) return
+    if (isUserEdit.current) {
+      isUserEdit.current = false
+      return
+    }
+    if (editorRef.current.innerHTML !== (value || "")) {
+      editorRef.current.innerHTML = value || ""
+    }
+  }, [value])
 
   const exec = useCallback((command: string, val?: string) => {
+    isUserEdit.current = true
     document.execCommand(command, false, val)
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML)
@@ -54,6 +67,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = "120p
   }, [exec])
 
   const insertHtmlAtCursor = useCallback((html: string) => {
+    isUserEdit.current = true
     const sel = window.getSelection()
     if (!sel || !sel.rangeCount) return
     const range = sel.getRangeAt(0)
@@ -94,6 +108,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = "120p
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
+      isUserEdit.current = true
       const sel = window.getSelection()
       if (!sel || !sel.rangeCount) return
       const range = sel.getRangeAt(0)
@@ -167,6 +182,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = "120p
         suppressContentEditableWarning
         onInput={() => {
           if (editorRef.current) {
+            isUserEdit.current = true
             const editor = editorRef.current
             const bareDivs = editor.querySelectorAll(":scope > div:not([class])")
             bareDivs.forEach((div) => {
@@ -179,7 +195,6 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = "120p
         }}
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
-        dangerouslySetInnerHTML={{ __html: value || "" }}
         className="px-3 py-2 text-sm text-fg focus:outline-none empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]"
         data-placeholder={placeholder ?? "Write something..."}
         style={{ minHeight }}
