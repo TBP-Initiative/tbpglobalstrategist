@@ -93,7 +93,7 @@ export async function POST(req: Request) {
           {
             description: plan.description,
             amount: {
-              currency_code: "USD",
+              currency_code: "GBP",
               value: String(plan.amount),
             },
           },
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
         paymentProvider: "PAYPAL",
         paymentReference: paypalData.id,
         paymentAmount: plan.amount,
-        paymentCurrency: "USD",
+        paymentCurrency: "GBP",
       },
     })
 

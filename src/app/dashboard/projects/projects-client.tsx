@@ -371,7 +371,7 @@ function NewProjectDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="budget">Budget ($)</Label>
+              <Label htmlFor="budget">Budget (£)</Label>
               <Input id="budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="250000" />
             </div>
           </div>
@@ -836,7 +836,7 @@ function EditProjectDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-budget">Budget ($)</Label>
+              <Label htmlFor="edit-budget">Budget (£)</Label>
               <Input id="edit-budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="250000" />
             </div>
           </div>
@@ -1279,7 +1279,7 @@ export function ProjectsClient({
                     Status: p.status,
                     Organization: p.organization?.name ?? "",
                     "Created By": p.createdBy.name ?? p.createdBy.email,
-                    Budget: p.budget ? `$${Number(p.budget).toLocaleString()}` : "",
+                    Budget: p.budget ? `£${Number(p.budget).toLocaleString()}` : "",
                     Contributors: p.contributors,
                     Created: new Date(p.createdAt).toLocaleDateString(),
                   })),
@@ -1405,7 +1405,7 @@ export function ProjectsClient({
                       </TableCell>
                       <TableCell>
                         <span className="text-sm font-medium">
-                          {project.budget ? `$${Number(project.budget).toLocaleString()}` : "—"}
+                          {project.budget ? `£${Number(project.budget).toLocaleString()}` : "—"}
                         </span>
                       </TableCell>
                       <TableCell>

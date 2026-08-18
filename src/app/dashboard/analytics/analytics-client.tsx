@@ -113,7 +113,7 @@ export function AnalyticsClient({
                   { Metric: "Completed Projects", Value: String(stats.completed) },
                   { Metric: "Cancelled Projects", Value: String(stats.cancelled) },
                   { Metric: "Organizations", Value: String(stats.totalOrgs) },
-                  { Metric: "Total Budget", Value: `$${(stats.totalBudget / 1000).toFixed(0)}k` },
+                  { Metric: "Total Budget", Value: `£${(stats.totalBudget / 1000).toFixed(0)}k` },
                   { Metric: "Messages", Value: String(stats.totalMessages) },
                   { Metric: "Activities", Value: String(stats.totalActivities) },
                 ], "analytics-report")
@@ -135,7 +135,7 @@ export function AnalyticsClient({
         <StatsCard icon={<Users size={18} />} label="Total Users" value={String(stats.totalUsers)} delay={0} />
         <StatsCard icon={<FolderKanban size={18} />} label="Projects" value={String(stats.totalProjects)} delay={0.05} />
         <StatsCard icon={<Building2 size={18} />} label="Organizations" value={String(stats.totalOrgs)} delay={0.1} />
-        <StatsCard icon={<DollarSign size={18} />} label="Total Budget" value={`$${(stats.totalBudget / 1000).toFixed(0)}k`} delay={0.15} />
+        <StatsCard icon={<DollarSign size={18} />} label="Total Budget" value={`£${(stats.totalBudget / 1000).toFixed(0)}k`} delay={0.15} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

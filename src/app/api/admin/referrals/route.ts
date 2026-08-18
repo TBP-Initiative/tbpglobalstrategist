@@ -192,7 +192,7 @@ export async function PATCH(req: Request) {
         data: {
           userId: credit.userId,
           title: "Referral Bonus Approved!",
-          message: `Your $${Number(credit.amount)} referral bonus has been approved and added to your wallet.`,
+          message: `Your £${Number(credit.amount)} referral bonus has been approved and added to your wallet.`,
           type: "SYSTEM",
         },
       })
@@ -234,7 +234,7 @@ export async function PATCH(req: Request) {
         data: {
           userId: credit.userId,
           title: "Referral Payment Sent!",
-          message: `Your referral reward of $${Number(credit.amount)} has been paid out.`,
+          message: `Your referral reward of £${Number(credit.amount)} has been paid out.`,
           type: "SYSTEM",
         },
       })
@@ -312,7 +312,7 @@ export async function PATCH(req: Request) {
         data: {
           userId: payout.userId,
           title: "Payout Processed!",
-          message: `Your payout of $${Number(payout.amount)} via ${payout.method} has been processed.${transactionRef ? ` Transaction ref: ${transactionRef}` : ""}`,
+          message: `Your payout of £${Number(payout.amount)} via ${payout.method} has been processed.${transactionRef ? ` Transaction ref: ${transactionRef}` : ""}`,
           type: "SYSTEM",
         },
       })
@@ -351,7 +351,7 @@ export async function PATCH(req: Request) {
         data: {
           userId: payout.userId,
           title: "Payout Request Rejected",
-          message: `Your payout request of $${Number(payout.amount)} has been rejected.${reason ? ` Reason: ${reason}` : ""} Funds returned to your wallet.`,
+          message: `Your payout request of £${Number(payout.amount)} has been rejected.${reason ? ` Reason: ${reason}` : ""} Funds returned to your wallet.`,
           type: "SYSTEM",
         },
       })

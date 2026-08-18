@@ -14,13 +14,13 @@ export function getStripe(): Stripe {
 export const STRIPE_PLANS = {
   STANDARD: {
     amount: 150000,
-    currency: "usd",
+    currency: "gbp",
     name: "TBP Global Strategist Fellowship",
     description: "TBP Global Strategist Fellowship",
   },
   PLUS: {
     amount: 750000,
-    currency: "usd",
+    currency: "gbp",
     name: "Applied R&D & Technology Development",
     description: "Applied R&D & Technology Development",
   },

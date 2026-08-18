@@ -325,9 +325,9 @@ export default function SummitPage() {
               </p>
               <div className="mt-8 space-y-4">
                 {[
-                  { title: "Full Access Pass", desc: "All sessions, workshops, networking events, and gala dinner", price: "$2,499" },
-                  { title: "Executive Pass", desc: "Main summit, select workshops, and networking reception", price: "$1,799" },
-                  { title: "Virtual Pass", desc: "Live stream access to all keynotes and panel discussions", price: "$499" },
+                  { title: "Full Access Pass", desc: "All sessions, workshops, networking events, and gala dinner", price: "£2,499" },
+                  { title: "Executive Pass", desc: "Main summit, select workshops, and networking reception", price: "£1,799" },
+                  { title: "Virtual Pass", desc: "Live stream access to all keynotes and panel discussions", price: "£499" },
                 ].map((tier) => (
                   <div key={tier.title} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
                     <div>

@@ -169,7 +169,7 @@ export default async function BrowseProjectsPage() {
                       {project.budget && (
                         <div className="flex items-center gap-1">
                           <DollarSign size={12} />
-                          <span>{Number(project.budget).toLocaleString()}</span>
+                          <span>£{Number(project.budget).toLocaleString()}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-1">

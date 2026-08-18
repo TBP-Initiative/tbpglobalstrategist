@@ -150,7 +150,7 @@ export function StepTerms({ data, pathway, onNext, onBack, saving }: StepTermsPr
           placeholder="Type your full legal name as signature"
           className="mt-3"
         />
-        <p className="mt-2 text-xs text-gray-400">Selected pathway: {pathway === "PLUS" ? "Applied R&D & Technology Development \u2014 US$7,500" : "TBP Global Strategist Fellowship \u2014 US$1,500"}</p>
+        <p className="mt-2 text-xs text-gray-400">Selected pathway: {pathway === "PLUS" ? "Applied R&D & Technology Development \u2014 £7,500" : "TBP Global Strategist Fellowship \u2014 £1,500"}</p>
       </div>
 
       <div className="mt-8 flex justify-between">

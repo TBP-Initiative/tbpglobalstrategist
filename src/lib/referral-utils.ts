@@ -37,7 +37,7 @@ export async function autoApproveReferralCredits() {
       data: {
         userId: credit.userId,
         title: "Referral Bonus Approved!",
-        message: `Your $${Number(credit.amount)} referral bonus has been approved and added to your wallet. You can now request a payout.`,
+        message: `Your £${Number(credit.amount)} referral bonus has been approved and added to your wallet. You can now request a payout.`,
         type: "SYSTEM",
       },
     })

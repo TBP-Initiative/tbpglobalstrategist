@@ -148,7 +148,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 {project.budget && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Budget</span>
-                    <span className="font-medium">${Number(project.budget).toLocaleString()}</span>
+                    <span className="font-medium">£{Number(project.budget).toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">

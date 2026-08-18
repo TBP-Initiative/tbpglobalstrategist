@@ -100,7 +100,7 @@ export function ReferralDashboardClient() {
       return
     }
     if (payoutData && amt < payoutData.minPayout) {
-      toast.error(`Minimum payout is $${payoutData.minPayout}`)
+      toast.error(`Minimum payout is £${payoutData.minPayout}`)
       return
     }
     setSubmittingPayout(true)
@@ -143,7 +143,7 @@ export function ReferralDashboardClient() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">My Referrals</h1>
-        <p className="text-sm text-gray-500">Share your referral link. Earn $50 for each referral who completes payment.</p>
+        <p className="text-sm text-gray-500">Share your referral link. Earn £50 for each referral who completes payment.</p>
       </div>
 
       {/* Referral Link Card */}
@@ -177,15 +177,15 @@ export function ReferralDashboardClient() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-lg border bg-white p-4 text-center">
               <p className="text-xs text-gray-500">Available Balance</p>
-              <p className="mt-1 text-2xl font-bold text-green-600">${wallet.availableBalance}</p>
+              <p className="mt-1 text-2xl font-bold text-green-600">£{wallet.availableBalance}</p>
             </div>
             <div className="rounded-lg border bg-white p-4 text-center">
               <p className="text-xs text-gray-500">Paid Out</p>
-              <p className="mt-1 text-2xl font-bold text-gray-700">${wallet.paidBalance}</p>
+              <p className="mt-1 text-2xl font-bold text-gray-700">£{wallet.paidBalance}</p>
             </div>
             <div className="rounded-lg border bg-white p-4 text-center">
               <p className="text-xs text-gray-500">Total Earned</p>
-              <p className="mt-1 text-2xl font-bold text-primary">${data.totalEarned}</p>
+              <p className="mt-1 text-2xl font-bold text-primary">£{data.totalEarned}</p>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-3">
@@ -198,7 +198,7 @@ export function ReferralDashboardClient() {
               Request Payout
             </Button>
             {!canPayout && (
-              <p className="text-xs text-gray-500">Minimum payout: ${payoutData?.minPayout || 100}</p>
+              <p className="text-xs text-gray-500">Minimum payout: £{payoutData?.minPayout || 100}</p>
             )}
           </div>
 
@@ -318,7 +318,7 @@ export function ReferralDashboardClient() {
                         </td>
                         <td className="py-3">
                           {r.credit ? (
-                            <span className="font-semibold">${r.credit.amount}</span>
+                            <span className="font-semibold">£{r.credit.amount}</span>
                           ) : (
                             <span className="text-gray-400">—</span>
                           )}
@@ -376,7 +376,7 @@ export function ReferralDashboardClient() {
                 <tbody>
                   {payoutData.payoutRequests.map((p) => (
                     <tr key={p.id} className="border-b">
-                      <td className="py-3 font-semibold">${p.amount}</td>
+                      <td className="py-3 font-semibold">£{p.amount}</td>
                       <td className="py-3">{p.method === "PAYPAL" ? "PayPal" : "Bank Transfer"}</td>
                       <td className="py-3">
                         <Badge variant={p.status === "PAID" ? "default" : p.status === "PENDING" ? "secondary" : "destructive"}>

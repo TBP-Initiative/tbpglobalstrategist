@@ -310,7 +310,7 @@ export default function PaymentMethodsPage() {
             <div className="py-8 text-center text-gray-500">
               <DollarSign size={32} className="mx-auto mb-3 text-gray-300" />
               <p>No payout requests yet.</p>
-              <p className="text-xs text-gray-400">Request a payout from your Referrals dashboard once your balance reaches $100.</p>
+              <p className="text-xs text-gray-400">Request a payout from your Referrals dashboard once your balance reaches £100.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -329,7 +329,7 @@ export default function PaymentMethodsPage() {
                 <tbody>
                   {payoutHistory.map((p) => (
                     <tr key={p.id} className="border-b">
-                      <td className="py-3 font-semibold">${p.amount}</td>
+                      <td className="py-3 font-semibold">£{p.amount}</td>
                       <td className="py-3">{p.method === "PAYPAL" ? "PayPal" : "Bank Transfer"}</td>
                       <td className="py-3">
                         {p.paymentMethod ? (

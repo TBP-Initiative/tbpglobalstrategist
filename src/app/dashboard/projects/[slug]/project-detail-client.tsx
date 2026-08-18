@@ -163,7 +163,7 @@ export function ProjectDetailClient({
             <DollarSign size={14} />
             <span className="text-xs">Budget</span>
           </div>
-          <p className="text-lg font-semibold">{project.budget ? `$${Number(project.budget).toLocaleString()}` : "—"}</p>
+          <p className="text-lg font-semibold">{project.budget ? `£${Number(project.budget).toLocaleString()}` : "—"}</p>
         </GlassCard>
         <GlassCard className="p-4" intensity="light">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">

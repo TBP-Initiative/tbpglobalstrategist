@@ -90,7 +90,7 @@ const initiatives = [
     icon: TreePine,
     color: "from-emerald-500 to-green-500",
     category: "Sustainability",
-    impact: "$50M deployed",
+    impact: "£50M deployed",
     strategists: 45,
     href: "#",
   },
@@ -141,7 +141,7 @@ const impactStats = [
   { value: "15+", label: "Active Initiatives" },
   { value: "64", label: "Countries Reached" },
   { value: "1,200+", label: "Strategists Deployed" },
-  { value: "$120M+", label: "Investment Mobilized" },
+  { value: "£120M+", label: "Investment Mobilized" },
   { value: "20M+", label: "Lives Impacted" },
 ]
 

@@ -21,7 +21,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [cancelled, setCancelled] = useState(false)
   const pathway = pathwayProp || (data?.pathway as string) || "STANDARD"
-  const amount = pathway === "PLUS" ? "$7,500" : "$1,500"
+  const amount = pathway === "PLUS" ? "£7,500" : "£1,500"
   const isTestMode = process.env.NODE_ENV !== "production"
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function StepPayment({ data, pathway: pathwayProp, onNext, onBack }: Step
           <PayPalScriptProvider
             options={{
               clientId: paypalClientId,
-              currency: "USD",
+              currency: "GBP",
               intent: "capture",
             }}
           >

@@ -77,7 +77,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     progress,
     startDate: project.startDate?.toLocaleDateString("en-US", { month: "short", year: "numeric" }) ?? "",
     targetDate: project.endDate?.toLocaleDateString("en-US", { month: "short", year: "numeric" }) ?? "",
-    budget: project.budget ? `$${Number(project.budget).toLocaleString()}` : "",
+    budget: project.budget ? `£${Number(project.budget).toLocaleString()}` : "",
     innovationAreas: [] as string[],
     organization: project.organization
       ? { name: project.organization.name, logo: null as null, industry: "", website: "" }

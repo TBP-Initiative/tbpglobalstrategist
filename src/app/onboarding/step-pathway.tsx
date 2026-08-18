@@ -14,7 +14,7 @@ interface StepPathwayProps {
 const PATHWAYS: Record<string, { name: string; price: string; duration: string; features: string[] }> = {
   STANDARD: {
     name: "TBP Global Strategist Fellowship",
-    price: "US$1,500",
+    price: "£1,500",
     duration: "12\u201324 weeks",
     features: [
       "Guided DESQUELET\u00AE learning pathway",
@@ -28,7 +28,7 @@ const PATHWAYS: Record<string, { name: string; price: string; duration: string; 
   },
   PLUS: {
     name: "Applied R&D & Technology Development",
-    price: "US$7,500",
+    price: "£7,500",
     duration: "16\u201324 weeks",
     features: [
       "Core Fellowship learning + DESQUELET\u00AE",

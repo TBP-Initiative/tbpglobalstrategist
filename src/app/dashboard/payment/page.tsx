@@ -9,7 +9,7 @@ import { Shield, Loader2, CheckCircle2, Star, Zap } from "lucide-react"
 const PLANS = {
   STANDARD: {
     amount: 1500,
-    display: "$1,500",
+    display: "£1,500",
     name: "TBP Global Strategist Fellowship",
     description: "The essential pathway to becoming a TBP Global Strategist Fellow.",
     features: [
@@ -24,7 +24,7 @@ const PLANS = {
   },
   PLUS: {
     amount: 7500,
-    display: "$7,500",
+    display: "£7,500",
     name: "Applied R&D & Technology Development",
     description: "An applied research and technology development pathway.",
     features: [
@@ -75,7 +75,7 @@ export default function PaymentPage() {
             return
           }
           const script = document.createElement("script")
-          script.src = `https://www.paypal.com/sdk/js?client-id=${d.paypalClientId}&currency=USD&intent=capture`
+          script.src = `https://www.paypal.com/sdk/js?client-id=${d.paypalClientId}&currency=GBP&intent=capture`
           script.async = true
           script.onload = () => setSdkReady(true)
           script.onerror = () => setPaypalError("Failed to load PayPal SDK. Please refresh and try again.")

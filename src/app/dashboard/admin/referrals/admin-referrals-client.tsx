@@ -190,14 +190,14 @@ export function AdminReferralsClient() {
         <Card>
           <CardContent className="p-4 text-center">
             <DollarSign className="mx-auto h-6 w-6 text-green-600" />
-            <p className="mt-2 text-2xl font-bold">${data.stats.totalPaidCredits}</p>
+            <p className="mt-2 text-2xl font-bold">£{data.stats.totalPaidCredits}</p>
             <p className="text-xs text-gray-500">Paid Out</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <Gift className="mx-auto h-6 w-6 text-purple-500" />
-            <p className="mt-2 text-2xl font-bold">${data.stats.totalPendingCredits}</p>
+            <p className="mt-2 text-2xl font-bold">£{data.stats.totalPendingCredits}</p>
             <p className="text-xs text-gray-500">Pending Hold</p>
           </CardContent>
         </Card>
@@ -236,7 +236,7 @@ export function AdminReferralsClient() {
                           <p className="text-xs text-gray-400">{p.userEmail}</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-semibold text-lg">${p.amount}</p>
+                           <p className="font-semibold text-lg">£{p.amount}</p>
                           <p className="text-[10px] text-gray-400">{p.method === "PAYPAL" ? "PayPal" : "Bank Transfer"}</p>
                         </div>
                         <div>
@@ -351,8 +351,8 @@ export function AdminReferralsClient() {
                   {data.wallets.map((w) => (
                     <tr key={w.id} className="border-b">
                       <td className="py-3"><p className="font-medium">{w.userName}</p><p className="text-xs text-gray-400">{w.userEmail}</p></td>
-                      <td className="py-3 font-semibold text-green-600">${w.availableBalance}</td>
-                      <td className="py-3 text-gray-500">${w.paidBalance}</td>
+                      <td className="py-3 font-semibold text-green-600">£{w.availableBalance}</td>
+                      <td className="py-3 text-gray-500">£{w.paidBalance}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -411,7 +411,7 @@ export function AdminReferralsClient() {
                         <td className="py-3"><p className="font-medium">{r.referrerName}</p><p className="text-xs text-gray-400">{r.referrerEmail}</p></td>
                         <td className="py-3"><p className="font-medium">{r.referredName || "—"}</p><p className="text-xs text-gray-400">{r.referredEmail}</p></td>
                         <td className="py-3"><Badge className={`${s.color} border-0`}>{s.label}</Badge></td>
-                        <td className="py-3">{r.credit ? <span className="font-semibold">${r.credit.amount}</span> : <span className="text-gray-400">—</span>}</td>
+                        <td className="py-3">{r.credit ? <span className="font-semibold">£{r.credit.amount}</span> : <span className="text-gray-400">—</span>}</td>
                         <td className="py-3">
                           {cs ? (
                             <div>

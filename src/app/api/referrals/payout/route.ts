@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     }
 
     if (amount < MIN_PAYOUT) {
-      return NextResponse.json({ error: `Minimum payout is $${MIN_PAYOUT}` }, { status: 400 })
+      return NextResponse.json({ error: `Minimum payout is £${MIN_PAYOUT}` }, { status: 400 })
     }
 
     if (!["BANK_TRANSFER", "PAYPAL"].includes(method)) {
@@ -142,7 +142,7 @@ export async function POST(req: Request) {
         data: {
           userId: admin.id,
           title: "New Payout Request",
-          message: `A strategist has requested a $${amount} payout via ${method.replace("_", " ")}.`,
+          message: `A strategist has requested a £${amount} payout via ${method.replace("_", " ")}.`,
           type: "SYSTEM",
           link: "/dashboard/admin/referrals",
         },

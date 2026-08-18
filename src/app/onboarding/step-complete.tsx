@@ -10,7 +10,7 @@ interface StepCompleteProps {
 
 export function StepComplete({ data }: StepCompleteProps) {
   const pathway = (data?.pathway as string) || "STANDARD"
-  const amount = pathway === "PLUS" ? "$7,500" : "$1,500"
+  const amount = pathway === "PLUS" ? "£7,500" : "£1,500"
   const paymentRef = (data?.paymentReference as string) || null
   const paymentProvider = (data?.paymentProvider as string) || null
   const paidAt = data?.paidAt ? new Date(data.paidAt as string) : new Date()
