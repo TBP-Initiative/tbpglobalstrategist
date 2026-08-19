@@ -28,16 +28,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const project = await prisma.project.findUnique({
     where: { id },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      shortDescription: true,
-      description: true,
-      objectives: true,
-      strategicRelevance: true,
-      category: true,
-      budget: true,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        shortDescription: true,
+        description: true,
+        objectives: true,
+        strategicRelevance: true,
+        category: true,
+        eligiblePathways: true,
+        budget: true,
       status: true,
       startDate: true,
       endDate: true,
@@ -174,6 +175,22 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   </div>
                 )}
               </div>
+            </GlassCard>
+          </AnimatedSection>
+
+          <AnimatedSection>
+            <GlassCard className="p-6" intensity="light">
+              <h3 className="mb-2 text-sm font-semibold">Eligible Pathway</h3>
+              <Badge variant="outline" className="text-xs">
+                {project.eligiblePathways === "FELLOWSHIP" ? "Fellowship" : project.eligiblePathways === "APPLIED_RD" ? "Applied R&D" : "Both (Fellowship + R&D)"}
+              </Badge>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {project.eligiblePathways === "BOTH"
+                  ? "Open to all pathway participants."
+                  : project.eligiblePathways === "FELLOWSHIP"
+                    ? "Available for TBP Global Strategist Fellowship participants only."
+                    : "Available for Applied R&D & Technology Development participants only."}
+              </p>
             </GlassCard>
           </AnimatedSection>
 

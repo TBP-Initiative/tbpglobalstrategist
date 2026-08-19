@@ -16,7 +16,7 @@ export async function POST(
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true },
+      select: { id: true, eligiblePathways: true },
     })
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
@@ -27,6 +27,25 @@ export async function POST(
     })
     if (existing) {
       return NextResponse.json({ ok: true, message: "Already a contributor" })
+    }
+
+    const submission = await prisma.onboardingSubmission.findUnique({
+      where: { userId: session.user.id },
+      select: { pathway: true },
+    })
+    const userPathway = submission?.pathway ?? null
+
+    if (project.eligiblePathways && project.eligiblePathways !== "BOTH" && userPathway && userPathway !== project.eligiblePathways) {
+      const projectPathwayLabel = project.eligiblePathways === "FELLOWSHIP" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
+      const userPathwayLabel = userPathway === "FELLOWSHIP" || userPathway === "STANDARD" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
+      return NextResponse.json({
+        error: "Pathway mismatch",
+        pathwayMismatch: true,
+        projectPathway: project.eligiblePathways,
+        projectPathwayLabel,
+        userPathway,
+        userPathwayLabel,
+      }, { status: 403 })
     }
 
     const profile = await prisma.strategistProfile.findUnique({
