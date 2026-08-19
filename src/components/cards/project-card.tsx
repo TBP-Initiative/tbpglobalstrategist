@@ -22,6 +22,8 @@ export interface ProjectCardData {
   contributors: { name: string; avatar: string | null }[]
   image?: string | null
   isFeatured?: boolean
+  eligiblePathways?: string
+  region?: string
 }
 
 interface ProjectCardProps {

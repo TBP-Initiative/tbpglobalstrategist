@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { ArrowUpDown, Filter, Plus, Sparkles } from "lucide-react"
+import { ArrowUpDown, Filter, Plus, Sparkles, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/shared/search-input"
@@ -10,6 +10,25 @@ import { type ProjectCardData } from "@/components/cards/project-card"
 import { FeaturedProjectCard, type FeaturedProjectData } from "@/components/cards/featured-project-card"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GradientText } from "@/components/shared/gradient-text"
+
+const PATHWAY_OPTIONS = [
+  { value: "", label: "All Pathways" },
+  { value: "BOTH", label: "Both (Fellowship + R&D)" },
+  { value: "FELLOWSHIP", label: "Fellowship Only" },
+  { value: "APPLIED_RD", label: "Applied R&D Only" },
+]
+
+const REGION_OPTIONS = [
+  { value: "", label: "All Regions" },
+  { value: "Africa", label: "Africa" },
+  { value: "Asia", label: "Asia" },
+  { value: "Europe", label: "Europe" },
+  { value: "North America", label: "North America" },
+  { value: "South America", label: "South America" },
+  { value: "Oceania", label: "Oceania" },
+  { value: "Middle East", label: "Middle East" },
+  { value: "Global", label: "Global" },
+]
 
 interface ProjectsDirectoryProps {
   categories: string[]
@@ -19,6 +38,8 @@ interface ProjectsDirectoryProps {
 
 export function ProjectsDirectory({ categories, featuredProjects, allProjects }: ProjectsDirectoryProps) {
   const [activeCategory, setActiveCategory] = React.useState("All")
+  const [activePathway, setActivePathway] = React.useState("")
+  const [activeRegion, setActiveRegion] = React.useState("")
   const [searchQuery, setSearchQuery] = React.useState("")
   const [sortBy, setSortBy] = React.useState<"newest" | "progress" | "name">("newest")
 
@@ -26,6 +47,14 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
     let list = activeCategory === "All"
       ? allProjects
       : allProjects.filter((p) => p.category === activeCategory)
+
+    if (activePathway) {
+      list = list.filter((p) => p.eligiblePathways === activePathway || p.eligiblePathways === "BOTH")
+    }
+
+    if (activeRegion) {
+      list = list.filter((p) => p.region === activeRegion)
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
@@ -42,7 +71,9 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
     else if (sortBy === "name") sorted.sort((a, b) => a.title.localeCompare(b.title))
 
     return sorted
-  }, [activeCategory, searchQuery, sortBy, allProjects])
+  }, [activeCategory, activePathway, activeRegion, searchQuery, sortBy, allProjects])
+
+  const hasActiveFilters = activePathway !== "" || activeRegion !== ""
 
   return (
     <>
@@ -90,10 +121,30 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
               style={{ colorScheme: "dark" }}
               showClear
             />
-            <Button variant="outline" size="md" className="gap-2 shrink-0">
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
+            <div className="flex gap-2">
+              <select
+                value={activePathway}
+                onChange={(e) => setActivePathway(e.target.value)}
+                className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-[13px] font-medium text-white placeholder-white/50 backdrop-blur-sm focus:border-white/40 focus:outline-none"
+              >
+                {PATHWAY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value} className="bg-gray-900 text-white">
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={activeRegion}
+                onChange={(e) => setActiveRegion(e.target.value)}
+                className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-[13px] font-medium text-white placeholder-white/50 backdrop-blur-sm focus:border-white/40 focus:outline-none"
+              >
+                {REGION_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value} className="bg-gray-900 text-white">
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -120,6 +171,32 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
             <div className="h-1 w-8 rounded-full bg-primary" />
             <h2 className="text-lg font-semibold">All Projects</h2>
           </div>
+          {hasActiveFilters && (
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {activePathway && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[12px] font-medium text-primary">
+                  {PATHWAY_OPTIONS.find((o) => o.value === activePathway)?.label}
+                  <button onClick={() => setActivePathway("")} className="hover:text-primary/70">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {activeRegion && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[12px] font-medium text-primary">
+                  {activeRegion}
+                  <button onClick={() => setActiveRegion("")} className="hover:text-primary/70">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={() => { setActivePathway(""); setActiveRegion("") }}
+                className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {categories.map((cat) => (
@@ -195,6 +272,8 @@ export function ProjectsDirectory({ categories, featuredProjects, allProjects }:
                 onClick={() => {
                   setSearchQuery("")
                   setActiveCategory("All")
+                  setActivePathway("")
+                  setActiveRegion("")
                 }}
               >
                 Clear filters

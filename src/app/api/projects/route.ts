@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories, eligiblePathways, newOrganizationName } = body
+    const { title, shortDescription, description, objectives, strategicRelevance, image, status, budget, organizationId, startDate, endDate, categories, eligiblePathways, region, newOrganizationName } = body
 
     if (!title || typeof title !== "string") {
       return NextResponse.json({ error: "Title is required" }, { status: 422 })
@@ -80,6 +80,7 @@ export async function POST(request: Request) {
         endDate: endDate ? new Date(endDate) : null,
         category: categories ? JSON.stringify(categories) : null,
         eligiblePathways: eligiblePathways ?? "BOTH",
+        region: region ?? null,
         organizationId: resolvedOrgId ?? null,
         createdById: session.user.id!,
       },
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
         image: true,
         category: true,
         eligiblePathways: true,
+        region: true,
         shortDescription: true,
         description: true,
         objectives: true,

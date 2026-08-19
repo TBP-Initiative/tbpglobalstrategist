@@ -226,6 +226,7 @@ model Project {
   isFeatured         Boolean       @default(false)
   featuredAt         DateTime?
   eligiblePathways   String?       @default("BOTH") // "FELLOWSHIP", "APPLIED_RD", or "BOTH"
+  region             String?
   organizationId     String?
   createdById        String
   createdAt          DateTime      @default(now())

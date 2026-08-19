@@ -90,6 +90,8 @@ async function getAllProjects() {
       category: true,
       status: true,
       image: true,
+      eligiblePathways: true,
+      region: true,
       milestones: {
         select: { id: true, completed: true, weight: true },
       },
@@ -113,6 +115,8 @@ async function getAllProjects() {
     category: parseFirstCategory(p.category),
     status: statusToDisplay(p.status),
     progress: computeProgress(p.milestones),
+    eligiblePathways: p.eligiblePathways ?? "BOTH",
+    region: p.region ?? null,
     contributorCount: p.contributors.length,
     contributors: p.contributors.map((c) => ({
       name: c.user.name ?? "Unknown",

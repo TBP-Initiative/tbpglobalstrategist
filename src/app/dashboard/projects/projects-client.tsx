@@ -88,6 +88,7 @@ type ProjectData = {
   createdBy: { id?: string; name: string | null; email: string }
   contributors: number
   eligiblePathways?: string
+  region?: string
 }
 
 type OrganizationData = {
@@ -131,6 +132,7 @@ function NewProjectDialog({
   const [strategicRelevance, setStrategicRelevance] = useState("")
   const [status, setStatus] = useState("DRAFT")
   const [eligiblePathways, setEligiblePathways] = useState("BOTH")
+  const [region, setRegion] = useState("")
   const [budget, setBudget] = useState("")
   const [organizationId, setOrganizationId] = useState("")
   const [newOrgName, setNewOrgName] = useState("")
@@ -191,6 +193,7 @@ function NewProjectDialog({
           categories: categories.length > 0 ? categories : undefined,
           status,
           eligiblePathways,
+          region: region || undefined,
           budget: budget ? Number(budget) : undefined,
           organizationId: organizationId || undefined,
           newOrganizationName: newOrgName.trim() || undefined,
@@ -388,6 +391,23 @@ function NewProjectDialog({
             </Select>
           </div>
           <div className="space-y-2">
+            <Label htmlFor="region">Region</Label>
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger id="region" placeholder="Select region...">
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Africa">Africa</SelectItem>
+                <SelectItem value="Asia">Asia</SelectItem>
+                <SelectItem value="Europe">Europe</SelectItem>
+                <SelectItem value="North America">North America</SelectItem>
+                <SelectItem value="South America">South America</SelectItem>
+                <SelectItem value="Oceania">Oceania</SelectItem>
+                <SelectItem value="Middle East">Middle East</SelectItem>
+                <SelectItem value="Global">Global</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="org">Organization</Label>
             <Select value={organizationId} onValueChange={(val) => { setOrganizationId(val); if (val !== "_new") setNewOrgName("") }}>
               <SelectTrigger id="org" placeholder="Select organization...">
@@ -567,6 +587,7 @@ function EditProjectDialog({
   const [strategicRelevance, setStrategicRelevance] = useState("")
   const [status, setStatus] = useState("DRAFT")
   const [eligiblePathways, setEligiblePathways] = useState("BOTH")
+  const [region, setRegion] = useState("")
   const [budget, setBudget] = useState("")
   const [organizationId, setOrganizationId] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -601,6 +622,7 @@ function EditProjectDialog({
       setStrategicRelevance(project.strategicRelevance ?? "")
       setStatus(project.status)
       setEligiblePathways(project.eligiblePathways ?? "BOTH")
+      setRegion(project.region ?? "")
       setBudget(project.budget ?? "")
       setOrganizationId(project.organization?.id ?? "")
       setStartDate(project.startDate ? project.startDate.slice(0, 10) : "")
@@ -685,6 +707,7 @@ function EditProjectDialog({
           categories: categories.length > 0 ? categories : undefined,
           status,
           eligiblePathways,
+          region: region || undefined,
           budget: budget ? Number(budget) : undefined,
           organizationId: organizationId || undefined,
           startDate: startDate || undefined,
@@ -849,6 +872,23 @@ function EditProjectDialog({
                 <SelectItem value="BOTH">Both (Fellowship + R&D)</SelectItem>
                 <SelectItem value="FELLOWSHIP">Fellowship Only</SelectItem>
                 <SelectItem value="APPLIED_RD">Applied R&D Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-region">Region</Label>
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger id="edit-region" placeholder="Select region...">
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Africa">Africa</SelectItem>
+                <SelectItem value="Asia">Asia</SelectItem>
+                <SelectItem value="Europe">Europe</SelectItem>
+                <SelectItem value="North America">North America</SelectItem>
+                <SelectItem value="South America">South America</SelectItem>
+                <SelectItem value="Oceania">Oceania</SelectItem>
+                <SelectItem value="Middle East">Middle East</SelectItem>
+                <SelectItem value="Global">Global</SelectItem>
               </SelectContent>
             </Select>
           </div>
