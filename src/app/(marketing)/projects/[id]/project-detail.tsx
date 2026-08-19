@@ -96,13 +96,13 @@ export function ProjectDetail({ project, isAdmin }: { project: ProjectData; isAd
       </div>
 
       {project.image && (
-        <div className="w-full h-[300px] sm:h-[420px] overflow-hidden bg-muted">
-          <img
-            src={project.image}
-            alt={project.title}
-            className="h-full w-full object-cover"
-          />
-        </div>
+              <div className="w-full overflow-hidden bg-muted">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full max-h-[500px] h-auto object-cover"
+                />
+              </div>
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
