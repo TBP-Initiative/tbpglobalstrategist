@@ -43,7 +43,7 @@ type Submission = {
   createdAt: string
   updatedAt: string
   user: { id: string; name: string | null; email: string | null }
-  project: { id: string; name: string } | null
+  project: { id: string; title: string } | null
   revisions: Revision[]
 }
 
@@ -214,7 +214,7 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                         {sub.project && (
                           <span className="flex items-center gap-1">
                             <FolderKanban size={11} />
-                            {sub.project.name}
+                            {sub.project.title}
                           </span>
                         )}
                         <span className="flex items-center gap-1">

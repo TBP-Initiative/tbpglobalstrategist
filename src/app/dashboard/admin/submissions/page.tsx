@@ -16,7 +16,7 @@ export default async function AdminSubmissionsPage() {
     where: { isLatest: true },
     include: {
       user: { select: { id: true, name: true, email: true } },
-      project: { select: { id: true, name: true } },
+      project: { select: { id: true, title: true } },
       revisions: {
         select: { id: true, version: true, title: true, status: true, createdAt: true, changelog: true },
         orderBy: { version: "asc" },
