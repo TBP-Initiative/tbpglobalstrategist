@@ -1,126 +1,205 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { FileText, Trophy, GitBranch, Users, Clock, ExternalLink } from "lucide-react"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { FileText, Trophy, GitBranch, Users, Clock, ExternalLink, ChevronDown, ChevronUp, History, Folder } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
-interface ActivityTimelineProps {
-  activities: {
-    id: string
-    title: string
-    description: string
-    date: string
-    type: "publication" | "milestone" | "contribution" | "assignment"
-    fileUrl?: string
-    fileType?: string
-    fileSize?: number | null
-  }[]
+interface ActivityItem {
+  id: string
+  title: string
+  description: string
+  date: string
+  type: "publication" | "milestone" | "contribution" | "assignment"
+  fileUrl?: string
+  fileType?: string
+  fileSize?: number | null
+  version?: number
+  status?: string
+  changelog?: string | null
+  projectId?: string | null
+  projectTitle?: string | null
 }
 
-const typeConfig = {
-  publication: { icon: FileText, gradient: "from-indigo-500 to-purple-500" },
-  milestone: { icon: Trophy, gradient: "from-amber-400 to-orange-500" },
-  contribution: { icon: GitBranch, gradient: "from-emerald-400 to-teal-500" },
-  assignment: { icon: Users, gradient: "from-cyan-400 to-blue-500" },
+interface ActivityTimelineProps {
+  activities: ActivityItem[]
+}
+
+const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
+  DRAFT: { label: "Draft", class: "bg-gray-100 text-gray-600" },
+  UNDER_REVIEW: { label: "Under Review", class: "bg-blue-100 text-blue-700" },
+  REVISION: { label: "Revision", class: "bg-amber-100 text-amber-700" },
+  APPROVED: { label: "Approved", class: "bg-green-100 text-green-700" },
+  PUBLISHED: { label: "Published", class: "bg-purple-100 text-purple-700" },
 }
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 }
 
 export function ActivityTimeline({ activities }: ActivityTimelineProps) {
+  const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
+
+  if (activities.length === 0) {
+    return (
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900">Activity & Contributions</h2>
+        <p className="text-sm text-gray-400">No activity yet.</p>
+      </section>
+    )
+  }
+
+  const grouped = activities.reduce<Record<string, ActivityItem[]>>((acc, item) => {
+    const key = item.projectId ?? "__general__"
+    if (!acc[key]) acc[key] = []
+    acc[key].push(item)
+    return acc
+  }, {})
+
+  const projectEntries = Object.entries(grouped).filter(([k]) => k !== "__general__")
+  const generalEntries = grouped["__general__"] ?? []
+
   return (
     <section className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-900">Activity & Contributions</h2>
 
-      {activities.length === 0 ? (
-        <p className="text-sm text-gray-400">No activity yet.</p>
-      ) : (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
-        className="relative"
-      >
-        {activities.map((activity, index) => {
-          const { icon: Icon, gradient } = typeConfig[activity.type]
-
+      <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} className="space-y-8">
+        {projectEntries.map(([projectId, items]) => {
+          const projectTitle = items[0].projectTitle ?? "Project"
           return (
-            <motion.div
-              key={activity.id}
-              variants={itemVariants}
-              className="relative flex gap-4 pb-8 last:pb-0"
-            >
-              {/* Vertical line */}
-              {index < activities.length - 1 && (
-                <div className="absolute left-[19px] top-10 h-full w-px bg-gradient-to-b from-gray-200 to-transparent" />
-              )}
-
-              {/* Glowing dot */}
-              <div className="relative flex shrink-0 items-start pt-1.5">
-                <div className="relative">
-                  <div className="h-3 w-3 rounded-full bg-gradient-to-br from-indigo-400 to-teal-400 shadow-[0_0_12px_rgba(99,102,241,0.5)]" />
-                  <div className="absolute inset-0 h-3 w-3 animate-ping rounded-full bg-indigo-400/30" />
-                </div>
+            <motion.div key={projectId} variants={itemVariants} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Folder size={16} className="text-primary" />
+                <h3 className="text-base font-bold text-gray-900">{projectTitle}</h3>
               </div>
-
-              {/* Icon + Content */}
-              <div className="flex min-w-0 flex-1 gap-3">
-                {/* Type icon */}
-                <div
-                  className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg",
-                    gradient
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5 text-white" />
-                </div>
-
-                {/* Content */}
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <h3 className="text-base font-semibold text-gray-900">
-                    {activity.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-gray-600">
-                    {activity.description}
-                  </p>
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <Clock className="h-3 w-3 text-gray-400" />
-                    <span className="text-sm text-gray-400">{activity.date}</span>
-                  </div>
-                  {activity.fileUrl && (
-                    <a
-                      href={activity.fileUrl.startsWith("data:") ? `/api/submissions/download?id=${activity.id}` : activity.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {activity.title}
-                      {activity.fileSize ? ` · ${(activity.fileSize / 1024).toFixed(0)} KB` : ""}
-                    </a>
-                  )}
-                </div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Research & Technical Contributions</p>
+              <div className="space-y-3">
+                {items.map((item, idx) => (
+                  <ContributionCard key={item.id} item={item} index={idx} expandedHistory={expandedHistory} setExpandedHistory={setExpandedHistory} />
+                ))}
               </div>
             </motion.div>
           )
         })}
+
+        {generalEntries.length > 0 && (
+          <motion.div variants={itemVariants}>
+            {projectEntries.length > 0 && (
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Other Contributions</p>
+            )}
+            <div className="space-y-3">
+              {generalEntries.map((item, idx) => (
+                <ContributionCard key={item.id} item={item} index={idx} expandedHistory={expandedHistory} setExpandedHistory={setExpandedHistory} />
+              ))}
+            </div>
+          </motion.div>
+        )}
       </motion.div>
-      )}
     </section>
+  )
+}
+
+function ContributionCard({
+  item, index, expandedHistory, setExpandedHistory,
+}: {
+  item: ActivityItem
+  index: number
+  expandedHistory: string | null
+  setExpandedHistory: (id: string | null) => void
+}) {
+  const statusCfg = item.status ? STATUS_CONFIG[item.status] : null
+  const isExpanded = expandedHistory === item.id
+
+  return (
+    <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold text-gray-400">{String(index + 1).padStart(2, "0")} —</span>
+            <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
+            {item.version && item.version > 1 && (
+              <Badge variant="outline" className="text-[10px]">v{item.version}</Badge>
+            )}
+            {statusCfg && (
+              <Badge className={cn("text-[10px]", statusCfg.class)}>{statusCfg.label}</Badge>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Current: {item.version ? `Revision ${item.version}` : "Initial Submission"}
+          </p>
+          {item.changelog && (
+            <p className="text-xs text-gray-400 mt-1 italic">&ldquo;{item.changelog}&rdquo;</p>
+          )}
+          <div className="flex items-center gap-2 mt-2">
+            <Clock size={10} className="text-gray-400" />
+            <span className="text-[10px] text-gray-400">
+              {new Date(item.date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {item.fileUrl && (
+            <a
+              href={item.fileUrl.startsWith("data:") ? `/api/submissions/download?id=${item.id}` : item.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+            >
+              <ExternalLink size={11} />
+              View
+            </a>
+          )}
+        </div>
+      </div>
+
+      {item.version && item.version > 1 && (
+        <button
+          onClick={() => setExpandedHistory(isExpanded ? null : item.id)}
+          className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          <History size={11} />
+          {isExpanded ? "Hide" : "View"} Version History
+          {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        </button>
+      )}
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 rounded-lg border border-gray-200 bg-white p-3 space-y-2">
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Research Development Record</p>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>Initial Submission</span>
+                <span className="text-gray-300">&rarr;</span>
+                <span>{item.version} revision{item.version! > 2 ? "s" : ""}</span>
+                <span className="text-gray-300">&rarr;</span>
+                <span className={cn("font-medium", statusCfg?.class)}>{statusCfg?.label ?? "Current"}</span>
+              </div>
+              {item.changelog && (
+                <div className="mt-2 rounded-md bg-gray-50 p-2">
+                  <p className="text-[10px] font-medium text-gray-500">Latest changelog:</p>
+                  <p className="text-xs text-gray-600">{item.changelog}</p>
+                </div>
+              )}
+              <p className="text-[10px] text-gray-400 italic">
+                Research Progression Evidence — This work was developed through multiple research and technical-review stages. Earlier versions are retained within the strategist&apos;s verified development record.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

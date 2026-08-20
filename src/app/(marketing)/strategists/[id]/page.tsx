@@ -240,7 +240,7 @@ export default async function StrategistProfilePage({
 
     try {
       const submissions = await prisma.submission.findMany({
-        where: { userId: id },
+        where: { userId: id, isLatest: true },
         orderBy: { createdAt: "desc" },
         select: {
           id: true,
@@ -250,7 +250,11 @@ export default async function StrategistProfilePage({
           fileType: true,
           fileSize: true,
           stage: true,
+          version: true,
+          status: true,
+          changelog: true,
           createdAt: true,
+          project: { select: { id: true, title: true, slug: true } },
         },
       })
 
@@ -263,6 +267,11 @@ export default async function StrategistProfilePage({
         fileUrl: s.fileUrl,
         fileType: s.fileType,
         fileSize: s.fileSize,
+        version: s.version,
+        status: s.status,
+        changelog: s.changelog,
+        projectId: s.project?.id ?? null,
+        projectTitle: s.project?.title ?? null,
       }))
     } catch { /* ignore */ }
   }

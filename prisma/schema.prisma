@@ -79,6 +79,14 @@ enum ActivityAction {
   PUBLISH
 }
 
+enum SubmissionStatus {
+  DRAFT
+  UNDER_REVIEW
+  REVISION
+  APPROVED
+  PUBLISHED
+}
+
 model User {
   id            String   @id @default(cuid())
   name          String?
@@ -240,6 +248,7 @@ model Project {
   milestones    Milestone[]
   relations     ProjectRelation[]   @relation("ProjectRelations")
   relatedTo     ProjectRelation[]   @relation("RelatedProjects")
+  submissions   Submission[]
 }
 
 model Milestone {
@@ -448,21 +457,33 @@ model UserWorkArea {
 }
 
 model Submission {
-  id        String   @id @default(cuid())
-  userId    String
-  stage     String
-  title     String
+  id          String           @id @default(cuid())
+  userId      String
+  projectId   String?
+  stage       String
+  title       String
   description String?
-  fileUrl   String
-  fileType  String
-  fileSize  Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  fileUrl     String
+  fileType    String
+  fileSize    Int?
+  version     Int              @default(1)
+  isLatest    Boolean          @default(true)
+  status      SubmissionStatus @default(DRAFT)
+  changelog   String?
+  parentSubmissionId String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  parentSubmission Submission? @relation("SubmissionRevisions", fields: [parentSubmissionId], references: [id], onDelete: SetNull)
+  revisions       Submission[] @relation("SubmissionRevisions")
 
   @@index([userId])
   @@index([stage])
+  @@index([projectId])
+  @@index([parentSubmissionId])
+  @@index([userId, projectId, isLatest])
 }
 
 model OnboardingSubmission {
