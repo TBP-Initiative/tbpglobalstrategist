@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { GlassCard } from "@/components/ui/glass-card"
+import { GlassCard } from "@/components/shared/glass-card"
 import { Button } from "@/components/ui/button"
 import {
   CheckCircle2,
