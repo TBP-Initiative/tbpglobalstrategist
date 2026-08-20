@@ -240,7 +240,7 @@ export default async function StrategistProfilePage({
 
     try {
       const submissions = await prisma.submission.findMany({
-        where: { userId: id, isLatest: true },
+        where: { userId: id, isLatest: true, status: { not: "DRAFT" } },
         orderBy: { createdAt: "desc" },
         select: {
           id: true,
