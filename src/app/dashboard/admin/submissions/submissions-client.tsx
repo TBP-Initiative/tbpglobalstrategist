@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Eye,
   AlertTriangle,
+  Calendar,
 } from "lucide-react"
 
 type Revision = {
@@ -69,6 +70,9 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>("ALL")
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [backdateId, setBackdateId] = useState<string | null>(null)
+  const [backdateValue, setBackdateValue] = useState("")
+  const [backdateError, setBackdateError] = useState<string | null>(null)
 
   const filtered = filterStatus === "ALL" ? submissions : submissions.filter((s) => s.status === filterStatus)
 
@@ -114,6 +118,34 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
       }
     } catch {
       alert("Network error")
+    } finally {
+      setProcessingId(null)
+    }
+  }
+
+  async function handleBackdate(id: string) {
+    if (!backdateValue) {
+      setBackdateError("Pick a date")
+      return
+    }
+    setBackdateError(null)
+    setProcessingId(id)
+    try {
+      const res = await fetch(`/api/submissions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ createdAt: new Date(backdateValue).toISOString() }),
+      })
+      if (res.ok) {
+        setBackdateId(null)
+        setBackdateValue("")
+        startTransition(() => router.refresh())
+      } else {
+        const data = await res.json()
+        setBackdateError(data.error || "Failed")
+      }
+    } catch {
+      setBackdateError("Network error")
     } finally {
       setProcessingId(null)
     }
@@ -328,6 +360,55 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
                             </a>
                           </div>
                         )}
+
+                        {/* Backdate */}
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-1">Created Date</p>
+                          {backdateId === sub.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="datetime-local"
+                                value={backdateValue}
+                                onChange={(e) => setBackdateValue(e.target.value)}
+                                className="border rounded px-2 py-1 text-xs"
+                              />
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => handleBackdate(sub.id)}
+                                disabled={processingId === sub.id}
+                              >
+                                {processingId === sub.id ? "Saving..." : "Save"}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => { setBackdateId(null); setBackdateValue(""); setBackdateError(null) }}
+                              >
+                                Cancel
+                              </Button>
+                              {backdateError && <span className="text-xs text-red-500">{backdateError}</span>}
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 hover:underline"
+                              onClick={() => {
+                                setBackdateId(sub.id)
+                                const d = new Date(sub.createdAt)
+                                const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+                                setBackdateValue(local)
+                              }}
+                            >
+                              <Calendar size={11} />
+                              {new Date(sub.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                              <span className="text-gray-400">(click to change)</span>
+                            </button>
+                          )}
+                        </div>
 
                         {/* Version history */}
                         {hasRevisions && (

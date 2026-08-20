@@ -41,7 +41,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await req.json()
-    const { status, title, description } = body
+    const { status, title, description, createdAt } = body
 
     const submission = await prisma.submission.findUnique({
       where: { id },
@@ -52,13 +52,21 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    if (submission.userId !== session.user.id) {
+    const isAdmin = session.user.role === "ADMIN"
+    if (submission.userId !== session.user.id && !isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
     const data: Record<string, unknown> = {}
     if (title !== undefined) data.title = title
     if (description !== undefined) data.description = description
+    if (createdAt !== undefined) {
+      const parsed = new Date(createdAt)
+      if (isNaN(parsed.getTime())) {
+        return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+      }
+      data.createdAt = parsed
+    }
     if (status !== undefined) {
       if (status === "UNDER_REVIEW" && (submission.status === "DRAFT" || submission.status === "REVISION")) {
         data.status = "UNDER_REVIEW"
