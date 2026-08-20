@@ -138,7 +138,7 @@ function ContributionCard({
             <p className="text-xs text-gray-400 mt-1 italic">&ldquo;{item.changelog}&rdquo;</p>
           )}
           {item.description && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+            <p className="text-xs text-gray-500 mt-1">{item.description}</p>
           )}
           <div className="flex items-center gap-2 mt-2">
             <Clock size={10} className="text-gray-400" />
