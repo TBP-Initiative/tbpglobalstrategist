@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import DashboardLayout from "@/components/layout/dashboard-layout"
 import { Loader2 } from "lucide-react"
 
-const adminPaths = ["/dashboard/users", "/dashboard/projects", "/dashboard/analytics", "/dashboard/system", "/dashboard/settings", "/dashboard/admin"]
+const adminPaths = ["/dashboard/users", "/dashboard/projects", "/dashboard/analytics", "/dashboard/system", "/dashboard/settings", "/dashboard/admin", "/dashboard/admin/submissions"]
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

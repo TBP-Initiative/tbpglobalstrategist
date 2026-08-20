@@ -39,6 +39,7 @@ import {
   MessageSquare,
   Activity,
   Plus,
+  FileText,
 } from "lucide-react"
 import {
   LineChart,
@@ -453,6 +454,10 @@ export function AdminDashboardClient({
                 <Button type="button" variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => router.push("/dashboard/analytics")}>
                   <BarChart3 size={14} />
                   View Analytics
+                </Button>
+                <Button type="button" variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => router.push("/dashboard/admin/submissions")}>
+                  <FileText size={14} />
+                  Review Submissions
                 </Button>
               </div>
             </GlassCard>

@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   Share2,
   CreditCard,
+  FileText,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -63,6 +64,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
         { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
         { label: "Referrals", href: "/dashboard/admin/referrals", icon: Share2 },
+        { label: "Submissions", href: "/dashboard/admin/submissions", icon: FileText },
       ],
     },
     {
