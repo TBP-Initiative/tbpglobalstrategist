@@ -63,7 +63,7 @@ const statusLabels: Record<string, string> = {
   PUBLISHED: "Published",
 }
 
-export default function AdminSubmissionsClient({ submissions }: { submissions: Submission[] }) {
+export default function AdminSubmissionsClient({ submissions, isAdmin }: { submissions: Submission[]; isAdmin: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -284,16 +284,18 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
                         <Eye size={12} />
                         {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                       </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-2 text-xs gap-1 text-red-500 hover:bg-red-50"
-                        onClick={() => setConfirmDelete(confirmDelete === sub.id ? null : sub.id)}
-                        disabled={isProcessing}
-                      >
-                        <Trash2 size={12} />
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs gap-1 text-red-500 hover:bg-red-50"
+                          onClick={() => setConfirmDelete(confirmDelete === sub.id ? null : sub.id)}
+                          disabled={isProcessing}
+                        >
+                          <Trash2 size={12} />
+                        </Button>
+                      )}
                     </div>
                   </div>
 
@@ -361,7 +363,8 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
                           </div>
                         )}
 
-                        {/* Backdate */}
+                        {/* Backdate (admin only) */}
+                        {isAdmin && (
                         <div>
                           <p className="text-xs font-medium text-gray-500 mb-1">Created Date</p>
                           {backdateId === sub.id ? (
@@ -409,6 +412,7 @@ export default function AdminSubmissionsClient({ submissions }: { submissions: S
                             </button>
                           )}
                         </div>
+                        )}
 
                         {/* Version history */}
                         {hasRevisions && (

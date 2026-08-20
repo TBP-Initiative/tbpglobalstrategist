@@ -42,6 +42,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             role: true,
             isActive: true,
             image: true,
+            isPublishAssessor: true,
           },
         });
 
@@ -57,6 +58,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           role: user.role,
           image: user.image,
           isActive: user.isActive,
+          isPublishAssessor: user.isPublishAssessor,
         };
       },
     }),

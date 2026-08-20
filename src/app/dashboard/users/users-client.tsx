@@ -43,6 +43,7 @@ import {
   Shield,
   Download,
   RefreshCw,
+  ClipboardCheck,
 } from "lucide-react"
 
 type UserData = {
@@ -51,6 +52,7 @@ type UserData = {
   email: string
   role: string
   image: string | null
+  isPublishAssessor: boolean
   createdAt: string
   projects: number
   stage: string | null
@@ -69,6 +71,29 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
   const router = useRouter()
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  async function handleToggleAssessor(userId: string, current: boolean) {
+    setTogglingId(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/toggle-assessor`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublishAssessor: !current }),
+      })
+      if (res.ok) {
+        toast.success(current ? "Removed assessor designation" : "Granted assessor designation")
+        router.refresh()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || "Failed")
+      }
+    } catch {
+      toast.error("Network error")
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   const strategistCount = users.filter((u) => u.role === "STRATEGIST" || u.role === "RESEARCHER").length
 
@@ -185,9 +210,16 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={(roleColors[user.role] ?? "") + " text-[10px] px-1.5"}>
-                        {user.role.replace("_", " ")}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="outline" className={(roleColors[user.role] ?? "") + " text-[10px] px-1.5"}>
+                          {user.role.replace("_", " ")}
+                        </Badge>
+                        {user.isPublishAssessor && (
+                          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] px-1.5">
+                            Assessor
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {user.stage ? (
@@ -235,6 +267,13 @@ export function UsersClient({ users, total }: { users: UserData[]; total: number
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <ChangeRoleDialog userId={user.id} userName={user.name ?? "Unnamed"} currentRole={user.role} />
+                            <DropdownMenuItem
+                              onClick={() => handleToggleAssessor(user.id, user.isPublishAssessor)}
+                              disabled={togglingId === user.id}
+                            >
+                              <ClipboardCheck size={13} className="mr-2" />
+                              {user.isPublishAssessor ? "Remove Assessor" : "Make Assessor"}
+                            </DropdownMenuItem>
                             <ChangeStageDialog userId={user.id} userName={user.name ?? "Unnamed"} currentStage={user.stage} />
                             <AssignAreasDialog userId={user.id} userName={user.name ?? "Unnamed"} />
                             <ChangePasswordDialog userId={user.id} userName={user.name ?? "Unnamed"} />

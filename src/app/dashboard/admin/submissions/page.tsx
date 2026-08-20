@@ -11,7 +11,7 @@ export default async function AdminSubmissionsPage() {
   if (!session?.user?.email) redirect("/login")
 
   const user = await prisma.user.findUnique({ where: { email: session.user.email } })
-  if (!user || user.role !== "ADMIN") redirect("/dashboard")
+  if (!user || (user.role !== "ADMIN" && !user.isPublishAssessor)) redirect("/dashboard")
 
   const submissions = await prisma.submission.findMany({
     where: { isLatest: true },
@@ -33,5 +33,5 @@ export default async function AdminSubmissionsPage() {
     revisions: s.revisions.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
   }))
 
-  return <AdminSubmissionsClient submissions={serialized} />
+  return <AdminSubmissionsClient submissions={serialized} isAdmin={user.role === "ADMIN"} />
 }

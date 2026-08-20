@@ -13,7 +13,7 @@ export const authConfig: NextAuthConfig = {
       const isOnLogin = nextUrl.pathname.startsWith("/login");
       const isOnRegister = nextUrl.pathname.startsWith("/register");
 
-      if (isOnAdmin && auth?.user?.role !== "ADMIN") {
+      if (isOnAdmin && auth?.user?.role !== "ADMIN" && !(auth?.user as any)?.isPublishAssessor) {
         return NextResponse.redirect(new URL("/dashboard", nextUrl));
       }
 
@@ -32,6 +32,10 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.isPublishAssessor = (user as any).isPublishAssessor;
+      }
+      if (token.isPublishAssessor === undefined && token.id) {
+        token.isPublishAssessor = false;
       }
       // Strip adapter-injected OAuth fields to keep JWT small
       delete (token as any).picture
@@ -50,6 +54,7 @@ export const authConfig: NextAuthConfig = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        (session.user as any).isPublishAssessor = token.isPublishAssessor;
       }
       return session;
     },

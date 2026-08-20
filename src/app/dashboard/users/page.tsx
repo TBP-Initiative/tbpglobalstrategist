@@ -17,6 +17,7 @@ export default async function AdminUsersPage() {
         role: true,
         image: true,
         isActive: true,
+        isPublishAssessor: true,
         createdAt: true,
         strategistProfile: { select: { stage: true } },
         workAreaAssignments: {
@@ -35,6 +36,7 @@ export default async function AdminUsersPage() {
     email: u.email,
     role: u.role,
     image: u.image,
+    isPublishAssessor: u.isPublishAssessor,
     createdAt: u.createdAt.toISOString(),
     projects: u._count.createdProjects,
     stage: u.strategistProfile?.stage ?? null,
