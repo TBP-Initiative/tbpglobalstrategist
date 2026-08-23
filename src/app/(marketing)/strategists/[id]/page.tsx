@@ -258,21 +258,25 @@ export default async function StrategistProfilePage({
         },
       })
 
-      activities = submissions.map((s) => ({
-        id: s.id,
-        title: s.title,
-        description: s.description ?? `Submitted for stage: ${s.stage}`,
-        date: s.createdAt.toISOString(),
-        type: "milestone" as const,
-        fileUrl: s.fileUrl,
-        fileType: s.fileType,
-        fileSize: s.fileSize,
-        version: s.version,
-        status: s.status,
-        changelog: s.changelog,
-        projectId: s.project?.id ?? null,
-        projectTitle: s.project?.title ?? null,
-      }))
+      activities = submissions.map((s) => {
+        const isPublic = s.status === "APPROVED" || s.status === "PUBLISHED"
+
+        return {
+          id: s.id,
+          title: s.title,
+          description: s.description ?? `Submitted for stage: ${s.stage}`,
+          date: s.createdAt.toISOString(),
+          type: "milestone" as const,
+          fileUrl: isPublic ? s.fileUrl : undefined,
+          fileType: isPublic ? s.fileType : undefined,
+          fileSize: isPublic ? s.fileSize : null,
+          version: s.version,
+          status: s.status,
+          changelog: s.changelog,
+          projectId: s.project?.id ?? null,
+          projectTitle: s.project?.title ?? null,
+        }
+      })
     } catch { /* ignore */ }
   }
 

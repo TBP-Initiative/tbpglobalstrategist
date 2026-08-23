@@ -115,6 +115,7 @@ function ContributionCard({
   setExpandedHistory: (id: string | null) => void
 }) {
   const statusCfg = item.status ? STATUS_CONFIG[item.status] : null
+  const isApproved = item.status === "APPROVED" || item.status === "PUBLISHED"
   const isExpanded = expandedHistory === item.id
 
   return (
@@ -132,7 +133,14 @@ function ContributionCard({
             )}
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            Current: {item.version ? `Revision ${item.version}` : "Initial Submission"}
+            {isApproved ? (
+              <>Current: {item.version ? `Revision ${item.version}` : "Initial Submission"}</>
+            ) : (
+              <span className="inline-flex items-center gap-1 italic">
+                <Clock size={11} className="text-amber-500" />
+                Report on review — awaiting approval and not yet published
+              </span>
+            )}
           </p>
           {item.changelog && (
             <p className="text-xs text-gray-400 mt-1 italic">&ldquo;{item.changelog}&rdquo;</p>
