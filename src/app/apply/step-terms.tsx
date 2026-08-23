@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,6 +46,7 @@ const CHECKBOX_LABELS: Record<string, string> = {
 }
 
 export function StepTerms({ data, pathway, onNext, onBack, saving }: StepTermsProps) {
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [signature, setSignature] = useState((data?.signatureName as string) || "")
   const [readSections, setReadSections] = useState<Set<number>>(new Set())
   const [scrolledToBottom, setScrolledToBottom] = useState(false)
@@ -69,6 +70,19 @@ export function StepTerms({ data, pathway, onNext, onBack, saving }: StepTermsPr
     }
   }
 
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el && el.scrollHeight <= el.clientHeight + 1) {
+      setScrolledToBottom(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (scrolledToBottom) {
+      setReadSections(new Set(TERMS_SECTIONS.map((s) => s.id)))
+    }
+  }, [scrolledToBottom])
+
   const markRead = (id: number) => {
     setReadSections((prev) => new Set(prev).add(id))
   }
@@ -83,6 +97,7 @@ export function StepTerms({ data, pathway, onNext, onBack, saving }: StepTermsPr
       <p className="mt-1 text-sm text-gray-500">Section 8 of the Application / Programme Terms Form</p>
 
       <div
+        ref={scrollRef}
         className="mt-6 max-h-[45vh] space-y-4 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50/50 p-5"
         onScroll={handleScroll}
       >
@@ -108,7 +123,7 @@ export function StepTerms({ data, pathway, onNext, onBack, saving }: StepTermsPr
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-400">
           {readSections.size}/{TERMS_SECTIONS.length} sections read
-          {!scrolledToBottom && " • Scroll to bottom to continue"}
+          {!scrolledToBottom && " • Scroll to the bottom of the terms to continue"}
         </p>
       </div>
 
