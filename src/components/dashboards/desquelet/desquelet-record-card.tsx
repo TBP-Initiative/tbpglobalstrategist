@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/shared/glass-card"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { DesqueletProgressBar } from "./desquelet-progress-bar"
 import { DESQUELET_STAGE_ORDER, DESQUELET_STAGE_MAP, type DesqueletStageKey } from "@/lib/desquelet-prompts"
@@ -50,12 +49,12 @@ export function DesqueletRecordCard({ record, index = 0 }: DesqueletRecordCardPr
         <GlassCard className="p-5 hover:border-indigo-500/30 transition-all cursor-pointer" hover intensity="light">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-white">{record.title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{record.title}</h3>
               {record.project && (
-                <p className="text-sm text-white/50 mt-1">{record.project.title}</p>
+                <p className="text-sm text-gray-500 mt-1">{record.project.title}</p>
               )}
             </div>
-            <Badge variant="outline" className="text-white/60">
+            <Badge variant="outline" className="text-gray-500">
               V{record.currentRevision}
             </Badge>
           </div>
@@ -66,8 +65,8 @@ export function DesqueletRecordCard({ record, index = 0 }: DesqueletRecordCardPr
             compact
           />
 
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
-            <div className="flex items-center gap-4 text-xs text-white/40">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+            <div className="flex items-center gap-4 text-xs text-gray-400">
               <span className="flex items-center gap-1">
                 <Calendar size={12} />
                 {new Date(record.lastUpdated).toLocaleDateString()}
@@ -81,7 +80,7 @@ export function DesqueletRecordCard({ record, index = 0 }: DesqueletRecordCardPr
                 {record.milestones} milestones
               </span>
             </div>
-            <ArrowRight size={16} className="text-white/40" />
+            <ArrowRight size={16} className="text-gray-400" />
           </div>
         </GlassCard>
       </Link>

@@ -61,11 +61,11 @@ export default function DesqueletRecordsPage() {
       <AnimatedSection>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Layers className="text-indigo-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <Layers className="text-indigo-600" />
               DESQUELET Application Records
             </h1>
-            <p className="text-white/60 mt-1">
+            <p className="text-gray-500 mt-1">
               Your live workspace for documenting DESQUELET methodology application
             </p>
           </div>
@@ -81,14 +81,14 @@ export default function DesqueletRecordsPage() {
       {records.length === 0 ? (
         <AnimatedSection delay={0.1}>
           <GlassCard className="p-12 text-center" intensity="light">
-            <FolderKanban size={48} className="mx-auto text-white/20 mb-4" />
-            <h2 className="text-lg font-semibold text-white mb-2">No DESQUELET Records Yet</h2>
-            <p className="text-white/50 mb-6 max-w-md mx-auto">
+            <FolderKanban size={48} className="mx-auto text-gray-300 mb-4" />
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">No DESQUELET Records Yet</h2>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
               Join a project or workstream to automatically create your first DESQUELET Application Record.
               Each record tracks your progress through the nine DESQUELET stages.
             </p>
             <Link href="/dashboard/projects">
-              <Button variant="outline" className="border-white/20 text-white/70 hover:text-white">
+              <Button variant="outline" className="border-gray-200 text-gray-600 hover:text-gray-900">
                 Browse Projects
               </Button>
             </Link>
@@ -104,22 +104,22 @@ export default function DesqueletRecordsPage() {
 
       <AnimatedSection delay={0.2}>
         <GlassCard className="p-6" intensity="light">
-          <h3 className="text-sm font-semibold text-white/80 mb-3">About DESQUELET</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">About DESQUELET</h3>
           <div className="grid grid-cols-3 md:grid-cols-9 gap-3">
             {[
               { letter: "D", name: "Deep Understanding" },
-              { letter: "E", name: "Exploration of Systems" },
+              { letter: "E1", name: "Exploration of Systems" },
               { letter: "S", name: "Strategic Planning" },
               { letter: "Q", name: "Questioning" },
               { letter: "U", name: "Unique Framing" },
-              { letter: "E", name: "Effective Engagement" },
+              { letter: "E2", name: "Effective Engagement" },
               { letter: "L", name: "Learning Through Simulation" },
-              { letter: "E", name: "Execution Model" },
+              { letter: "E3", name: "Execution Model" },
               { letter: "T", name: "Transferability" },
             ].map((stage, i) => (
-              <div key={i} className="text-center p-2 bg-white/5 rounded-lg">
-                <span className="text-lg font-bold text-indigo-400">{stage.letter}</span>
-                <p className="text-[10px] text-white/40 mt-1">{stage.name}</p>
+              <div key={i} className="text-center p-2 bg-gray-50 rounded-lg">
+                <span className="text-lg font-bold text-indigo-600">{stage.letter}</span>
+                <p className="text-[10px] text-gray-400 mt-1">{stage.name}</p>
               </div>
             ))}
           </div>

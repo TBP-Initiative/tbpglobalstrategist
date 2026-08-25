@@ -49,20 +49,20 @@ export function DesqueletReturnDialog({
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-md bg-gray-900 border border-white/10 rounded-2xl shadow-2xl p-6"
+            className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-2xl p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <RotateCcw size={18} />
                 Return to Previous Stage
               </h3>
-              <button onClick={onClose} className="text-white/40 hover:text-white">
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-900">
                 <X size={18} />
               </button>
             </div>
 
-            <p className="text-sm text-white/60 mb-4">
+            <p className="text-sm text-gray-500 mb-4">
               Select which stage you want to return to and explain why.
             </p>
 
@@ -76,14 +76,14 @@ export function DesqueletReturnDialog({
                     className={cn(
                       "w-full flex items-center gap-3 p-3 rounded-lg border transition-all text-left",
                       selectedStage === key
-                        ? "border-blue-500/50 bg-blue-500/10"
-                        : "border-white/10 bg-white/5 hover:bg-white/10"
+                        ? "border-blue-500/50 bg-blue-50"
+                        : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                     )}
                   >
-                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-white/70 text-sm font-bold">
+                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-600 text-sm font-bold">
                       {config.letter}
                     </span>
-                    <span className="text-sm text-white/80">{config.name}</span>
+                    <span className="text-sm text-gray-700">{config.name}</span>
                   </button>
                 )
               })}
@@ -99,7 +99,7 @@ export function DesqueletReturnDialog({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Why are you returning to this stage? What changed or was discovered?"
-                  className="min-h-[100px] bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                  className="min-h-[100px] bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400"
                 />
               </motion.div>
             )}
@@ -108,14 +108,14 @@ export function DesqueletReturnDialog({
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="border-white/20 text-white/70"
+                className="border-gray-200 text-gray-600"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirm}
                 disabled={!selectedStage || !reason.trim()}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
               >
                 <RotateCcw size={14} className="mr-1" />
                 Create Iteration

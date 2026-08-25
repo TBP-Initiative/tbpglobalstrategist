@@ -20,7 +20,7 @@ interface DesqueletProgressBarProps {
 function getStatusColor(status: StageProgress["status"]): string {
   if (status === "completed") return "bg-green-500 text-white"
   if (status === "in_progress") return "bg-blue-500 text-white"
-  return "bg-white/10 text-white/50 border border-white/20"
+  return "bg-gray-100 text-gray-400 border border-gray-200"
 }
 
 function getStatusIcon(status: StageProgress["status"]): string {
@@ -40,13 +40,13 @@ export function DesqueletProgressBar({
   return (
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-white/70">
+        <span className="text-sm font-medium text-gray-500">
           DESQUELET Application Progress
         </span>
-        <span className="text-sm font-bold text-white">{overallProgress}%</span>
+        <span className="text-sm font-bold text-gray-900">{overallProgress}%</span>
       </div>
 
-      <div className="w-full bg-white/10 rounded-full h-2">
+      <div className="w-full bg-gray-100 rounded-full h-2">
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
           initial={{ width: 0 }}
@@ -84,7 +84,7 @@ export function DesqueletProgressBar({
       </div>
 
       {!compact && (
-        <div className="flex items-center gap-3 text-xs text-white/50">
+        <div className="flex items-center gap-3 text-xs text-gray-400">
           {DESQUELET_STAGE_ORDER.map((key) => {
             const config = DESQUELET_STAGE_MAP[key]
             return (

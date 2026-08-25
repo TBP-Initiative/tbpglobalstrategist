@@ -113,13 +113,13 @@ export function DesqueletEvidencePanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-white/80">Evidence</h4>
+        <h4 className="text-sm font-medium text-gray-700">Evidence</h4>
         {!readOnly && (
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowUpload(!showUpload)}
-            className="border-white/20 text-white/70 hover:text-white"
+            className="border-gray-200 text-gray-600 hover:text-gray-900"
           >
             <Upload size={14} className="mr-1" />
             Add Evidence
@@ -135,37 +135,37 @@ export function DesqueletEvidencePanel({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-3 bg-white/5 rounded-lg space-y-2">
+            <div className="p-3 bg-gray-50 rounded-lg space-y-2">
               <Input
                 value={uploadName}
                 onChange={(e) => setUploadName(e.target.value)}
                 placeholder="File name"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
               />
               <Input
                 value={uploadUrl}
                 onChange={(e) => setUploadUrl(e.target.value)}
                 placeholder="File URL (Google Drive, Dropbox, etc.)"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
               />
               <Input
                 value={uploadDescription}
                 onChange={(e) => setUploadDescription(e.target.value)}
                 placeholder="Description (optional)"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
               />
               <Input
                 value={uploadCategory}
                 onChange={(e) => setUploadCategory(e.target.value)}
                 placeholder="Category (e.g., simulation, paper, diagram)"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
               />
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowUpload(false)}
-                  className="border-white/20 text-white/70"
+                  className="border-gray-200 text-gray-600"
                 >
                   Cancel
                 </Button>
@@ -173,7 +173,7 @@ export function DesqueletEvidencePanel({
                   size="sm"
                   onClick={handleUpload}
                   disabled={isUploading}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   {isUploading ? "Adding..." : "Add"}
                 </Button>
@@ -185,7 +185,7 @@ export function DesqueletEvidencePanel({
 
       <div className="space-y-2">
         {evidence.length === 0 && (
-          <p className="text-xs text-white/40 text-center py-4">
+          <p className="text-xs text-gray-400 text-center py-4">
             No evidence attached yet
           </p>
         )}
@@ -194,14 +194,14 @@ export function DesqueletEvidencePanel({
             key={item.id}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 p-2 bg-white/5 rounded-lg group"
+            className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg group"
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white/10 text-white/60">
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100 text-gray-500">
               {getFileIcon(item.fileType)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/80 truncate">{item.fileName}</p>
-              <div className="flex items-center gap-2 text-xs text-white/40">
+              <p className="text-sm text-gray-700 truncate">{item.fileName}</p>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
                 {item.fileSize && <span>{formatFileSize(item.fileSize)}</span>}
                 {item.category && <Badge variant="outline" className="text-[10px] py-0">{item.category}</Badge>}
               </div>
@@ -210,14 +210,14 @@ export function DesqueletEvidencePanel({
               href={item.fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="text-blue-600 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <ExternalLink size={14} />
             </a>
             {!readOnly && (
               <button
                 onClick={() => handleDelete(item.id)}
-                className="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Trash2 size={14} />
               </button>

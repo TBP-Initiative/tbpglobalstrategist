@@ -93,7 +93,6 @@ export default function DesqueletWorkspacePage() {
   const [activeStage, setActiveStage] = useState<DesqueletStageKey>("D")
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showMobileNav, setShowMobileNav] = useState(false)
 
   const fetchRecord = useCallback(async () => {
     try {
@@ -215,8 +214,8 @@ export default function DesqueletWorkspacePage() {
   if (!record) {
     return (
       <div className="text-center py-12">
-        <p className="text-white/60">Record not found</p>
-        <Link href="/dashboard/desquelet" className="text-indigo-400 hover:text-indigo-300 mt-4 inline-block">
+        <p className="text-gray-500">Record not found</p>
+        <Link href="/dashboard/desquelet" className="text-indigo-600 hover:text-indigo-700 mt-4 inline-block">
           Back to Records
         </Link>
       </div>
@@ -251,20 +250,20 @@ export default function DesqueletWorkspacePage() {
     <div className="space-y-6">
       <AnimatedSection>
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/dashboard/desquelet" className="text-white/40 hover:text-white">
+          <Link href="/dashboard/desquelet" className="text-gray-400 hover:text-gray-900">
             <ChevronLeft size={20} />
           </Link>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Layers className="text-indigo-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <Layers className="text-indigo-600" />
               {record.title}
             </h1>
             {record.project && (
-              <p className="text-white/60 mt-1">{record.project.title}</p>
+              <p className="text-gray-500 mt-1">{record.project.title}</p>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg">
+            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
               {(["FELLOW", "ASSESSOR", "PUBLIC"] as const).map((v) => (
                 <button
                   key={v}
@@ -273,7 +272,7 @@ export default function DesqueletWorkspacePage() {
                     "px-2 py-1 rounded text-xs font-medium transition-all",
                     record.visibility === v
                       ? "bg-indigo-600 text-white"
-                      : "text-white/40 hover:text-white/70"
+                      : "text-gray-400 hover:text-gray-700"
                   )}
                   title={v === "FELLOW" ? "Only you can see" : v === "ASSESSOR" ? "You and assessors can see" : "Visible on public profile"}
                 >
@@ -285,7 +284,7 @@ export default function DesqueletWorkspacePage() {
               variant="outline"
               size="sm"
               onClick={handleGeneratePdf}
-              className="border-white/20 text-white/70 hover:text-white"
+              className="border-gray-200 text-gray-600 hover:text-gray-900"
             >
               <Download size={14} className="mr-1" />
               PDF
@@ -300,8 +299,8 @@ export default function DesqueletWorkspacePage() {
             stages={stages}
             overallProgress={overallProgress}
           />
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-            <div className="flex items-center gap-4 text-xs text-white/40">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+            <div className="flex items-center gap-4 text-xs text-gray-400">
               <span className="flex items-center gap-1">
                 <Clock size={12} />
                 Last updated: {new Date(record.updatedAt).toLocaleDateString()}
@@ -339,35 +338,35 @@ export default function DesqueletWorkspacePage() {
                       className={cn(
                         "w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left",
                         isActive
-                          ? "bg-indigo-500/20 border border-indigo-500/30"
-                          : "hover:bg-white/5 border border-transparent"
+                          ? "bg-indigo-50 border border-indigo-200"
+                          : "hover:bg-gray-50 border border-transparent"
                       )}
                     >
                       <span className={cn(
                         "flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold shrink-0",
-                        percentage >= 100 ? "bg-green-500/20 text-green-400" :
-                        percentage > 0 ? "bg-blue-500/20 text-blue-400" :
-                        "bg-white/10 text-white/50"
+                        percentage >= 100 ? "bg-green-100 text-green-600" :
+                        percentage > 0 ? "bg-blue-100 text-blue-600" :
+                        "bg-gray-100 text-gray-400"
                       )}>
                         {config.letter}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={cn(
                           "text-sm font-medium truncate",
-                          isActive ? "text-white" : "text-white/70"
+                          isActive ? "text-gray-900" : "text-gray-700"
                         )}>
                           {config.name}
                         </p>
-                        <p className="text-xs text-white/40">{percentage}%</p>
+                        <p className="text-xs text-gray-400">{percentage}%</p>
                       </div>
                       {hasReview && (
                         <Badge
                           variant="outline"
                           className={cn(
                             "text-[10px] shrink-0",
-                            latestReview?.status === "APPROVED" ? "text-green-400 border-green-500/30" :
-                            latestReview?.status === "REVISION_REQUIRED" ? "text-amber-400 border-amber-500/30" :
-                            "text-blue-400 border-blue-500/30"
+                            latestReview?.status === "APPROVED" ? "text-green-600 border-green-200" :
+                            latestReview?.status === "REVISION_REQUIRED" ? "text-amber-600 border-amber-200" :
+                            "text-blue-600 border-blue-200"
                           )}
                         >
                           {latestReview?.status === "APPROVED" ? "✓" :
@@ -395,11 +394,11 @@ export default function DesqueletWorkspacePage() {
                     }
                   }}
                   disabled={currentStageIndex === 0}
-                  className="border-white/20 text-white/70 hover:text-white"
+                  className="border-gray-200 text-gray-600 hover:text-gray-900"
                 >
                   <ChevronLeft size={14} />
                 </Button>
-                <span className="text-sm text-white/60">
+                <span className="text-sm text-gray-500">
                   {currentStageIndex + 1} / {DESQUELET_STAGE_ORDER.length}
                 </span>
                 <Button
@@ -411,7 +410,7 @@ export default function DesqueletWorkspacePage() {
                     }
                   }}
                   disabled={currentStageIndex === DESQUELET_STAGE_ORDER.length - 1}
-                  className="border-white/20 text-white/70 hover:text-white"
+                  className="border-gray-200 text-gray-600 hover:text-gray-900"
                 >
                   <ChevronRight size={14} />
                 </Button>

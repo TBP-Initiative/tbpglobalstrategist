@@ -106,25 +106,25 @@ export function DesqueletStageEditor({
       <GlassCard className="p-6" intensity="medium">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
               <span className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-xl text-lg font-bold",
-                percentage >= 100 ? "bg-green-500/20 text-green-400" :
-                percentage > 0 ? "bg-blue-500/20 text-blue-400" :
-                "bg-white/10 text-white/50"
+                percentage >= 100 ? "bg-green-100 text-green-600" :
+                percentage > 0 ? "bg-blue-100 text-blue-600" :
+                "bg-gray-100 text-gray-400"
               )}>
                 {config.letter}
               </span>
               {config.name}
             </h2>
-            <p className="text-sm text-white/60 mt-1">{config.description}</p>
+            <p className="text-sm text-gray-500 mt-1">{config.description}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-white/70">
+            <Badge variant="outline" className="text-gray-500">
               {percentage}% complete
             </Badge>
             {lastSaved && (
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-gray-400">
                 {isSaving ? "Saving..." : `Saved ${lastSaved.toLocaleTimeString()}`}
               </span>
             )}
@@ -133,42 +133,42 @@ export function DesqueletStageEditor({
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-white/80 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
               Your Response
             </label>
             <Textarea
               value={response}
               onChange={(e) => setResponse(e.target.value)}
               placeholder={`Describe your work on ${config.name}...`}
-              className="min-h-[200px] bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-blue-500/50"
+              className="min-h-[200px] bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500/50"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-white/80 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
               Additional Notes
             </label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Optional notes, observations, or context..."
-              className="min-h-[100px] bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-blue-500/50"
+              className="min-h-[100px] bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500/50"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-white/80 mb-2 block flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
               <Link2 size={14} />
               References & Links
             </label>
             <div className="space-y-2">
               {links.map((link, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
-                  <span className="flex-1 text-sm text-white/80 truncate">{link.label}</span>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">
+                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                  <span className="flex-1 text-sm text-gray-700 truncate">{link.label}</span>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-xs">
                     Open
                   </a>
-                  <button onClick={() => removeLink(index)} className="text-red-400 hover:text-red-300">
+                  <button onClick={() => removeLink(index)} className="text-red-400 hover:text-red-500">
                     <X size={14} />
                   </button>
                 </div>
@@ -178,20 +178,20 @@ export function DesqueletStageEditor({
                   value={newLinkLabel}
                   onChange={(e) => setNewLinkLabel(e.target.value)}
                   placeholder="Label"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400"
                 />
                 <Input
                   value={newLinkUrl}
                   onChange={(e) => setNewLinkUrl(e.target.value)}
                   placeholder="URL"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={addLink}
-                  className="border-white/20 text-white/70 hover:text-white"
+                  className="border-gray-200 text-gray-600 hover:text-gray-900"
                 >
                   <Plus size={14} />
                 </Button>
@@ -200,13 +200,13 @@ export function DesqueletStageEditor({
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onReturnToStage(stage)}
-              className="border-white/20 text-white/70 hover:text-white"
+              className="border-gray-200 text-gray-600 hover:text-gray-900"
             >
               <RotateCcw size={14} className="mr-1" />
               Return to Previous Stage
@@ -218,7 +218,7 @@ export function DesqueletStageEditor({
               size="sm"
               onClick={() => saveStageContent({ response, notes, links }, percentage)}
               disabled={isSaving}
-              className="border-white/20 text-white/70 hover:text-white"
+              className="border-gray-200 text-gray-600 hover:text-gray-900"
             >
               <Save size={14} className="mr-1" />
               {isSaving ? "Saving..." : "Save"}

@@ -22,22 +22,22 @@ interface DesqueletReviewPanelProps {
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   PENDING: {
     label: "Pending Review",
-    color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    color: "bg-blue-50 text-blue-600 border-blue-200",
     icon: <Clock size={14} />,
   },
   APPROVED: {
     label: "Approved",
-    color: "bg-green-500/10 text-green-400 border-green-500/20",
+    color: "bg-green-50 text-green-600 border-green-200",
     icon: <CheckCircle2 size={14} />,
   },
   REVISION_REQUIRED: {
     label: "Revision Required",
-    color: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    color: "bg-amber-50 text-amber-600 border-amber-200",
     icon: <XCircle size={14} />,
   },
   FURTHER_EVIDENCE_REQUIRED: {
     label: "Further Evidence Required",
-    color: "bg-red-500/10 text-red-400 border-red-500/20",
+    color: "bg-red-50 text-red-600 border-red-200",
     icon: <AlertCircle size={14} />,
   },
 }
@@ -50,9 +50,9 @@ export function DesqueletReviewPanel({
     return (
       <GlassCard className={className} intensity="light">
         <div className="p-4 text-center">
-          <Clock size={24} className="mx-auto text-white/30 mb-2" />
-          <p className="text-sm text-white/40">No reviews yet</p>
-          <p className="text-xs text-white/30 mt-1">
+          <Clock size={24} className="mx-auto text-gray-300 mb-2" />
+          <p className="text-sm text-gray-400">No reviews yet</p>
+          <p className="text-xs text-gray-300 mt-1">
             Submit your stage for assessor review
           </p>
         </div>
@@ -67,7 +67,7 @@ export function DesqueletReviewPanel({
     <GlassCard className={className} intensity="light">
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-white/80">Assessor Review</h4>
+          <h4 className="text-sm font-medium text-gray-700">Assessor Review</h4>
           <Badge
             variant="outline"
             className={cn("flex items-center gap-1", config.color)}
@@ -86,7 +86,7 @@ export function DesqueletReviewPanel({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="p-3 bg-white/5 rounded-lg"
+                className="p-3 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -98,15 +98,15 @@ export function DesqueletReviewPanel({
                       {reviewConfig.label}
                     </Badge>
                   </div>
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-gray-400">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </span>
                 </div>
                 {review.feedback && (
-                  <p className="text-sm text-white/70 mt-2">{review.feedback}</p>
+                  <p className="text-sm text-gray-600 mt-2">{review.feedback}</p>
                 )}
                 {review.reviewer && (
-                  <p className="text-xs text-white/40 mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     Reviewed by {review.reviewer.name || review.reviewer.email}
                   </p>
                 )}
