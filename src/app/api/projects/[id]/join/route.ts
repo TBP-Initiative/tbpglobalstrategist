@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { DESQUELET_STAGE_ORDER } from "@/lib/desquelet-prompts"
 
 export async function POST(
   _req: Request,
@@ -66,6 +67,32 @@ export async function POST(
         role: "CONTRIBUTOR",
       },
     })
+
+    const existingRecord = await prisma.desqueletRecord.findUnique({
+      where: { userId_projectId: { userId: session.user.id, projectId } },
+    })
+
+    if (!existingRecord) {
+      const projectTitle = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { title: true },
+      })
+
+      await prisma.desqueletRecord.create({
+        data: {
+          userId: session.user.id,
+          projectId,
+          title: projectTitle?.title || "Workstream Record",
+          stages: {
+            create: DESQUELET_STAGE_ORDER.map((stage) => ({
+              stage: stage as "D" | "E1" | "S" | "Q" | "U" | "E2" | "L" | "E3" | "T",
+              content: {},
+              percentageComplete: 0,
+            })),
+          },
+        },
+      })
+    }
 
     await prisma.activityLog.create({
       data: {

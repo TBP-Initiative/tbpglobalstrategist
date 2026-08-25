@@ -7,6 +7,632 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id                  String                    @id @default(cuid())
+  name                String?
+  email               String                    @unique
+  emailVerified       DateTime?
+  image               String?
+  role                Role                      @default(STRATEGIST)
+  passwordHash        String?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  referralCode        String?                   @unique
+  isActive            Boolean                   @default(true)
+  isPublishAssessor   Boolean                   @default(false)
+  accounts            Account[]
+  achievements        Achievement[]
+  activityLogs        ActivityLog[]
+  conversations       ConversationParticipant[]
+  desqueletRecords    DesqueletRecord[]
+  desqueletReviews    DesqueletReview[]
+  receivedMessages    Message[]                 @relation("ReceivedMessages")
+  sentMessages        Message[]                 @relation("SentMessages")
+  notifications       Notification[]
+  onboarding          OnboardingSubmission?
+  organizationMembers OrganizationMember[]
+  paymentMethods      PaymentMethod[]
+  payoutAuditLogs     PayoutAuditLog[]
+  payoutRequests      PayoutRequest[]
+  createdProjects     Project[]                 @relation("CreatedProjects")
+  projectContributors ProjectContributor[]
+  publications        Publication[]
+  referralsReceived   Referral?                 @relation("ReferredUser")
+  referralsMade       Referral[]                @relation("Referrer")
+  referralCredits     ReferralCredit[]
+  referralWallet      ReferralWallet?
+  sessions            Session[]
+  strategistProfile   StrategistProfile?
+  submissions         Submission[]
+  workAreaAssignments UserWorkArea[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model StrategistProfile {
+  id                String           @id @default(cuid())
+  userId            String           @unique
+  bio               String?
+  title             String?
+  yearsOfExperience Int?
+  hourlyRate        Decimal?
+  availability      Boolean          @default(true)
+  linkedinUrl       String?
+  websiteUrl        String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  stage             ProgressionStage @default(CANDIDATE)
+  sector            String?
+  city              String?
+  country           String?
+  countryCode       String?
+  category          String?
+  featuredProjectId String?
+  expertiseTags     ExpertiseTag[]
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Organization {
+  id          String               @id @default(cuid())
+  name        String
+  slug        String               @unique
+  description String?
+  logo        String?
+  websiteUrl  String?
+  industry    String?
+  size        String?
+  location    String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  members     OrganizationMember[]
+  projects    Project[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role         @default(CORPORATE)
+  joinedAt       DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model Project {
+  id                 String               @id @default(cuid())
+  title              String
+  slug               String               @unique
+  description        String?
+  shortDescription   String?
+  objectives         String?              @default("[]")
+  strategicRelevance String?
+  status             ProjectStatus        @default(DRAFT)
+  budget             Decimal?
+  startDate          DateTime?
+  endDate            DateTime?
+  image              String?
+  category           String?
+  isFeatured         Boolean              @default(false)
+  featuredAt         DateTime?
+  organizationId     String?
+  createdById        String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  eligiblePathways   String?              @default("BOTH")
+  region             String?
+  desqueletRecords   DesqueletRecord[]
+  milestones         Milestone[]
+  createdBy          User                 @relation("CreatedProjects", fields: [createdById], references: [id], onDelete: Cascade)
+  organization       Organization?        @relation(fields: [organizationId], references: [id])
+  contributors       ProjectContributor[]
+  media              ProjectMedia[]
+  relations          ProjectRelation[]    @relation("ProjectRelations")
+  relatedTo          ProjectRelation[]    @relation("RelatedProjects")
+  submissions        Submission[]
+  tags               Tag[]                @relation("ProjectToTag")
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  weight      Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectMedia {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String
+  url       String
+  title     String?
+  fileType  String?
+  fileSize  Int?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectRelation {
+  id               String   @id @default(cuid())
+  projectId        String
+  relatedProjectId String
+  relationType     String   @default("RELATED")
+  createdAt        DateTime @default(now())
+  project          Project  @relation("ProjectRelations", fields: [projectId], references: [id], onDelete: Cascade)
+  relatedProject   Project  @relation("RelatedProjects", fields: [relatedProjectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, relatedProjectId])
+  @@index([projectId])
+  @@index([relatedProjectId])
+}
+
+model ProjectContributor {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      String   @default("CONTRIBUTOR")
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Tag {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  expertiseTags ExpertiseTag[]
+  projects      Project[]      @relation("ProjectToTag")
+}
+
+model ExpertiseTag {
+  id        String            @id @default(cuid())
+  profileId String
+  tagId     String
+  createdAt DateTime          @default(now())
+  profile   StrategistProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tag       Tag               @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, tagId])
+}
+
+model Publication {
+  id            String    @id @default(cuid())
+  title         String
+  abstract      String?
+  url           String?
+  publishedDate DateTime?
+  publisher     String?
+  authorId      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  issuer         String?
+  issuedDate     DateTime?
+  certificateUrl String?
+  userId         String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType @default(SYSTEM)
+  read      Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  content        String
+  senderId       String
+  receiverId     String?
+  read           Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  receiver       User?         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender         User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId, receiverId])
+}
+
+model Conversation {
+  id           String                    @id @default(cuid())
+  name         String?
+  isGroup      Boolean                   @default(false)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id        String         @id @default(cuid())
+  userId    String
+  action    ActivityAction
+  entity    String?
+  entityId  String?
+  metadata  String?
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkArea {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  assignments UserWorkArea[]
+}
+
+model UserWorkArea {
+  id         String   @id @default(cuid())
+  userId     String
+  workAreaId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workArea   WorkArea @relation(fields: [workAreaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workAreaId])
+}
+
+model Submission {
+  id                 String           @id @default(cuid())
+  userId             String
+  stage              String
+  title              String
+  description        String?
+  fileUrl            String
+  fileType           String
+  fileSize           Int?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  projectId          String?
+  version            Int              @default(1)
+  isLatest           Boolean          @default(true)
+  status             SubmissionStatus @default(DRAFT)
+  changelog          String?
+  parentSubmissionId String?
+  parentSubmission   Submission?      @relation("SubmissionRevisions", fields: [parentSubmissionId], references: [id])
+  revisions          Submission[]     @relation("SubmissionRevisions")
+  project            Project?         @relation(fields: [projectId], references: [id])
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stage])
+  @@index([projectId])
+  @@index([parentSubmissionId])
+  @@index([userId, projectId, isLatest])
+}
+
+model OnboardingSubmission {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  status               OnboardingStatus   @default(IN_PROGRESS)
+  currentStep          Int                @default(1)
+  fullName             String?
+  preferredName        String?
+  phoneNumber          String?
+  city                 String?
+  country              String?
+  linkedinUrl          String?
+  currentStatus        String?
+  pathway              FellowshipPathway?
+  pathwayAmount        Decimal?
+  signatureName        String?
+  agreedToTerms        Boolean            @default(false)
+  agreedToConduct      Boolean            @default(false)
+  agreedToIP           Boolean            @default(false)
+  agreedToPrivacy      Boolean            @default(false)
+  agreedToNoClaim      Boolean            @default(false)
+  agreedToAccurate     Boolean            @default(false)
+  agreedToRefund       Boolean            @default(false)
+  paymentProvider      PaymentProvider?
+  paymentStatus        PaymentStatus      @default(PENDING)
+  paymentReference     String?
+  paymentAmount        Decimal?
+  paymentCurrency      String?            @default("USD")
+  paidAt               DateTime?
+  profileVisibility    String?            @default("PUBLIC")
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  areasOfInterest      String?            @default("[]")
+  otherArea            String?
+  referredBy           String?
+  source               String             @default("ONBOARDING")
+  dateOfBirth          String?
+  nationality          String?
+  highestQualification String?
+  institution          String?
+  fieldOfStudy         String?
+  yearsOfExperience    Int?
+  tentativeProject     String?
+  fellowshipObjectives String?
+  tentativeProjectId   String?
+  secondaryProjectIds  String?            @default("[]")
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model Referral {
+  id             String          @id @default(cuid())
+  referrerId     String
+  referredUserId String          @unique
+  code           String
+  status         String          @default("PENDING_REGISTRATION")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  referredUser   User            @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
+  referrer       User            @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  credit         ReferralCredit?
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([code])
+}
+
+model ReferralCredit {
+  id         String    @id @default(cuid())
+  userId     String
+  referralId String    @unique
+  amount     Decimal   @default(50)
+  status     String    @default("PENDING")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  paidAt     DateTime?
+  approvedAt DateTime?
+  referral   Referral  @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ReferralWallet {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  availableBalance Decimal  @default(0)
+  paidBalance      Decimal  @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PayoutRequest {
+  id              String           @id @default(cuid())
+  userId          String
+  amount          Decimal
+  method          String
+  accountDetails  String
+  status          String           @default("PENDING")
+  processedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  paymentMethodId String?
+  transactionRef  String?
+  paidAt          DateTime?
+  processedById   String?
+  auditLogs       PayoutAuditLog[]
+  paymentMethod   PaymentMethod?   @relation(fields: [paymentMethodId], references: [id])
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model PaymentMethod {
+  id             String          @id @default(cuid())
+  userId         String
+  type           String
+  isDefault      Boolean         @default(false)
+  label          String?
+  paypalEmail    String?
+  accountHolder  String?
+  bankName       String?
+  accountNumber  String?
+  routingNumber  String?
+  swiftCode      String?
+  iban           String?
+  country        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payoutRequests PayoutRequest[]
+
+  @@index([userId])
+}
+
+model PayoutAuditLog {
+  id              String        @id @default(cuid())
+  payoutRequestId String
+  userId          String
+  action          String
+  details         String?
+  transactionRef  String?
+  createdAt       DateTime      @default(now())
+  payoutRequest   PayoutRequest @relation(fields: [payoutRequestId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([payoutRequestId])
+  @@index([userId])
+  @@index([action])
+}
+
+model DesqueletRecord {
+  id              String                  @id @default(cuid())
+  userId          String
+  projectId       String?
+  title           String
+  currentRevision Int                     @default(1)
+  visibility      DesqueletVisibility     @default(FELLOW)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  iterations      DesqueletIteration[]
+  milestones      DesqueletMilestone[]
+  project         Project?                @relation(fields: [projectId], references: [id])
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stages          DesqueletStageContent[]
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model DesqueletStageContent {
+  id                 String              @id @default(cuid())
+  recordId           String
+  stage              DesqueletStage
+  content            Json                @default("{}")
+  percentageComplete Int                 @default(0)
+  lastEditedAt       DateTime            @default(now())
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  evidence           DesqueletEvidence[]
+  reviews            DesqueletReview[]
+  record             DesqueletRecord     @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@unique([recordId, stage])
+  @@index([recordId])
+}
+
+model DesqueletEvidence {
+  id             String                @id @default(cuid())
+  stageContentId String
+  fileName       String
+  fileUrl        String
+  fileType       String
+  fileSize       Int?
+  description    String?
+  category       String?
+  createdAt      DateTime              @default(now())
+  stageContent   DesqueletStageContent @relation(fields: [stageContentId], references: [id], onDelete: Cascade)
+
+  @@index([stageContentId])
+}
+
+model DesqueletIteration {
+  id        String          @id @default(cuid())
+  recordId  String
+  fromStage DesqueletStage
+  toStage   DesqueletStage
+  reason    String
+  createdAt DateTime        @default(now())
+  record    DesqueletRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@index([recordId])
+}
+
+model DesqueletMilestone {
+  id        String          @id @default(cuid())
+  recordId  String
+  version   Int
+  label     String
+  reason    String?
+  snapshot  Json
+  createdAt DateTime        @default(now())
+  record    DesqueletRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@unique([recordId, version])
+  @@index([recordId])
+}
+
+model DesqueletReview {
+  id             String                @id @default(cuid())
+  stageContentId String
+  reviewerId     String
+  status         DesqueletReviewStatus @default(PENDING)
+  feedback       String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  reviewer       User                  @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  stageContent   DesqueletStageContent @relation(fields: [stageContentId], references: [id], onDelete: Cascade)
+
+  @@index([stageContentId])
+  @@index([reviewerId])
+}
+
 enum Role {
   ADMIN
   STRATEGIST
@@ -87,584 +713,27 @@ enum SubmissionStatus {
   PUBLISHED
 }
 
-model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String   @unique
-  emailVerified DateTime?
-  image         String?
-  role              Role     @default(STRATEGIST)
-  isActive          Boolean  @default(true)
-  isPublishAssessor Boolean  @default(false)
-  passwordHash  String?
-  referralCode  String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  accounts         Account[]
-  sessions         Session[]
-  strategistProfile StrategistProfile?
-  organizationMembers OrganizationMember[]
-  projectContributors ProjectContributor[]
-  createdProjects  Project[]          @relation("CreatedProjects")
-  sentMessages     Message[]          @relation("SentMessages")
-  receivedMessages Message[]          @relation("ReceivedMessages")
-  conversations    ConversationParticipant[]
-  notifications    Notification[]
-  activityLogs     ActivityLog[]
-  achievements     Achievement[]
-  publications     Publication[]
-  workAreaAssignments UserWorkArea[]
-  submissions      Submission[]
-  onboarding       OnboardingSubmission?
-  referralsMade    Referral[]         @relation("Referrer")
-  referralsReceived Referral[]        @relation("ReferredUser")
-  referralCredits  ReferralCredit[]
-  referralWallet   ReferralWallet?
-  payoutRequests   PayoutRequest[]
-  paymentMethods   PaymentMethod[]
-  payoutAuditLogs  PayoutAuditLog[]
+enum DesqueletStage {
+  D
+  E1
+  S
+  Q
+  U
+  E2
+  L
+  E3
+  T
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
+enum DesqueletReviewStatus {
+  PENDING
+  APPROVED
+  REVISION_REQUIRED
+  FURTHER_EVIDENCE_REQUIRED
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-model StrategistProfile {
-  id                String           @id @default(cuid())
-  userId            String           @unique
-  bio               String?
-  title             String?
-  stage             ProgressionStage @default(CANDIDATE)
-  sector            String?
-  category          String?
-  city              String?
-  country           String?
-  countryCode       String?
-  yearsOfExperience Int?
-  hourlyRate        Decimal? 
-  availability      Boolean          @default(true)
-  linkedinUrl       String?
-  websiteUrl        String?
-  featuredProjectId String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expertiseTags ExpertiseTag[]
-}
-
-model Organization {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String? 
-  logo        String?
-  websiteUrl  String?
-  industry    String?
-  size        String?
-  location    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  members OrganizationMember[]
-  projects Project[]
-}
-
-model OrganizationMember {
-  id             String   @id @default(cuid())
-  organizationId String
-  userId         String
-  role           Role     @default(CORPORATE)
-  joinedAt       DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, userId])
-}
-
-model Project {
-  id                 String        @id @default(cuid())
-  title              String
-  slug               String        @unique
-  description        String?      
-  shortDescription   String?
-  objectives         String?       @default("[]")
-  strategicRelevance String?
-  status             ProjectStatus @default(DRAFT)
-  budget             Decimal?      
-  startDate          DateTime?
-  endDate            DateTime?
-  image              String?
-  category           String?
-  isFeatured         Boolean       @default(false)
-  featuredAt         DateTime?
-  eligiblePathways   String?       @default("BOTH") // "FELLOWSHIP", "APPLIED_RD", or "BOTH"
-  region             String?
-  organizationId     String?
-  createdById        String
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-
-  organization  Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  createdBy     User                @relation("CreatedProjects", fields: [createdById], references: [id], onDelete: Cascade)
-  contributors  ProjectContributor[]
-  tags          Tag[]
-  media         ProjectMedia[]
-  milestones    Milestone[]
-  relations     ProjectRelation[]   @relation("ProjectRelations")
-  relatedTo     ProjectRelation[]   @relation("RelatedProjects")
-  submissions   Submission[]
-}
-
-model Milestone {
-  id          String    @id @default(cuid())
-  projectId   String
-  title       String
-  description String?
-  dueDate     DateTime?
-  completed   Boolean   @default(false)
-  completedAt DateTime?
-  sortOrder   Int       @default(0)
-  weight      Int       @default(1)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([projectId])
-}
-
-model ProjectMedia {
-  id        String   @id @default(cuid())
-  projectId String
-  type      String   // "IMAGE", "VIDEO", "DOCUMENT", "YOUTUBE", "VIMEO"
-  url       String
-  title     String?
-  fileType  String?  // "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", etc.
-  fileSize  Int?
-  createdAt DateTime @default(now())
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([projectId])
-}
-
-model ProjectRelation {
-  id                String   @id @default(cuid())
-  projectId         String
-  relatedProjectId  String
-  relationType      String   @default("RELATED") // "RELATED", "PARENT", "CHILD", "DEPENDENCY", "INITIATIVE", "PORTFOLIO", "CLUSTER"
-  createdAt         DateTime @default(now())
-
-  project        Project @relation("ProjectRelations", fields: [projectId], references: [id], onDelete: Cascade)
-  relatedProject Project @relation("RelatedProjects", fields: [relatedProjectId], references: [id], onDelete: Cascade)
-
-  @@unique([projectId, relatedProjectId])
-  @@index([projectId])
-  @@index([relatedProjectId])
-}
-
-model ProjectContributor {
-  id        String   @id @default(cuid())
-  projectId String
-  userId    String
-  role      String   @default("CONTRIBUTOR")
-  joinedAt  DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([projectId, userId])
-}
-
-model Tag {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  projects       Project[]
-  expertiseTags  ExpertiseTag[]
-}
-
-model ExpertiseTag {
-  id        String   @id @default(cuid())
-  profileId String
-  tagId     String
-  createdAt DateTime @default(now())
-
-  profile StrategistProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  tag     Tag               @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@unique([profileId, tagId])
-}
-
-model Publication {
-  id            String   @id @default(cuid())
-  title         String
-  abstract      String? 
-  url           String?
-  publishedDate DateTime?
-  publisher     String?
-  authorId      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
-}
-
-model Achievement {
-  id          String   @id @default(cuid())
-  title       String
-  description String? 
-  issuer      String?
-  issuedDate  DateTime?
-  certificateUrl String?
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Notification {
-  id      String           @id @default(cuid())
-  userId  String
-  title   String
-  message String          
-  type    NotificationType @default(SYSTEM)
-  read    Boolean          @default(false)
-  link    String?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Message {
-  id             String    @id @default(cuid())
-  content        String   
-  senderId       String
-  conversationId String?
-  receiverId     String?
-  read           Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  sender       User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver     User?         @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: SetNull)
-  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
-
-  @@index([conversationId])
-  @@index([senderId, receiverId])
-}
-
-model Conversation {
-  id        String   @id @default(cuid())
-  name      String?
-  isGroup   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  messages       Message[]
-  participants   ConversationParticipant[]
-}
-
-model ConversationParticipant {
-  id             String   @id @default(cuid())
-  conversationId String
-  userId         String
-  joinedAt       DateTime @default(now())
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([conversationId, userId])
-  @@index([conversationId])
-  @@index([userId])
-}
-
-model ActivityLog {
-  id        String         @id @default(cuid())
-  userId    String
-  action    ActivityAction
-  entity    String?
-  entityId  String?
-  metadata  String?
-  createdAt DateTime       @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model WorkArea {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  assignments UserWorkArea[]
-}
-
-model UserWorkArea {
-  id         String   @id @default(cuid())
-  userId     String
-  workAreaId String
-  createdAt  DateTime @default(now())
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workArea WorkArea  @relation(fields: [workAreaId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, workAreaId])
-}
-
-model Submission {
-  id          String           @id @default(cuid())
-  userId      String
-  projectId   String?
-  stage       String
-  title       String
-  description String?
-  fileUrl     String
-  fileType    String
-  fileSize    Int?
-  version     Int              @default(1)
-  isLatest    Boolean          @default(true)
-  status      SubmissionStatus @default(DRAFT)
-  changelog   String?
-  parentSubmissionId String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  parentSubmission Submission? @relation("SubmissionRevisions", fields: [parentSubmissionId], references: [id], onDelete: SetNull)
-  revisions       Submission[] @relation("SubmissionRevisions")
-
-  @@index([userId])
-  @@index([stage])
-  @@index([projectId])
-  @@index([parentSubmissionId])
-  @@index([userId, projectId, isLatest])
-}
-
-model OnboardingSubmission {
-  id                String            @id @default(cuid())
-  userId            String            @unique
-  status            OnboardingStatus  @default(IN_PROGRESS)
-  currentStep       Int               @default(1)
-  source            String            @default("ONBOARDING")
-
-  // Step 1: Participant Details
-  fullName          String?
-  preferredName     String?
-  phoneNumber       String?
-  city              String?
-  country           String?
-  linkedinUrl       String?
-  currentStatus     String?
-  areasOfInterest   String?           @default("[]")
-  otherArea         String?
-  referredBy        String?
-
-  // Institute Application: Personal Details
-  dateOfBirth       String?
-  nationality       String?
-
-  // Institute Application: Professional Background
-  highestQualification String?
-  institution       String?
-  fieldOfStudy      String?
-  yearsOfExperience Int?
-
-  // Institute Application: Tentative Project & Objectives
-  tentativeProject  String?
-  tentativeProjectId String?
-  secondaryProjectIds String?        @default("[]")
-  fellowshipObjectives String?
-
-  // Step 3: Fellowship Pathway
-  pathway           FellowshipPathway?
-  pathwayAmount     Decimal?
-
-  // Step 5: Agreement
-  signatureName     String?
-  agreedToTerms     Boolean           @default(false)
-  agreedToConduct   Boolean           @default(false)
-  agreedToIP        Boolean           @default(false)
-  agreedToPrivacy   Boolean           @default(false)
-  agreedToNoClaim   Boolean           @default(false)
-  agreedToAccurate  Boolean           @default(false)
-  agreedToRefund    Boolean           @default(false)
-
-  // Step 6: Payment
-  paymentProvider   PaymentProvider?
-  paymentStatus     PaymentStatus     @default(PENDING)
-  paymentReference  String?
-  paymentAmount     Decimal?
-  paymentCurrency   String?           @default("USD")
-  paidAt            DateTime?
-
-  // Profile visibility preference
-  profileVisibility String?           @default("PUBLIC")
-
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-}
-
-model Referral {
-  id              String   @id @default(cuid())
-  referrerId      String
-  referredUserId  String   @unique
-  code            String
-  status          String   @default("PENDING_REGISTRATION") // PENDING_REGISTRATION, PAYMENT_RECEIVED, WAITING_APPROVAL, APPROVED, PAID, CANCELLED
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  referrer     User             @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredUser User             @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
-  credit       ReferralCredit?
-
-  @@index([referrerId])
-  @@index([referredUserId])
-  @@index([code])
-}
-
-model ReferralCredit {
-  id              String    @id @default(cuid())
-  userId          String
-  referralId      String    @unique
-  amount          Decimal   @default(50)
-  status          String    @default("PENDING") // PENDING, APPROVED, PAID, CANCELLED
-  approvedAt      DateTime?
-  paidAt          DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model ReferralWallet {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  availableBalance Decimal @default(0)
-  paidBalance      Decimal @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model PayoutRequest {
-  id                String    @id @default(cuid())
-  userId            String
-  paymentMethodId   String?
-  amount            Decimal
-  method            String   // BANK_TRANSFER, PAYPAL
-  accountDetails    String   // JSON string with account info
-  status            String   @default("PENDING") // PENDING, APPROVED, PAID, REJECTED
-  transactionRef    String?  // Transaction reference after payment
-  processedAt       DateTime?
-  paidAt            DateTime?
-  processedById     String?  // Admin who approved/processed
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
-  auditLogs     PayoutAuditLog[]
-
-  @@index([userId])
-  @@index([status])
-}
-
-model PaymentMethod {
-  id            String   @id @default(cuid())
-  userId        String
-  type          String   // BANK_TRANSFER, PAYPAL
-  isDefault     Boolean  @default(false)
-  label         String?  // e.g. "My PayPal", "Business Account"
-  
-  // PayPal fields
-  paypalEmail   String?
-  
-  // Bank Transfer fields
-  accountHolder String?
-  bankName      String?
-  accountNumber String?
-  routingNumber String?
-  swiftCode     String?
-  iban          String?
-  country       String?
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payoutRequests PayoutRequest[]
-
-  @@index([userId])
-}
-
-model PayoutAuditLog {
-  id              String   @id @default(cuid())
-  payoutRequestId String
-  userId          String   // Who performed the action
-  action          String   // CREATED, APPROVED, REJECTED, PAID, REVERTED
-  details         String?  // JSON with additional details
-  transactionRef  String?  // Transaction reference
-  createdAt       DateTime @default(now())
-
-  payoutRequest PayoutRequest @relation(fields: [payoutRequestId], references: [id], onDelete: Cascade)
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([payoutRequestId])
-  @@index([userId])
-  @@index([action])
+enum DesqueletVisibility {
+  FELLOW
+  ASSESSOR
+  PUBLIC
 }

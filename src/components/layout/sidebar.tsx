@@ -20,6 +20,7 @@ import {
   CreditCard,
   FileText,
   LogOut,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -41,6 +42,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
         { label: "Profile", href: "/dashboard/profile", icon: User },
         { label: "My Projects", href: "/dashboard/projects", icon: FolderKanban },
+        { label: "DESQUELET Record", href: "/dashboard/desquelet", icon: Layers },
         { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
         { label: "Referrals", href: "/dashboard/referrals", icon: Share2 },
         { label: "Payment Methods", href: "/dashboard/payment-methods", icon: CreditCard },

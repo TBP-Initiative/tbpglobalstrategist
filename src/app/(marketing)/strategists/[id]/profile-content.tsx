@@ -9,6 +9,7 @@ import { FeaturedProject } from "@/components/strategist-profile-2/featured-proj
 import { ProfileProjectGrid } from "@/components/strategist-profile-2/profile-project-grid"
 import { ActivityTimeline } from "@/components/strategist-profile-2/activity-timeline"
 import { CurrentTbpProjects } from "@/components/strategist-profile-2/current-tbp-projects"
+import { DesqueletProgression } from "@/components/strategist-profile-2/desquelet-progression/desquelet-progression"
 import type { StrategistProfile } from "@/data/strategists"
 import { getCategory } from "@/lib/categories"
 
@@ -99,7 +100,18 @@ interface Activity {
   fileUrl?: string; fileType?: string; fileSize?: number | null;
 }
 
-export function ProfileContent({ strategist, workAreas = [], projects = [], activities = [] }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[]; activities?: Activity[] }) {
+interface DesqueletStage {
+  letter: string; name: string; status: "completed" | "in_progress" | "pending"
+}
+interface DesqueletWorkstream {
+  id: string; title: string; project: { id: string; title: string; slug: string } | null;
+  stages: DesqueletStage[]; overallProgress: number; currentRevision: number; lastUpdated: string
+}
+interface DesqueletSummary {
+  totalWorkstreams: number; stagesCompleted: number; overallProgress: number
+}
+
+export function ProfileContent({ strategist, workAreas = [], projects = [], activities = [], desqueletData }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[]; activities?: Activity[]; desqueletData?: { records: DesqueletWorkstream[]; summary: DesqueletSummary } | null }) {
   const { heroData, focus, featured, activities: mappedActivities } = mapStrategist(strategist)
 
   const allActivities = activities.length > 0 ? activities : mappedActivities
@@ -121,6 +133,12 @@ export function ProfileContent({ strategist, workAreas = [], projects = [], acti
               {featured && (
                 <AnimatedSection>
                   <FeaturedProject project={featured} userId={strategist.id} />
+                </AnimatedSection>
+              )}
+
+              {desqueletData && desqueletData.records.length > 0 && (
+                <AnimatedSection>
+                  <DesqueletProgression records={desqueletData.records} summary={desqueletData.summary} />
                 </AnimatedSection>
               )}
 

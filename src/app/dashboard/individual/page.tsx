@@ -29,6 +29,7 @@ import {
   Clock,
   Sparkles,
   Globe,
+  Layers,
 } from "lucide-react"
 
 const stageColors: Record<string, string> = {
@@ -139,6 +140,15 @@ export default function IndividualDashboard() {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [collaborations, setCollaborations] = useState<CollaborationItem[]>([])
+  const [desqueletStats, setDesqueletStats] = useState<{
+    activeWorkstreams: number
+    stagesCompleted: number
+    totalStages: number
+    researchIterations: number
+    validatedOutputs: number
+    assessorReviews: number
+    overallProgress: number
+  } | null>(null)
 
   useEffect(() => {
     async function loadDashboard() {
@@ -153,13 +163,14 @@ export default function IndividualDashboard() {
           }
         }
 
-        const [statsData, profileData, projectsData, activitiesData, notificationsData, collabsData] = await Promise.all([
+        const [statsData, profileData, projectsData, activitiesData, notificationsData, collabsData, desqueletData] = await Promise.all([
           safeFetch("/api/dashboard/stats"),
           safeFetch("/api/profile"),
           safeFetch("/api/dashboard/my-projects"),
           safeFetch("/api/dashboard/activities"),
           safeFetch("/api/notifications"),
           safeFetch("/api/dashboard/collaborations"),
+          safeFetch("/api/desquelet/stats"),
         ])
 
         if (statsData && typeof statsData === "object" && !statsData.error) {
@@ -203,6 +214,9 @@ export default function IndividualDashboard() {
         }
         if (Array.isArray(collabsData)) {
           setCollaborations(collabsData)
+        }
+        if (desqueletData && typeof desqueletData === "object" && !desqueletData.error) {
+          setDesqueletStats(desqueletData)
         }
       } catch {
         // dashboard load failed — render with defaults
@@ -346,6 +360,47 @@ export default function IndividualDashboard() {
             delay={0.3}
           />
         </div>
+      )}
+
+      {desqueletStats && desqueletStats.activeWorkstreams > 0 && (
+        <AnimatedSection delay={0.15}>
+          <GlassCard className="p-6" intensity="light">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Layers size={16} className="text-indigo-400" />
+                <h2 className="text-lg font-semibold">DESQUELET Applied Development</h2>
+              </div>
+              <Button variant="ghost" size="sm" className="gap-1 text-xs" asChild>
+                <Link href="/dashboard/desquelet">
+                  View records
+                  <ArrowRight size={12} />
+                </Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-indigo-400">{desqueletStats.activeWorkstreams}</p>
+                <p className="text-xs text-muted-foreground mt-1">Active Workstreams</p>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-green-400">{desqueletStats.stagesCompleted}</p>
+                <p className="text-xs text-muted-foreground mt-1">Stages Completed</p>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-blue-400">{desqueletStats.researchIterations}</p>
+                <p className="text-xs text-muted-foreground mt-1">Research Iterations</p>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-amber-400">{desqueletStats.validatedOutputs}</p>
+                <p className="text-xs text-muted-foreground mt-1">Validated Outputs</p>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-purple-400">{desqueletStats.overallProgress}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Overall Progress</p>
+              </div>
+            </div>
+          </GlassCard>
+        </AnimatedSection>
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

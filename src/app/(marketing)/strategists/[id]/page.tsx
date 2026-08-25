@@ -280,5 +280,56 @@ export default async function StrategistProfilePage({
     } catch { /* ignore */ }
   }
 
-  return <ProfileContent strategist={strategist} workAreas={workAreas} projects={projects} activities={activities} />
+  let desqueletData: { records: { id: string; title: string; project: { id: string; title: string; slug: string } | null; stages: { letter: string; name: string; status: "completed" | "in_progress" | "pending" }[]; overallProgress: number; currentRevision: number; lastUpdated: string }[]; summary: { totalWorkstreams: number; stagesCompleted: number; overallProgress: number } } | null = null
+  try {
+    if (!getLocalStrategistById(id)) {
+      const desqueletRes = await prisma.desqueletRecord.findMany({
+        where: { userId: id, visibility: "PUBLIC" },
+        include: {
+          project: { select: { id: true, title: true, slug: true } },
+          stages: { select: { stage: true, percentageComplete: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      })
+
+      if (desqueletRes.length > 0) {
+        const { DESQUELET_STAGE_ORDER, DESQUELET_STAGE_MAP } = await import("@/lib/desquelet-prompts")
+        const records = desqueletRes.map((r) => ({
+          id: r.id,
+          title: r.title,
+          project: r.project,
+          stages: DESQUELET_STAGE_ORDER.map((key) => {
+            const stageData = r.stages.find((s) => s.stage === key)
+            const percentage = stageData?.percentageComplete ?? 0
+            const config = DESQUELET_STAGE_MAP[key]
+            return {
+              letter: config.letter,
+              name: config.name,
+              status: percentage >= 100 ? "completed" as const : percentage > 0 ? "in_progress" as const : "pending" as const,
+            }
+          }),
+          overallProgress: r.stages.length > 0
+            ? Math.round(r.stages.reduce((sum, s) => sum + s.percentageComplete, 0) / r.stages.length)
+            : 0,
+          currentRevision: r.currentRevision,
+          lastUpdated: r.updatedAt.toISOString(),
+        }))
+
+        const totalStagesCompleted = records.reduce(
+          (sum, r) => sum + r.stages.filter((s) => s.status === "completed").length,
+          0
+        )
+        const overallProgress = records.length > 0
+          ? Math.round(records.reduce((sum, r) => sum + r.overallProgress, 0) / records.length)
+          : 0
+
+        desqueletData = {
+          records,
+          summary: { totalWorkstreams: records.length, stagesCompleted: totalStagesCompleted, overallProgress },
+        }
+      }
+    }
+  } catch { /* ignore */ }
+
+  return <ProfileContent strategist={strategist} workAreas={workAreas} projects={projects} activities={activities} desqueletData={desqueletData} />
 }
