@@ -41,7 +41,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
       items: [
         { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
         { label: "Profile", href: "/dashboard/profile", icon: User },
-        { label: "My Projects", href: "/dashboard/projects", icon: FolderKanban },
+        { label: "My Projects", href: "/dashboard/desquelet", icon: FolderKanban },
         { label: "DESQUELET Record", href: "/dashboard/desquelet", icon: Layers },
         { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
         { label: "Referrals", href: "/dashboard/referrals", icon: Share2 },

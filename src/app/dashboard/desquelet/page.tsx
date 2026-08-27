@@ -69,7 +69,7 @@ export default function DesqueletRecordsPage() {
               Your live workspace for documenting DESQUELET methodology application
             </p>
           </div>
-          <Link href="/dashboard/projects">
+          <Link href="/dashboard/individual/browse">
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               <Plus size={16} className="mr-2" />
               New Record
@@ -87,7 +87,7 @@ export default function DesqueletRecordsPage() {
               Join a project or workstream to automatically create your first DESQUELET Application Record.
               Each record tracks your progress through the nine DESQUELET stages.
             </p>
-            <Link href="/dashboard/projects">
+            <Link href="/dashboard/individual/browse">
               <Button variant="outline" className="border-gray-200 text-gray-600 hover:text-gray-900">
                 Browse Projects
               </Button>

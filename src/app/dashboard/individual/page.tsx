@@ -413,7 +413,7 @@ export default function IndividualDashboard() {
                   <h2 className="text-lg font-semibold">My Projects</h2>
                 </div>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs" asChild>
-                  <Link href="/dashboard/projects">
+                  <Link href="/dashboard/desquelet">
                     View all
                     <ArrowRight size={12} />
                   </Link>

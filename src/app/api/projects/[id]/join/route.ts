@@ -26,47 +26,56 @@ export async function POST(
     const existing = await prisma.projectContributor.findUnique({
       where: { projectId_userId: { projectId, userId: session.user.id } },
     })
-    if (existing) {
-      return NextResponse.json({ ok: true, message: "Already a contributor" })
+
+    if (!existing) {
+      const submission = await prisma.onboardingSubmission.findUnique({
+        where: { userId: session.user.id },
+        select: { pathway: true },
+      })
+      const userPathway = submission?.pathway ?? null
+
+      if (project.eligiblePathways && project.eligiblePathways !== "BOTH" && userPathway && userPathway !== project.eligiblePathways) {
+        const projectPathwayLabel = project.eligiblePathways === "FELLOWSHIP" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
+        const userPathwayLabel = userPathway === "FELLOWSHIP" || userPathway === "STANDARD" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
+        return NextResponse.json({
+          error: "Pathway mismatch",
+          pathwayMismatch: true,
+          projectPathway: project.eligiblePathways,
+          projectPathwayLabel,
+          userPathway,
+          userPathwayLabel,
+        }, { status: 403 })
+      }
+
+      const profile = await prisma.strategistProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { stage: true },
+      })
+
+      const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
+      const currentStageIndex = stageOrder.indexOf(profile?.stage ?? "CANDIDATE")
+      if (currentStageIndex < stageOrder.indexOf("STRATEGIST")) {
+        return NextResponse.json({ error: "Must reach Strategist stage" }, { status: 403 })
+      }
+
+      await prisma.projectContributor.create({
+        data: {
+          projectId,
+          userId: session.user.id,
+          role: "CONTRIBUTOR",
+        },
+      })
+
+      await prisma.activityLog.create({
+        data: {
+          userId: session.user.id,
+          action: "PROJECT_JOIN",
+          entity: "Project",
+          entityId: projectId,
+          metadata: JSON.stringify({ projectId }),
+        },
+      })
     }
-
-    const submission = await prisma.onboardingSubmission.findUnique({
-      where: { userId: session.user.id },
-      select: { pathway: true },
-    })
-    const userPathway = submission?.pathway ?? null
-
-    if (project.eligiblePathways && project.eligiblePathways !== "BOTH" && userPathway && userPathway !== project.eligiblePathways) {
-      const projectPathwayLabel = project.eligiblePathways === "FELLOWSHIP" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
-      const userPathwayLabel = userPathway === "FELLOWSHIP" || userPathway === "STANDARD" ? "TBP Global Strategist Fellowship" : "Applied R&D & Technology Development"
-      return NextResponse.json({
-        error: "Pathway mismatch",
-        pathwayMismatch: true,
-        projectPathway: project.eligiblePathways,
-        projectPathwayLabel,
-        userPathway,
-        userPathwayLabel,
-      }, { status: 403 })
-    }
-
-    const profile = await prisma.strategistProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { stage: true },
-    })
-
-    const stageOrder = ["CANDIDATE", "STRATEGIST", "CONTRIBUTOR", "PROJECT_ALIGNED", "SECTOR_LEAD", "PAID_ADVISER"]
-    const currentStageIndex = stageOrder.indexOf(profile?.stage ?? "CANDIDATE")
-    if (currentStageIndex < stageOrder.indexOf("STRATEGIST")) {
-      return NextResponse.json({ error: "Must reach Strategist stage" }, { status: 403 })
-    }
-
-    await prisma.projectContributor.create({
-      data: {
-        projectId,
-        userId: session.user.id,
-        role: "CONTRIBUTOR",
-      },
-    })
 
     const existingRecord = await prisma.desqueletRecord.findUnique({
       where: { userId_projectId: { userId: session.user.id, projectId } },
@@ -93,16 +102,6 @@ export async function POST(
         },
       })
     }
-
-    await prisma.activityLog.create({
-      data: {
-        userId: session.user.id,
-        action: "PROJECT_JOIN",
-        entity: "Project",
-        entityId: projectId,
-        metadata: JSON.stringify({ projectId }),
-      },
-    })
 
     return NextResponse.json({ ok: true })
   } catch (err) {
