@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { motion } from "framer-motion"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
 import { DesqueletRecordCard } from "@/components/dashboards/desquelet/desquelet-record-card"
 import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/shared/loading-spinner"
-import { Layers, Plus, FolderKanban } from "lucide-react"
+import { toast } from "sonner"
+import { Layers, Plus, FolderKanban, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 interface RecordData {
@@ -25,16 +24,26 @@ interface RecordData {
   project?: { id: string; title: string; slug: string } | null
 }
 
+interface AvailableProject {
+  id: string
+  title: string
+  slug: string
+  status: string
+}
+
 export default function DesqueletRecordsPage() {
   const [records, setRecords] = useState<RecordData[]>([])
+  const [availableProjects, setAvailableProjects] = useState<AvailableProject[]>([])
   const [loading, setLoading] = useState(true)
+  const [startingId, setStartingId] = useState<string | null>(null)
 
   const fetchRecords = async () => {
     try {
       const res = await fetch("/api/desquelet/records")
       if (res.ok) {
         const data = await res.json()
-        setRecords(data)
+        setRecords(data.records ?? [])
+        setAvailableProjects(data.availableProjects ?? [])
       }
     } catch (err) {
       console.error("Failed to fetch DESQUELET records:", err)
@@ -46,6 +55,25 @@ export default function DesqueletRecordsPage() {
   useEffect(() => {
     fetchRecords()
   }, [])
+
+  const handleStart = async (project: AvailableProject) => {
+    if (startingId) return
+    setStartingId(project.id)
+    try {
+      const res = await fetch("/api/desquelet/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: project.id, title: project.title }),
+      })
+      if (!res.ok) throw new Error("Failed to create record")
+      toast.success("DESQUELET record created")
+      await fetchRecords()
+    } catch (err) {
+      toast.error("Failed to create record")
+    } finally {
+      setStartingId(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -81,7 +109,7 @@ export default function DesqueletRecordsPage() {
             <FolderKanban size={48} className="mx-auto text-gray-300 mb-4" />
             <h2 className="text-lg font-semibold text-gray-900 mb-2">No DESQUELET Records Yet</h2>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Join a project or workstream to automatically create your first DESQUELET Application Record.
+              Join a project or start one below to create your first DESQUELET Application Record.
               Each record tracks your progress through the nine DESQUELET stages.
             </p>
             <Link href="/dashboard/individual/browse">
@@ -97,6 +125,49 @@ export default function DesqueletRecordsPage() {
             <DesqueletRecordCard key={record.id} record={record} index={index} />
           ))}
         </div>
+      )}
+
+      {!loading && availableProjects.length > 0 && (
+        <AnimatedSection delay={0.15}>
+          <GlassCard className="p-6" intensity="light">
+            <div className="flex items-center gap-2 mb-2">
+              <FolderKanban size={16} className="text-indigo-600" />
+              <h3 className="text-sm font-semibold text-gray-700">Your Existing Projects</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              You are a contributor to these projects but haven&apos;t started a DESQUELET record yet.
+              Start one to apply the DESQUELET methodology to your work in that project.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {availableProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{project.title}</p>
+                    <p className="text-xs text-gray-400 capitalize">{project.status.toLowerCase()}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                    disabled={startingId === project.id}
+                    onClick={() => handleStart(project)}
+                  >
+                    {startingId === project.id ? (
+                      <LoadingSpinner />
+                    ) : (
+                      <>
+                        Start DESQUELET
+                        <ArrowRight size={14} className="ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </AnimatedSection>
       )}
 
       <AnimatedSection delay={0.2}>

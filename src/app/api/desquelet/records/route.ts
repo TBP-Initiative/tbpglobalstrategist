@@ -10,24 +10,37 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const records = await prisma.desqueletRecord.findMany({
-      where: { userId: session.user.id },
-      orderBy: { updatedAt: "desc" },
-      include: {
-        project: { select: { id: true, title: true, slug: true } },
-        stages: {
-          select: { stage: true, percentageComplete: true, lastEditedAt: true },
+    const [records, contributors] = await Promise.all([
+      prisma.desqueletRecord.findMany({
+        where: { userId: session.user.id },
+        orderBy: { updatedAt: "desc" },
+        include: {
+          project: { select: { id: true, title: true, slug: true } },
+          stages: {
+            select: { stage: true, percentageComplete: true, lastEditedAt: true },
+          },
+          iterations: {
+            select: { id: true },
+          },
+          milestones: {
+            select: { id: true },
+            orderBy: { version: "desc" },
+            take: 1,
+          },
         },
-        iterations: {
-          select: { id: true },
+      }),
+      prisma.projectContributor.findMany({
+        where: { userId: session.user.id },
+        select: {
+          project: { select: { id: true, title: true, slug: true, status: true } },
         },
-        milestones: {
-          select: { id: true },
-          orderBy: { version: "desc" },
-          take: 1,
-        },
-      },
-    })
+      }),
+    ])
+
+    const existingProjectIds = new Set(records.filter((r) => r.projectId).map((r) => r.projectId as string))
+    const availableProjects = contributors
+      .map((c) => c.project)
+      .filter((p) => !existingProjectIds.has(p.id))
 
     const result = records.map((r) => {
       const totalProgress = r.stages.length > 0
@@ -53,10 +66,10 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(result)
+    return NextResponse.json({ records: result, availableProjects })
   } catch (err) {
     console.error("DESQUELET records fetch error:", err)
-    return NextResponse.json([], { status: 200 })
+    return NextResponse.json({ records: [], availableProjects: [] }, { status: 200 })
   }
 }
 
