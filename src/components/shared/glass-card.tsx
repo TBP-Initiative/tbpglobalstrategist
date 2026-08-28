@@ -41,7 +41,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         blurClasses[blur],
         intensityClasses[intensity],
         hover &&
-          "transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] hover:border-white/30",
+          "transition-[transform,box-shadow,border-color] duration-300 hover:shadow-2xl hover:scale-[1.01] hover:border-white/30",
         className
       )}
       {...props}

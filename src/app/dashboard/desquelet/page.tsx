@@ -26,35 +26,26 @@ interface RecordData {
 }
 
 export default function DesqueletRecordsPage() {
-  const { data: session } = useSession()
   const [records, setRecords] = useState<RecordData[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const res = await fetch("/api/desquelet/records")
-        if (res.ok) {
-          const data = await res.json()
-          setRecords(data)
-        }
-      } catch (err) {
-        console.error("Failed to fetch DESQUELET records:", err)
-      } finally {
-        setLoading(false)
+  const fetchRecords = async () => {
+    try {
+      const res = await fetch("/api/desquelet/records")
+      if (res.ok) {
+        const data = await res.json()
+        setRecords(data)
       }
+    } catch (err) {
+      console.error("Failed to fetch DESQUELET records:", err)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchRecords()
   }, [])
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +69,13 @@ export default function DesqueletRecordsPage() {
         </div>
       </AnimatedSection>
 
-      {records.length === 0 ? (
+      {loading ? (
+        <AnimatedSection delay={0.1}>
+          <GlassCard className="flex items-center justify-center p-12" intensity="light">
+            <LoadingSpinner />
+          </GlassCard>
+        </AnimatedSection>
+      ) : records.length === 0 ? (
         <AnimatedSection delay={0.1}>
           <GlassCard className="p-12 text-center" intensity="light">
             <FolderKanban size={48} className="mx-auto text-gray-300 mb-4" />
