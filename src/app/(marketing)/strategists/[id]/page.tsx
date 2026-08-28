@@ -281,13 +281,41 @@ export default async function StrategistProfilePage({
   }
 
   let desqueletData: { records: { id: string; title: string; project: { id: string; title: string; slug: string } | null; stages: { letter: string; name: string; status: "completed" | "in_progress" | "pending" }[]; overallProgress: number; currentRevision: number; lastUpdated: string }[]; summary: { totalWorkstreams: number; stagesCompleted: number; overallProgress: number } } | null = null
+  let desqueletAssessment: {
+    professionalField: string
+    verified: boolean
+    records: {
+      id: string
+      title: string
+      project: { id: string; title: string; slug: string } | null
+      outcome: string
+      tone: "verified" | "assessment" | "evidence"
+      areasAssessed: { letter: string; name: string; status: "APPROVED" | "REVISION_REQUIRED" | "FURTHER_EVIDENCE_REQUIRED" }[]
+      highlight: string | null
+      reviews: { stageName: string; stageLetter: string; reviewer: string; status: "APPROVED" | "REVISION_REQUIRED" | "FURTHER_EVIDENCE_REQUIRED"; feedback: string | null; date: string }[]
+    }[]
+  } | null = null
   try {
     if (!getLocalStrategistById(id)) {
       const desqueletRes = await prisma.desqueletRecord.findMany({
         where: { userId: id, visibility: "PUBLIC" },
         include: {
           project: { select: { id: true, title: true, slug: true } },
-          stages: { select: { stage: true, percentageComplete: true } },
+          stages: {
+            select: {
+              stage: true,
+              percentageComplete: true,
+              reviews: {
+                select: {
+                  status: true,
+                  feedback: true,
+                  createdAt: true,
+                  reviewer: { select: { id: true, name: true } },
+                },
+                orderBy: { createdAt: "desc" },
+              },
+            },
+          },
         },
         orderBy: { updatedAt: "desc" },
       })
@@ -327,9 +355,74 @@ export default async function StrategistProfilePage({
           records,
           summary: { totalWorkstreams: records.length, stagesCompleted: totalStagesCompleted, overallProgress },
         }
+
+        const resolvedByRecord = desqueletRes
+          .map((record) => ({
+            record,
+            resolved: record.stages
+              .map((stage) => {
+                const review = stage.reviews.find((rv) => rv.status !== "PENDING")
+                if (!review) return null
+                return { stage, review }
+              })
+              .filter((x): x is NonNullable<typeof x> => x !== null),
+          }))
+          .filter((entry) => entry.resolved.length > 0)
+
+        const assessmentRecords = resolvedByRecord.map(({ record, resolved }) => {
+          const statuses = resolved.map((x) => x.review.status)
+          let outcome: string
+          let tone: "verified" | "assessment" | "evidence"
+          if (statuses.includes("FURTHER_EVIDENCE_REQUIRED")) {
+            outcome = "Further Evidence Required"
+            tone = "evidence"
+          } else if (statuses.includes("REVISION_REQUIRED")) {
+            outcome = "Approved Subject to Minor Revision"
+            tone = "assessment"
+          } else {
+            outcome = "DESQUELET Standard Met"
+            tone = "verified"
+          }
+
+          const highlight =
+            resolved
+              .slice()
+              .sort((a, b) => (b.review.feedback?.length ?? 0) - (a.review.feedback?.length ?? 0))[0]?.review.feedback ?? null
+
+          return {
+            id: record.id,
+            title: record.title,
+            project: record.project,
+            outcome,
+            tone,
+            areasAssessed: resolved.map(({ stage, review }) => ({
+              letter: DESQUELET_STAGE_MAP[stage.stage as keyof typeof DESQUELET_STAGE_MAP]?.letter ?? stage.stage,
+              name: DESQUELET_STAGE_MAP[stage.stage as keyof typeof DESQUELET_STAGE_MAP]?.name ?? stage.stage,
+              status: review.status as "APPROVED" | "REVISION_REQUIRED" | "FURTHER_EVIDENCE_REQUIRED",
+            })),
+            highlight,
+            reviews: resolved.map(({ stage, review }) => ({
+              stageName: DESQUELET_STAGE_MAP[stage.stage as keyof typeof DESQUELET_STAGE_MAP]?.name ?? stage.stage,
+              stageLetter: DESQUELET_STAGE_MAP[stage.stage as keyof typeof DESQUELET_STAGE_MAP]?.letter ?? stage.stage,
+              reviewer: review.reviewer?.name ?? "TBP Assessor",
+              status: review.status as "APPROVED" | "REVISION_REQUIRED" | "FURTHER_EVIDENCE_REQUIRED",
+              feedback: review.feedback,
+              date: review.createdAt.toISOString(),
+            })),
+          }
+        })
+
+        if (assessmentRecords.length > 0) {
+          const allResolved = assessmentRecords.flatMap((rec) => rec.reviews)
+          desqueletAssessment = {
+            professionalField: strategist.headline ?? "",
+            verified: allResolved.every((r) => r.status === "APPROVED"),
+            records: assessmentRecords,
+          }
+        }
       }
     }
   } catch { /* ignore */ }
 
-  return <ProfileContent strategist={strategist} workAreas={workAreas} projects={projects} activities={activities} desqueletData={desqueletData} />
+  return <ProfileContent strategist={strategist} workAreas={workAreas} projects={projects} activities={activities} desqueletData={desqueletData} desqueletAssessment={desqueletAssessment} />
 }

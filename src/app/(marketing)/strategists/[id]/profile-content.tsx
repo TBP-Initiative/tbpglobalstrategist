@@ -10,6 +10,8 @@ import { ProfileProjectGrid } from "@/components/strategist-profile-2/profile-pr
 import { ActivityTimeline } from "@/components/strategist-profile-2/activity-timeline"
 import { CurrentTbpProjects } from "@/components/strategist-profile-2/current-tbp-projects"
 import { DesqueletProgression } from "@/components/strategist-profile-2/desquelet-progression/desquelet-progression"
+import { DesqueletVerifiedAssessment } from "@/components/strategist-profile-2/desquelet-verified-assessment"
+import type { DesqueletAssessment } from "@/components/strategist-profile-2/desquelet-verified-assessment"
 import type { StrategistProfile } from "@/data/strategists"
 import { getCategory } from "@/lib/categories"
 
@@ -111,7 +113,7 @@ interface DesqueletSummary {
   totalWorkstreams: number; stagesCompleted: number; overallProgress: number
 }
 
-export function ProfileContent({ strategist, workAreas = [], projects = [], activities = [], desqueletData }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[]; activities?: Activity[]; desqueletData?: { records: DesqueletWorkstream[]; summary: DesqueletSummary } | null }) {
+export function ProfileContent({ strategist, workAreas = [], projects = [], activities = [], desqueletData, desqueletAssessment }: { strategist: StrategistProfile; workAreas?: string[]; projects?: ProfileProject[]; activities?: Activity[]; desqueletData?: { records: DesqueletWorkstream[]; summary: DesqueletSummary } | null; desqueletAssessment?: DesqueletAssessment | null }) {
   const { heroData, focus, featured, activities: mappedActivities } = mapStrategist(strategist)
 
   const allActivities = activities.length > 0 ? activities : mappedActivities
@@ -139,6 +141,12 @@ export function ProfileContent({ strategist, workAreas = [], projects = [], acti
               {desqueletData && desqueletData.records.length > 0 && (
                 <AnimatedSection>
                   <DesqueletProgression records={desqueletData.records} summary={desqueletData.summary} />
+                </AnimatedSection>
+              )}
+
+              {desqueletAssessment && desqueletAssessment.records.length > 0 && (
+                <AnimatedSection>
+                  <DesqueletVerifiedAssessment assessment={desqueletAssessment} />
                 </AnimatedSection>
               )}
 
