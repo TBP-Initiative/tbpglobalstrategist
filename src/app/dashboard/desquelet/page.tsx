@@ -7,7 +7,7 @@ import { DesqueletRecordCard } from "@/components/dashboards/desquelet/desquelet
 import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/shared/loading-spinner"
 import { toast } from "sonner"
-import { Layers, Plus, FolderKanban, ArrowRight } from "lucide-react"
+import { Layers, Plus, FolderKanban, ArrowRight, BookOpen } from "lucide-react"
 import Link from "next/link"
 
 interface RecordData {
@@ -56,6 +56,25 @@ export default function DesqueletRecordsPage() {
     fetchRecords()
   }, [])
 
+  const handleDownloadGuide = async () => {
+    try {
+      const res = await fetch("/api/desquelet/guide")
+      if (!res.ok) throw new Error("Failed to generate guide")
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "desquelet-user-guide.pdf"
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success("User guide downloaded")
+    } catch (err) {
+      toast.error("Failed to download user guide")
+    }
+  }
+
   const handleStart = async (project: AvailableProject) => {
     if (startingId) return
     setStartingId(project.id)
@@ -88,12 +107,23 @@ export default function DesqueletRecordsPage() {
               Your live workspace for documenting DESQUELET methodology application
             </p>
           </div>
-          <Link href="/dashboard/individual/browse">
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
-              <Plus size={16} className="mr-2" />
-              New Record
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadGuide}
+              className="border-gray-200 text-gray-600 hover:text-gray-900"
+            >
+              <BookOpen size={16} className="mr-2" />
+              User Guide (PDF)
             </Button>
-          </Link>
+            <Link href="/dashboard/individual/browse">
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus size={16} className="mr-2" />
+                New Record
+              </Button>
+            </Link>
+          </div>
         </div>
       </AnimatedSection>
 
