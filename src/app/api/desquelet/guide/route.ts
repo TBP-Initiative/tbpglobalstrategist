@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { launchPdfBrowser } from "@/lib/pdf-browser"
 import { DESQUELET_STAGE_MAP, DESQUELET_STAGE_ORDER } from "@/lib/desquelet-prompts"
 
 const STAGES_HTML = DESQUELET_STAGE_ORDER.map((key, i) => {
@@ -325,17 +326,12 @@ export async function GET() {
     const userName = session.user.name ?? session.user.email ?? "User"
     const html = buildHtml(userName, generatedAt)
 
-    let puppeteer
+    let browser
     try {
-      puppeteer = await import("puppeteer-core")
+      browser = await launchPdfBrowser()
     } catch {
       return NextResponse.json({ error: "PDF generation not available" }, { status: 500 })
     }
-
-    const browser = await puppeteer.default.launch({
-      executablePath: process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      headless: true,
-    })
 
     try {
       const page = await browser.newPage()

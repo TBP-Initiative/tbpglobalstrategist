@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { launchPdfBrowser } from "@/lib/pdf-browser"
 import { DESQUELET_STAGE_MAP, DESQUELET_STAGE_ORDER, type DesqueletStageKey } from "@/lib/desquelet-prompts"
 
 export async function POST(
@@ -144,17 +145,12 @@ export async function POST(
 </body>
 </html>`
 
-    let puppeteer
+    let browser
     try {
-      puppeteer = await import("puppeteer-core")
+      browser = await launchPdfBrowser()
     } catch {
       return NextResponse.json({ error: "PDF generation not available" }, { status: 500 })
     }
-
-    const browser = await puppeteer.default.launch({
-      executablePath: process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      headless: true,
-    })
 
     const page = await browser.newPage()
     await page.setContent(html, { waitUntil: "domcontentloaded" })
