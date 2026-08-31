@@ -11,7 +11,10 @@ import { toast } from "sonner"
 import {
   Link2, FileText, CheckCircle2, ExternalLink, Clock, AlertCircle,
   GitBranch, History, Send, ChevronDown, ChevronUp, X, Trash2, Eye,
+  Download, UploadCloud, FileUp,
 } from "lucide-react"
+
+const DESQUELET_TEMPLATE_URL = "/docs/desquelet-application-record-template.docx"
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -76,6 +79,9 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [url, setUrl] = useState("")
+  const [inputMode, setInputMode] = useState<"url" | "file">("url")
+  const [file, setFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submissions, setSubmissions] = useState<SubmissionData[]>([])
   const [loadingSubmissions, setLoadingSubmissions] = useState(true)
@@ -128,6 +134,40 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed")
     } finally { setSubmitting(false) }
+  }
+
+  async function handleFileSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!file || !title.trim()) {
+      toast.error("Please provide a title and choose a file")
+      return
+    }
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const upRes = await fetch("/api/upload", { method: "POST", body: formData })
+      if (!upRes.ok) { const err = await upRes.json(); throw new Error(err.error ?? "Upload failed") }
+      const { url: fileUrl } = await upRes.json()
+
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stage: currentStage, title: title.trim(),
+          description: description.trim() || null,
+          fileUrl, fileType: getUrlType(file.name) === "Document" ? file.name.split(".").pop()?.toLowerCase() ?? "docx" : "file",
+          fileSize: file.size,
+        }),
+      })
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Failed") }
+      const newSub = await res.json()
+      setSubmissions((prev) => [newSub, ...prev])
+      setTitle(""); setDescription(""); setFile(null)
+      toast.success("Submission saved")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed")
+    } finally { setUploading(false) }
   }
 
   async function handleRevision(parentId: string) {
@@ -195,15 +235,58 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
           <h2 className="text-lg font-semibold">Research Outputs & Submissions</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input placeholder="Title (e.g. Load Distribution Optimisation)" value={title} onChange={(e) => setTitle(e.target.value)} disabled={submitting} />
-          <Textarea placeholder="Description or notes (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={submitting} />
-          <Input type="url" placeholder="Paste document or video URL" value={url} onChange={(e) => setUrl(e.target.value)} disabled={submitting} />
-          <p className="text-[10px] text-muted-foreground/60">Paste a link to Google Drive, YouTube, Dropbox, OneDrive, or any public URL</p>
-          <Button type="submit" className="w-full gap-1.5" disabled={submitting || !url.trim() || !title.trim()}>
-            {submitting ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Saving...</> : <><Link2 size={14} /> New Submission</>}
-          </Button>
-        </form>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-primary/20 bg-primary/5 p-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">DESQUELET Methodology Report</p>
+            <p className="text-xs text-muted-foreground">Download the template, fill it in, then upload the completed DOCX below.</p>
+          </div>
+          <a href={DESQUELET_TEMPLATE_URL} download>
+            <Button type="button" variant="outline" size="sm" className="gap-1.5 shrink-0">
+              <Download size={14} /> Download Template
+            </Button>
+          </a>
+        </div>
+
+        <div className="mb-4 inline-flex rounded-lg border border-border p-1">
+          <button type="button" onClick={() => setInputMode("url")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${inputMode === "url" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"}`}>
+            Add Link
+          </button>
+          <button type="button" onClick={() => setInputMode("file")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${inputMode === "file" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"}`}>
+            Upload File
+          </button>
+        </div>
+
+        {inputMode === "url" ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input placeholder="Title (e.g. Load Distribution Optimisation)" value={title} onChange={(e) => setTitle(e.target.value)} disabled={submitting} />
+            <Textarea placeholder="Description or notes (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={submitting} />
+            <Input type="url" placeholder="Paste document or video URL" value={url} onChange={(e) => setUrl(e.target.value)} disabled={submitting} />
+            <p className="text-[10px] text-muted-foreground/60">Paste a link to Google Drive, YouTube, Dropbox, OneDrive, or any public URL</p>
+            <Button type="submit" className="w-full gap-1.5" disabled={submitting || !url.trim() || !title.trim()}>
+              {submitting ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Saving...</> : <><Link2 size={14} /> New Submission</>}
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleFileSubmit} className="space-y-4">
+            <Input placeholder="Title (e.g. DESQUELET Application Record — Load Optimisation)" value={title} onChange={(e) => setTitle(e.target.value)} disabled={uploading} />
+            <Textarea placeholder="Description or notes (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={uploading} />
+            <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
+              <FileUp size={20} className="text-muted-foreground/60" />
+              <span className="text-sm text-muted-foreground">{file ? file.name : "Choose a completed DESQUELET DOCX to upload"}</span>
+              {file && <span className="text-xs text-muted-foreground/60">{(file.size / 1024).toFixed(1)} KB</span>}
+              <input
+                type="file"
+                accept=".docx,.doc,.pdf"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                disabled={uploading}
+              />
+            </label>
+            <Button type="submit" className="w-full gap-1.5" disabled={uploading || !file || !title.trim()}>
+              {uploading ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Uploading...</> : <><UploadCloud size={14} /> Upload Completed Report</>}
+            </Button>
+          </form>
+        )}
 
         <div className="mt-8">
           <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
