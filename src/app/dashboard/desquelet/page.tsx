@@ -57,22 +57,7 @@ export default function DesqueletRecordsPage() {
   }, [])
 
   const handleDownloadGuide = async () => {
-    try {
-      const res = await fetch("/api/desquelet/guide")
-      if (!res.ok) throw new Error("Failed to generate guide")
-      const blob = await res.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "desquelet-user-guide.pdf"
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      toast.success("User guide downloaded")
-    } catch (err) {
-      toast.error("Failed to download user guide")
-    }
+    window.open("/dashboard/desquelet/guide", "_blank", "noopener,noreferrer")
   }
 
   const handleStart = async (project: AvailableProject) => {
@@ -115,7 +100,7 @@ export default function DesqueletRecordsPage() {
               className="border-gray-200 text-gray-600 hover:text-gray-900"
             >
               <BookOpen size={16} className="mr-2" />
-              User Guide (PDF)
+              User Guide
             </Button>
             <Link href="/dashboard/individual/browse">
               <Button className="bg-indigo-600 hover:bg-indigo-700">

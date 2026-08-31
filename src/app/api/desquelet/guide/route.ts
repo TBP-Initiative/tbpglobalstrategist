@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { launchPdfBrowser } from "@/lib/pdf-browser"
 import { DESQUELET_STAGE_MAP, DESQUELET_STAGE_ORDER } from "@/lib/desquelet-prompts"
 
+export const maxDuration = 60
+
 const STAGES_HTML = DESQUELET_STAGE_ORDER.map((key, i) => {
   const cfg = DESQUELET_STAGE_MAP[key]
   return `

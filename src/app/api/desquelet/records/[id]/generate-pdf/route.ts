@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { launchPdfBrowser } from "@/lib/pdf-browser"
 import { DESQUELET_STAGE_MAP, DESQUELET_STAGE_ORDER, type DesqueletStageKey } from "@/lib/desquelet-prompts"
 
+export const maxDuration = 60
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
