@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronLeft, Check, Zap, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PROGRAMMES } from "@/lib/programmes"
 
 interface StepPathwayProps {
   data: Record<string, unknown> | null
@@ -11,36 +12,7 @@ interface StepPathwayProps {
   onBack: () => void
 }
 
-const PATHWAYS: Record<string, { name: string; price: string; duration: string; features: string[] }> = {
-  STANDARD: {
-    name: "TBP Global Strategist Fellowship",
-    price: "£1,500",
-    duration: "12\u201324 weeks",
-    features: [
-      "Guided DESQUELET\u00AE learning pathway",
-      "TBP Global Strategist Portal access",
-      "Primary Project + up to 2 Supporting Projects",
-      "Public profile and portfolio development",
-      "Feedback and progress review",
-      "Certificate of Completion",
-      "Verified Project Experience Record",
-    ],
-  },
-  PLUS: {
-    name: "Applied R&D & Technology Development",
-    price: "£7,500",
-    duration: "16\u201324 weeks",
-    features: [
-      "Core Fellowship learning + DESQUELET\u00AE",
-      "One approved TBP R&D project",
-      "Research / engineering / software development",
-      "Modelling, simulation or prototyping where relevant",
-      "Structured technical reviews",
-      "Applied R&D Project Record",
-      "Professional evidence portfolio",
-    ],
-  },
-}
+const PATHWAYS = { STANDARD: PROGRAMMES.STANDARD, PLUS: PROGRAMMES.PLUS }
 
 export function StepPathway({ data, onNext, onBack }: StepPathwayProps) {
   const [selected, setSelected] = useState<string>((data?.pathway as string) || "")

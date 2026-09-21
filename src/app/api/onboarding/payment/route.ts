@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 const PLANS = {
   STANDARD: {
-    amount: 1500,
+    amount: 2500,
     name: "TBP Global Strategist Fellowship",
     description: "TBP Global Strategist Fellowship",
   },

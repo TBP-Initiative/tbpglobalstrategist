@@ -53,6 +53,10 @@ export async function GET(
         isLatest: true,
         fileSize: true,
         fileType: true,
+        fileUrl: true,
+        assessorFeedback: true,
+        assessorNotes: true,
+        assessor: { select: { id: true, name: true } },
       },
     })
 
@@ -69,6 +73,10 @@ export async function GET(
         isLatest: true,
         fileSize: true,
         fileType: true,
+        fileUrl: true,
+        assessorFeedback: true,
+        assessorNotes: true,
+        assessor: { select: { id: true, name: true } },
         parentSubmissionId: true,
       },
     })

@@ -22,9 +22,10 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       include: {
         project: { select: { id: true, title: true, slug: true } },
+        assessor: { select: { id: true, name: true } },
         revisions: {
           orderBy: { version: "desc" },
-          select: { id: true, version: true, status: true, title: true, createdAt: true },
+          select: { id: true, version: true, status: true, title: true, createdAt: true, changelog: true, assessorFeedback: true, assessorNotes: true },
         },
       },
     })

@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TBP Global Strategist — Technical Architecture</title>
+<title>TBP Global Strategist â€” Technical Architecture</title>
 <style>
   @page { margin: 1.8cm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -69,28 +69,28 @@
 <div class="arch-box">
   <h4>High-Level Architecture</h4>
   <pre>
-┌─────────────────────────────────────────────────────────┐
-│                    CLIENT (Browser)                      │
-│  React 19 + Next.js App Router + Tailwind CSS v4        │
-└──────────────────────┬──────────────────────────────────┘
-                       │ HTTPS
-┌──────────────────────▼──────────────────────────────────┐
-│                 VERCEL EDGE NETWORK                      │
-│            (CDN + Edge Functions + SSL)                   │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│              NEXT.JS APPLICATION SERVER                   │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
-│  │  Page Routes │  │  API Routes  │  │   Middleware    │  │
-│  │  (SSR/SSG)   │  │  (44 endpoints)│ │  (Auth guard)  │  │
-│  └─────────────┘  └──────────────┘  └────────────────┘  │
-└──────┬───────────────┬──────────────┬───────────────────┘
-       │               │              │
-┌──────▼──────┐ ┌──────▼──────┐ ┌────▼────────────┐
-│  PostgreSQL  │ │  Supabase   │ │    Nodemailer    │
-│  (Prisma ORM)│ │  Storage    │ │   (Email)        │
-└─────────────┘ └─────────────┘ └─────────────────┘</pre>
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    CLIENT (Browser)                      â”‚
+â”‚  React 19 + Next.js App Router + Tailwind CSS v4        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚ HTTPS
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 VERCEL EDGE NETWORK                      â”‚
+â”‚            (CDN + Edge Functions + SSL)                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              NEXT.JS APPLICATION SERVER                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  Page Routes â”‚  â”‚  API Routes  â”‚  â”‚   Middleware    â”‚  â”‚
+â”‚  â”‚  (SSR/SSG)   â”‚  â”‚  (44 endpoints)â”‚ â”‚  (Auth guard)  â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚               â”‚              â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  PostgreSQL  â”‚ â”‚  Supabase   â”‚ â”‚    Nodemailer    â”‚
+â”‚  (Prisma ORM)â”‚ â”‚  Storage    â”‚ â”‚   (Email)        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜</pre>
 </div>
 
 <h2>2. Technology Stack</h2>
@@ -154,23 +154,23 @@
 <h3>3.2 Layout Hierarchy</h3>
 <pre>
 RootLayout (src/app/layout.tsx)
-├── Providers (QueryClient, Theme, Toaster)
-├── Marketing Layout (navbar + footer + marketing chat)
-│   ├── Home (/)
-│   ├── About (/about)
-│   ├── Strategists (/strategists)
-│   ├── Projects (/projects)
-│   └── ... other marketing pages
-├── Auth Layout (split screen with TBP branding)
-│   ├── Login (/login)
-│   └── Register (/register)
-└── Dashboard Layout (sidebar + header + breadcrumbs)
-    ├── Dashboard Home (/dashboard)
-    ├── Profile (/dashboard/profile)
-    ├── Projects (/dashboard/projects)
-    ├── Messages (/dashboard/messages)
-    ├── Admin (/dashboard/admin)
-    └── ... other dashboard pages</pre>
+â”œâ”€â”€ Providers (QueryClient, Theme, Toaster)
+â”œâ”€â”€ Marketing Layout (navbar + footer + marketing chat)
+â”‚   â”œâ”€â”€ Home (/)
+â”‚   â”œâ”€â”€ About (/about)
+â”‚   â”œâ”€â”€ Strategists (/strategists)
+â”‚   â”œâ”€â”€ Projects (/projects)
+â”‚   â””â”€â”€ ... other marketing pages
+â”œâ”€â”€ Auth Layout (split screen with TBP branding)
+â”‚   â”œâ”€â”€ Login (/login)
+â”‚   â””â”€â”€ Register (/register)
+â””â”€â”€ Dashboard Layout (sidebar + header + breadcrumbs)
+    â”œâ”€â”€ Dashboard Home (/dashboard)
+    â”œâ”€â”€ Profile (/dashboard/profile)
+    â”œâ”€â”€ Projects (/dashboard/projects)
+    â”œâ”€â”€ Messages (/dashboard/messages)
+    â”œâ”€â”€ Admin (/dashboard/admin)
+    â””â”€â”€ ... other dashboard pages</pre>
 
 <h3>3.3 Component Organization</h3>
 <table>
@@ -404,7 +404,7 @@ RootLayout (src/app/layout.tsx)
   <strong>7-Step Onboarding Process:</strong><br>
   1. <strong>Step 1 (Details):</strong> Account creation + personal information collection<br>
   2. <strong>Step 2 (Overview):</strong> Review and confirm submitted information<br>
-  3. <strong>Step 3 (Pathway):</strong> Fellowship pathway selection (TBP Global Strategist Fellowship $1,500 / Applied R&amp;D &amp; Technology Development $7,500)<br>
+  3. <strong>Step 3 (Pathway):</strong> Fellowship pathway selection (TBP Global Strategist Fellowship $2,500 / Applied R&amp;D &amp; Technology Development $7,500)<br>
   4. <strong>Step 4 (Agreement):</strong> Legal agreement review<br>
   5. <strong>Step 5 (Terms):</strong> Accept 7 required terms (checkboxes)<br>
   6. <strong>Step 6 (Payment):</strong> Process payment via PayPal<br>
@@ -434,7 +434,7 @@ RootLayout (src/app/layout.tsx)
 <pre>
 OnboardingSubmission {
   pathway: FellowshipPathway?    // STANDARD or PLUS
-  pathwayAmount: Decimal?        // 1500 or 7500
+  pathwayAmount: Decimal?        // 2500 or 7500
   paymentProvider: PaymentProvider? // PAYPAL
   paymentStatus: PaymentStatus   // PENDING, COMPLETED, FAILED, REFUNDED
   paymentReference: String?      // Transaction reference
@@ -472,14 +472,14 @@ Referral {
   referrerId: String           // User who made the referral
   referredUserId: String       // User who was referred
   code: String                 // Referral code used
-  status: String               // PENDING_REGISTRATION → PAYMENT_RECEIVED → WAITING_APPROVAL → APPROVED → PAID
+  status: String               // PENDING_REGISTRATION â†’ PAYMENT_RECEIVED â†’ WAITING_APPROVAL â†’ APPROVED â†’ PAID
 }
 
 ReferralCredit {
   userId: String               // User receiving the credit
   referralId: String           // Associated referral
   amount: Decimal              // Credit amount (default: $50)
-  status: String               // PENDING → APPROVED → PAID → CANCELLED
+  status: String               // PENDING â†’ APPROVED â†’ PAID â†’ CANCELLED
   approvedAt: DateTime?        // When credit was approved
   paidAt: DateTime?            // When credit was paid out
 }
@@ -496,7 +496,7 @@ PayoutRequest {
   amount: Decimal              // Payout amount
   method: String               // BANK_TRANSFER or PAYPAL
   accountDetails: String       // JSON with account information
-  status: String               // PENDING → APPROVED → PAID → REJECTED
+  status: String               // PENDING â†’ APPROVED â†’ PAID â†’ REJECTED
   transactionRef: String?      // Transaction reference after payment
   processedById: String?       // Admin who processed the payout
 }

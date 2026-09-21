@@ -22,7 +22,7 @@ export async function POST(
 
     const parent = await prisma.submission.findUnique({
       where: { id },
-      select: { id: true, userId: true, projectId: true, version: true, status: true, stage: true, title: true, isLatest: true },
+      select: { id: true, userId: true, projectId: true, version: true, status: true, stage: true, title: true, isLatest: true, assessorId: true, assessorFeedback: true, assessorNotes: true },
     })
 
     if (!parent) {
@@ -61,6 +61,9 @@ export async function POST(
           isLatest: true,
           status: "REVISION",
           changelog: changelog || null,
+          assessorId: parent.assessorId,
+          assessorFeedback: parent.assessorFeedback,
+          assessorNotes: parent.assessorNotes,
           parentSubmissionId: parent.id,
         },
       })

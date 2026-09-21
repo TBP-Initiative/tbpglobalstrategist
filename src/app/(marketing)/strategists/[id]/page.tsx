@@ -253,26 +253,28 @@ export default async function StrategistProfilePage({
           version: true,
           status: true,
           changelog: true,
+          assessorFeedback: true,
           createdAt: true,
+          assessor: { select: { id: true, name: true } },
           project: { select: { id: true, title: true, slug: true } },
         },
       })
 
       activities = submissions.map((s) => {
-        const isPublic = s.status === "APPROVED" || s.status === "PUBLISHED"
-
         return {
           id: s.id,
           title: s.title,
           description: s.description ?? `Submitted for stage: ${s.stage}`,
           date: s.createdAt.toISOString(),
           type: "milestone" as const,
-          fileUrl: isPublic ? s.fileUrl : undefined,
-          fileType: isPublic ? s.fileType : undefined,
-          fileSize: isPublic ? s.fileSize : null,
+          fileUrl: s.fileUrl,
+          fileType: s.fileType,
+          fileSize: s.fileSize,
           version: s.version,
           status: s.status,
           changelog: s.changelog,
+          assessorFeedback: s.assessorFeedback,
+          assessorName: s.assessor?.name ?? null,
           projectId: s.project?.id ?? null,
           projectTitle: s.project?.title ?? null,
         }

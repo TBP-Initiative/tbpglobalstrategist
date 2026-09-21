@@ -100,6 +100,7 @@ interface Activity {
   id: string; title: string; description: string; date: string;
   type: "publication" | "milestone" | "contribution" | "assignment";
   fileUrl?: string; fileType?: string; fileSize?: number | null;
+  assessorFeedback?: string | null; assessorName?: string | null;
 }
 
 interface DesqueletStage {

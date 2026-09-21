@@ -12,10 +12,11 @@ export async function GET(
       where: { id },
       include: {
         project: { select: { id: true, title: true, slug: true } },
+        assessor: { select: { id: true, name: true } },
         parentSubmission: { select: { id: true, version: true, title: true } },
         revisions: {
           orderBy: { version: "desc" },
-          select: { id: true, version: true, title: true, status: true, createdAt: true },
+          select: { id: true, version: true, title: true, status: true, createdAt: true, changelog: true, assessorFeedback: true, assessorNotes: true },
         },
       },
     })

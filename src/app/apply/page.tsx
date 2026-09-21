@@ -16,6 +16,7 @@ import { StepObjectives } from "./step-objectives"
 import { StepTerms } from "./step-terms"
 import { StepPayment } from "./step-payment"
 import { StepComplete } from "./step-complete"
+import { ProgrammeFees } from "@/components/shared/programme-fees"
 
 const STEPS = [
   { id: 1, label: "Application" },
@@ -158,6 +159,8 @@ function ApplicationContent() {
             Fellowship Application &amp; Programme Terms
           </p>
         </div>
+
+        <ProgrammeFees />
 
         <div className="mb-10 overflow-x-auto">
           <div className="flex min-w-max items-center justify-between">

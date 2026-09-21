@@ -57,10 +57,13 @@ type SubmissionData = {
   isLatest: boolean
   status: string
   changelog: string | null
+  assessorFeedback: string | null
+  assessorNotes: string | null
+  assessor: { id: string; name: string | null } | null
   createdAt: string
   parentSubmissionId: string | null
   project?: { id: string; title: string; slug: string } | null
-  revisions?: { id: string; version: number; status: string; title: string; createdAt: string }[]
+  revisions?: { id: string; version: number; status: string; title: string; createdAt: string; changelog: string | null; assessorFeedback: string | null; assessorNotes: string | null }[]
 }
 
 type VersionEntry = {
@@ -73,6 +76,10 @@ type VersionEntry = {
   isLatest: boolean
   fileSize: number | null
   fileType: string
+  fileUrl: string | null
+  assessorFeedback: string | null
+  assessorNotes: string | null
+  assessor: { id: string; name: string | null } | null
 }
 
 export function SubmissionForm({ currentStage }: { currentStage: string }) {
@@ -373,6 +380,28 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
                             </motion.div>
                           )}
                         </AnimatePresence>
+
+                        {(sub.assessorFeedback || sub.assessorNotes) && (
+                          <div className="border-t border-border p-3 bg-muted/20">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <CheckCircle2 size={13} className="text-emerald-500" />
+                              <p className="text-xs font-medium text-foreground">
+                                Assessor Feedback{sub.assessor?.name ? ` · ${sub.assessor.name}` : ""}
+                              </p>
+                            </div>
+                            {sub.assessorFeedback && (
+                              <p className="text-xs text-muted-foreground">{sub.assessorFeedback}</p>
+                            )}
+                            {sub.assessorNotes && (
+                              <div className="mt-2 rounded-lg border border-border bg-white/40 p-2.5">
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                  Full Revision &amp; Observations
+                                </p>
+                                <p className="text-xs text-foreground/90 whitespace-pre-wrap">{sub.assessorNotes}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -410,6 +439,15 @@ export function SubmissionForm({ currentStage }: { currentStage: string }) {
                           </div>
                           {v.changelog && <p className="mt-1 text-xs text-muted-foreground">{v.changelog}</p>}
                           <p className="mt-1 text-[10px] text-muted-foreground/60">{formatDate(v.createdAt)}</p>
+                          {(v.assessorFeedback || v.assessorNotes) && (
+                            <div className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2">
+                              <p className="text-[10px] font-semibold text-emerald-700 uppercase tracking-wider">
+                                {v.isLatest ? "Assessor Review" : "Assessor Feedback"}{v.assessor?.name ? ` · ${v.assessor.name}` : ""}
+                              </p>
+                              {v.assessorFeedback && <p className="mt-0.5 text-xs text-emerald-800">{v.assessorFeedback}</p>}
+                              {v.assessorNotes && <p className="mt-1 text-xs text-emerald-900/80 whitespace-pre-wrap">{v.assessorNotes}</p>}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

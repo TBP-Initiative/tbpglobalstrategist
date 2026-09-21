@@ -20,6 +20,7 @@ import {
   Eye,
   AlertTriangle,
   Calendar,
+  MessageSquareQuote,
 } from "lucide-react"
 
 type Revision = {
@@ -29,6 +30,8 @@ type Revision = {
   status: string
   createdAt: string
   changelog: string | null
+  assessorFeedback: string | null
+  assessorNotes: string | null
 }
 
 type Submission = {
@@ -44,6 +47,9 @@ type Submission = {
   updatedAt: string
   user: { id: string; name: string | null; email: string | null }
   project: { id: string; title: string } | null
+  assessor: { id: string; name: string | null } | null
+  assessorFeedback: string | null
+  assessorNotes: string | null
   revisions: Revision[]
 }
 
@@ -73,6 +79,10 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
   const [backdateId, setBackdateId] = useState<string | null>(null)
   const [backdateValue, setBackdateValue] = useState("")
   const [backdateError, setBackdateError] = useState<string | null>(null)
+  const [reviewPanelId, setReviewPanelId] = useState<string | null>(null)
+  const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null)
+  const [reviewSummary, setReviewSummary] = useState("")
+  const [reviewNotes, setReviewNotes] = useState("")
 
   const filtered = filterStatus === "ALL" ? submissions : submissions.filter((s) => s.status === filterStatus)
 
@@ -84,15 +94,21 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
     {} as Record<string, number>,
   )
 
-  async function handleAction(id: string, action: "approve" | "publish" | "reject") {
+  async function handleAction(id: string, action: "approve" | "publish" | "reject", feedback = "", notes = "") {
     setProcessingId(id)
     try {
       const res = await fetch(`/api/submissions/${id}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, feedback, notes }),
       })
       if (res.ok) {
+        if (action !== "publish") {
+          setReviewPanelId(null)
+          setReviewAction(null)
+          setReviewSummary("")
+          setReviewNotes("")
+        }
         startTransition(() => router.refresh())
       } else {
         const data = await res.json()
@@ -103,6 +119,19 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
     } finally {
       setProcessingId(null)
     }
+  }
+
+  function handleReview(id: string, action: "approve" | "reject") {
+    if (reviewPanelId !== id) {
+      setReviewPanelId(id)
+      setReviewAction(action)
+      return
+    }
+    if (reviewAction && reviewAction !== action) {
+      setReviewAction(action)
+      return
+    }
+    handleAction(id, action, reviewSummary.trim(), reviewNotes.trim())
   }
 
   async function handleDelete(id: string) {
@@ -241,23 +270,23 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-7 px-2 text-xs gap-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
-                            onClick={() => handleAction(sub.id, "approve")}
+                            className={`h-7 px-2 text-xs gap-1 ${reviewPanelId === sub.id && reviewAction === "approve" ? "bg-emerald-50 border-emerald-300" : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"}`}
+                            onClick={() => handleReview(sub.id, "approve")}
                             disabled={isProcessing}
                           >
                             <CheckCircle2 size={12} />
-                            Approve
+                            {reviewPanelId === sub.id && reviewAction === "approve" ? "Confirm" : "Approve"}
                           </Button>
                           <Button
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-7 px-2 text-xs gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={() => handleAction(sub.id, "reject")}
+                            className={`h-7 px-2 text-xs gap-1 ${reviewPanelId === sub.id && reviewAction === "reject" ? "bg-red-50 border-red-300" : "text-red-600 border-red-200 hover:bg-red-50"}`}
+                            onClick={() => handleReview(sub.id, "reject")}
                             disabled={isProcessing}
                           >
                             <XCircle size={12} />
-                            Reject
+                            {reviewPanelId === sub.id && reviewAction === "reject" ? "Confirm" : "Reject"}
                           </Button>
                         </>
                       )}
@@ -279,7 +308,7 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                         size="sm"
                         variant="outline"
                         className="h-7 px-2 text-xs gap-1"
-                        onClick={() => setExpandedId(isExpanded ? null : sub.id)}
+                        onClick={() => { setExpandedId(isExpanded ? null : sub.id); if (reviewPanelId === sub.id) { setReviewPanelId(null); setReviewAction(null); setReviewSummary(""); setReviewNotes("") } }}
                       >
                         <Eye size={12} />
                         {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -333,6 +362,59 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                   </AnimatePresence>
                 </div>
 
+                <AnimatePresence>
+                  {reviewPanelId === sub.id && reviewAction && sub.status === "UNDER_REVIEW" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mx-4 mt-3 mb-2 rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                          <MessageSquareQuote size={12} />
+                          {reviewAction === "approve" ? "Approval Feedback" : "Revision Feedback"}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">Feedback summary appears publicly on the report. Full notes are visible to the author on their dashboard.</p>
+                        <input
+                          type="text"
+                          placeholder="Feedback summary (e.g. approved / requires minor revision on methodology section)"
+                          value={reviewSummary}
+                          onChange={(e) => setReviewSummary(e.target.value)}
+                          className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none"
+                        />
+                        <textarea
+                          placeholder="Full revision notes, observations, and corrections for the author"
+                          value={reviewNotes}
+                          onChange={(e) => setReviewNotes(e.target.value)}
+                          rows={4}
+                          className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none resize-y"
+                        />
+                        <div className="flex items-center gap-2 pt-1">
+                          <Button
+                            type="button"
+                            size="sm"
+                            className={`h-7 text-xs ${reviewAction === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"} text-white`}
+                            onClick={() => handleAction(sub.id, reviewAction, reviewSummary.trim(), reviewNotes.trim())}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? "Submitting..." : reviewAction === "approve" ? "Confirm Approval" : "Confirm Rejection"}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            onClick={() => { setReviewPanelId(null); setReviewAction(null); setReviewSummary(""); setReviewNotes("") }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* Expanded detail */}
                 <AnimatePresence>
                   {isExpanded && (
@@ -360,6 +442,23 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                             >
                               View attached file <ExternalLink size={11} />
                             </a>
+                          </div>
+                        )}
+
+                        {sub.assessorFeedback && (
+                          <div className="rounded-md border border-blue-100 bg-blue-50 p-3 space-y-2">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-blue-800">
+                              <MessageSquareQuote size={12} />
+                              Assessor Feedback
+                              {sub.assessor?.name && <span className="font-normal text-blue-600">by {sub.assessor.name}</span>}
+                            </div>
+                            <p className="text-xs text-blue-900">{sub.assessorFeedback}</p>
+                            {sub.assessorNotes && (
+                              <div className="pt-1 border-t border-blue-100 mt-2">
+                                <p className="text-[10px] font-medium text-blue-700 mb-1 uppercase tracking-wider">Full Revision Notes</p>
+                                <p className="text-xs text-blue-800 whitespace-pre-wrap">{sub.assessorNotes}</p>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -420,13 +519,21 @@ export default function AdminSubmissionsClient({ submissions, isAdmin }: { submi
                             <p className="text-xs font-medium text-gray-500 mb-2">Version History ({sub.revisions.length} versions)</p>
                             <div className="space-y-1.5">
                               {sub.revisions.map((rev) => (
-                                <div key={rev.id} className="flex items-center gap-3 text-xs p-2 bg-white rounded border">
-                                  <span className="font-mono text-gray-400 w-6">v{rev.version}</span>
-                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${statusColors[rev.status] || "bg-gray-100"}`}>
-                                    {statusLabels[rev.status] || rev.status}
-                                  </span>
-                                  {rev.changelog && <span className="text-gray-500 truncate flex-1">{rev.changelog}</span>}
-                                  <span className="text-gray-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                                <div key={rev.id} className="text-xs p-2 bg-white rounded border">
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-mono text-gray-400 w-6">v{rev.version}</span>
+                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${statusColors[rev.status] || "bg-gray-100"}`}>
+                                      {statusLabels[rev.status] || rev.status}
+                                    </span>
+                                    {rev.changelog && <span className="text-gray-500 truncate flex-1">{rev.changelog}</span>}
+                                    <span className="text-gray-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                                  </div>
+                                  {rev.assessorFeedback && (
+                                    <div className="mt-1.5 rounded bg-blue-50 px-2 py-1.5">
+                                      <p className="text-[10px] font-medium text-blue-700 mb-0.5">Assessor feedback:</p>
+                                      <p className="text-[11px] text-blue-900">{rev.assessorFeedback}</p>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>

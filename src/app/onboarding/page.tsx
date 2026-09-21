@@ -13,6 +13,7 @@ import { StepTerms } from "./step-terms"
 import { StepAgreement } from "./step-agreement"
 import { StepPayment } from "./step-payment"
 import { StepComplete } from "./step-complete"
+import { ProgrammeFees } from "@/components/shared/programme-fees"
 
 const STEPS = [
   { id: 1, label: "Details" },

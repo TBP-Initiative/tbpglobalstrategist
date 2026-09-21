@@ -8,8 +8,8 @@ import { Shield, Loader2, CheckCircle2, Star, Zap } from "lucide-react"
 
 const PLANS = {
   STANDARD: {
-    amount: 1500,
-    display: "£1,500",
+    amount: 2500,
+    display: "£2,500",
     name: "TBP Global Strategist Fellowship",
     description: "The essential pathway to becoming a TBP Global Strategist Fellow.",
     features: [

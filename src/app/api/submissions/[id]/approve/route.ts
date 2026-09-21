@@ -24,6 +24,8 @@ export async function POST(
     const { id } = await params
     const body = await req.json().catch(() => ({}))
     const action = body.action as string | undefined
+    const feedback = typeof body.feedback === "string" ? body.feedback.trim() : ""
+    const notes = typeof body.notes === "string" ? body.notes.trim() : ""
 
     const submission = await prisma.submission.findUnique({
       where: { id },
@@ -51,7 +53,14 @@ export async function POST(
 
     const updated = await prisma.submission.update({
       where: { id },
-      data: { status: newStatus as "APPROVED" | "PUBLISHED" | "REVISION" },
+      data: {
+        status: newStatus as "APPROVED" | "PUBLISHED" | "REVISION",
+        ...(action === "publish" ? {} : {
+          assessorId: session.user.id,
+          assessorFeedback: feedback || null,
+          assessorNotes: notes || null,
+        }),
+      },
     })
 
     return NextResponse.json({ ok: true, status: updated.status })

@@ -66,7 +66,7 @@ function mapOnboardingStep(step: number, data: StepData) {
       break
     case 3:
       mapped.pathway = data.pathway
-      mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 1500
+      mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 2500
       break
     case 5:
       mapped.signatureName = data.signatureName
@@ -132,7 +132,7 @@ function mapApplicationStep(step: number, data: StepData) {
       break
     case 5:
       mapped.pathway = data.pathway
-      mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 1500
+      mapped.pathwayAmount = data.pathway === "PLUS" ? 7500 : 2500
       break
     case 6:
       mapped.tentativeProjectId = data.tentativeProjectId

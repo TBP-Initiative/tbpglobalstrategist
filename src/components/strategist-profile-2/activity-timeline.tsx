@@ -18,6 +18,8 @@ interface ActivityItem {
   version?: number
   status?: string
   changelog?: string | null
+  assessorFeedback?: string | null
+  assessorName?: string | null
   projectId?: string | null
   projectTitle?: string | null
 }
@@ -138,7 +140,7 @@ function ContributionCard({
             ) : (
               <span className="inline-flex items-center gap-1 italic">
                 <Clock size={11} className="text-amber-500" />
-                Report on review — awaiting approval and not yet published
+                Published for public viewing — currently under peer review
               </span>
             )}
           </p>
@@ -147,6 +149,14 @@ function ContributionCard({
           )}
           {item.description && (
             <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+          )}
+          {item.assessorFeedback && (
+            <div className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2.5">
+              <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                Assessor Feedback{item.assessorName ? ` · ${item.assessorName}` : ""}
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-900">{item.assessorFeedback}</p>
+            </div>
           )}
           <div className="flex items-center gap-2 mt-2">
             <Clock size={10} className="text-gray-400" />

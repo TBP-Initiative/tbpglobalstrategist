@@ -44,6 +44,7 @@ model User {
   sessions            Session[]
   strategistProfile   StrategistProfile?
   submissions         Submission[]
+  submissionAssessments Submission[]      @relation("SubmissionAssessments")
   workAreaAssignments UserWorkArea[]
 }
 
@@ -374,6 +375,10 @@ model Submission {
   isLatest           Boolean          @default(true)
   status             SubmissionStatus @default(DRAFT)
   changelog          String?
+  assessorId         String?
+  assessorFeedback   String?
+  assessorNotes      String?
+  assessor           User?            @relation("SubmissionAssessments", fields: [assessorId], references: [id])
   parentSubmissionId String?
   parentSubmission   Submission?      @relation("SubmissionRevisions", fields: [parentSubmissionId], references: [id])
   revisions          Submission[]     @relation("SubmissionRevisions")
@@ -384,6 +389,7 @@ model Submission {
   @@index([stage])
   @@index([projectId])
   @@index([parentSubmissionId])
+  @@index([assessorId])
   @@index([userId, projectId, isLatest])
 }
 
