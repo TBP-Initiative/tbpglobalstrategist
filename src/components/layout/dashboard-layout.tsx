@@ -47,7 +47,7 @@ type NotifItem = {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role?: "individual" | "admin";
+  role?: "individual" | "admin" | "assessor";
   user?: {
     name: string;
     email: string;
@@ -67,6 +67,8 @@ const routeLabels: Record<string, string> = {
   users: "Users",
   organization: "Organization",
   system: "System",
+  assessor: "Assessor",
+  individual: "Individual",
 };
 
 export default function DashboardLayout({
@@ -263,7 +265,7 @@ export default function DashboardLayout({
                     )}
                   </div>
                   <Link
-                    href={`/dashboard/${role}/notifications`}
+                    href={`/dashboard/${role === "assessor" ? "individual" : role}/notifications`}
                     className="block border-t border-border p-3 text-center text-xs text-primary hover:underline"
                   >
                     View all notifications

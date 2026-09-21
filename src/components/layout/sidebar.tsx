@@ -21,9 +21,10 @@ import {
   FileText,
   LogOut,
   Layers,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 type NavItem = {
   label: string;
@@ -32,7 +33,7 @@ type NavItem = {
   children?: { label: string; href: string }[];
 };
 
-type Role = "individual" | "admin";
+type Role = "individual" | "admin" | "assessor";
 
 const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
   individual: [
@@ -66,6 +67,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
         { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
         { label: "Referrals", href: "/dashboard/admin/referrals", icon: Share2 },
+        { label: "Assessor", href: "/dashboard/assessor", icon: ClipboardCheck },
         { label: "Submissions", href: "/dashboard/admin/submissions", icon: FileText },
       ],
     },
@@ -74,6 +76,23 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
       items: [
         { label: "System", href: "/dashboard/system", icon: Shield },
         { label: "Settings", href: "/dashboard/settings", icon: Settings },
+      ],
+    },
+  ],
+  assessor: [
+    {
+      title: "Main",
+      items: [
+        { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+        { label: "Profile", href: "/dashboard/profile", icon: User },
+        { label: "Assessor", href: "/dashboard/assessor", icon: ClipboardCheck },
+        { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+      ],
+    },
+    {
+      title: "Settings",
+      items: [
+        { label: "Account", href: "/dashboard/settings", icon: Settings },
       ],
     },
   ],
@@ -98,8 +117,13 @@ export default function Sidebar({
   user,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [hasPaid, setHasPaid] = useState<boolean | null>(null);
+
+  const isAssessor =
+    session?.user?.role === "ADMIN" ||
+    Boolean((session?.user as { isPublishAssessor?: boolean } | undefined)?.isPublishAssessor);
 
   useEffect(() => {
     const checkPayment = () =>
@@ -113,12 +137,20 @@ export default function Sidebar({
     return () => window.removeEventListener("payment-completed", checkPayment)
   }, [])
 
-  const sections = (navConfig[role] || navConfig.individual).map((section) => ({
-    ...section,
-    items: section.items.filter(
+  const sections = (navConfig[role] || navConfig.individual).map((section, index) => {
+    const items = section.items.filter(
       (item) => !(hasPaid && item.href === "/dashboard/payment")
-    ),
-  }));
+    );
+    if (
+      index === 0 &&
+      isAssessor &&
+      role === "individual" &&
+      !items.some((item) => item.href === "/dashboard/assessor")
+    ) {
+      items.splice(1, 0, { label: "Assessor", href: "/dashboard/assessor", icon: ClipboardCheck });
+    }
+    return { ...section, items };
+  });
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => ({ ...prev, [title]: !prev[title] }));

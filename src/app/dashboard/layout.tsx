@@ -50,12 +50,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     )
   }
 
+  const isAdmin = session?.user?.role === "ADMIN"
+  const isAssessor =
+    isAdmin ||
+    Boolean((session?.user as { isPublishAssessor?: boolean } | undefined)?.isPublishAssessor)
+
   const role =
-    pathname.startsWith("/dashboard/individual")
-      ? "individual"
-      : adminPaths.some((p) => pathname.startsWith(p)) || pathname.startsWith("/dashboard/admin")
+    pathname.startsWith("/dashboard/assessor") && isAssessor
+      ? isAdmin
         ? "admin"
-        : "individual"
+        : "assessor"
+      : pathname.startsWith("/dashboard/individual")
+        ? "individual"
+        : adminPaths.some((p) => pathname.startsWith(p)) || pathname.startsWith("/dashboard/admin")
+          ? "admin"
+          : "individual"
 
   const user = session?.user
     ? {
