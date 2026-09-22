@@ -136,7 +136,7 @@ export default function IndividualDashboard() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[]; expertiseTags?: string[] } | null>(null)
-  const [assessor, setAssessor] = useState<{ id: string; name: string | null; email: string; image: string | null } | null>(null)
+  const [assessor, setAssessor] = useState<{ id: string; name: string | null; email: string; image: string | null; role: string } | null>(null)
 
   const [projects, setProjects] = useState<ProjectItem[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
@@ -529,7 +529,10 @@ export default function IndividualDashboard() {
                 <h3 className="text-sm font-semibold">Your Assessor</h3>
               </div>
               {assessor ? (
-                <div className="flex items-center gap-3">
+                <Link
+                  href={`/strategists/${assessor.id}`}
+                  className={assessor.role === "STRATEGIST" ? "group flex items-center gap-3" : "flex items-center gap-3 cursor-default"}
+                >
                   <Avatar size="sm">
                     {assessor.image ? (
                       <img src={assessor.image} alt={assessor.name || assessor.email} className="h-full w-full object-cover" />
@@ -544,10 +547,18 @@ export default function IndividualDashboard() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{assessor.name || assessor.email}</p>
+                    <p
+                      className={
+                        assessor.role === "STRATEGIST"
+                          ? "text-sm font-medium truncate text-indigo-600 transition-colors group-hover:text-indigo-800 group-hover:underline"
+                          : "text-sm font-medium truncate"
+                      }
+                    >
+                      {assessor.name || assessor.email}
+                    </p>
                     <p className="text-xs text-muted-foreground truncate">{assessor.email}</p>
                   </div>
-                </div>
+                </Link>
               ) : (
                 <p className="py-2 text-xs text-muted-foreground">
                   No assessor assigned yet. Your assessor will review your DESQUELET stages and submissions.
