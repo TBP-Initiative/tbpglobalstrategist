@@ -142,7 +142,7 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
         method: "PATCH",
       })
       setConversations((prev) =>
-        prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0, messages: c.messages.map((m) => ({ ...m, read: true })) } : c))
+        prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0, messages: (c.messages ?? []).map((m) => ({ ...m, read: true })) } : c))
       )
     } catch { /* ignore */ }
   }, [])
@@ -191,7 +191,7 @@ export function ChatWidget({ currentUserId, openWithUser }: { currentUserId: str
           prev
             .map((c) =>
               c.id === activeConvId
-                ? { ...c, lastMessage: content, lastMessageAt: msg.createdAt, messages: [...c.messages, msg] }
+                ? { ...c, lastMessage: content, lastMessageAt: msg.createdAt, messages: [...(c.messages ?? []), msg] }
                 : c
             )
             .sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
