@@ -12,7 +12,9 @@ export default async function AssessorPage() {
   const user = await prisma.user.findUnique({ where: { email: session.user.email } })
   if (!user || (user.role !== "ADMIN" && !user.isPublishAssessor)) redirect("/dashboard")
 
-  const [pendingReviews, submissions] = await Promise.all([
+  const isAdmin = user.role === "ADMIN"
+
+  const [pendingReviews, submissions, students] = await Promise.all([
     prisma.desqueletReview.findMany({
       where: { reviewerId: user.id, status: "PENDING" },
       include: {
@@ -36,7 +38,11 @@ export default async function AssessorPage() {
       orderBy: { createdAt: "asc" },
     }),
     prisma.submission.findMany({
-      where: { isLatest: true, status: "UNDER_REVIEW" },
+      where: {
+        isLatest: true,
+        status: "UNDER_REVIEW",
+        ...(isAdmin ? {} : { user: { assessorId: user.id } }),
+      },
       include: {
         user: { select: { id: true, name: true, email: true } },
         assessor: { select: { id: true, name: true } },
@@ -45,6 +51,21 @@ export default async function AssessorPage() {
           select: { id: true, version: true, title: true, status: true, createdAt: true, changelog: true, assessorFeedback: true, assessorNotes: true },
           orderBy: { version: "asc" },
         },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.findMany({
+      where: { assessorId: user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+        createdAt: true,
+        strategistProfile: { select: { stage: true } },
+        onboarding: { select: { status: true, source: true } },
+        _count: { select: { desqueletRecords: true, submissions: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -83,11 +104,26 @@ export default async function AssessorPage() {
     revisions: s.revisions.map((rev) => ({ ...rev, createdAt: rev.createdAt.toISOString() })),
   }))
 
+  const serializedStudents = students.map((s) => ({
+    id: s.id,
+    name: s.name,
+    email: s.email,
+    image: s.image,
+    role: s.role,
+    createdAt: s.createdAt.toISOString(),
+    stage: s.strategistProfile?.stage ?? null,
+    onboardingStatus: s.onboarding?.status ?? null,
+    source: s.onboarding?.source ?? null,
+    records: s._count.desqueletRecords,
+    submissions: s._count.submissions,
+  }))
+
   return (
     <AssessorClient
       reviews={serializedReviews}
       submissions={serializedSubmissions}
-      isAdmin={user.role === "ADMIN"}
+      students={serializedStudents}
+      isAdmin={isAdmin}
     />
   )
 }

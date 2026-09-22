@@ -21,6 +21,7 @@ export async function GET() {
         image: true,
         role: true,
         createdAt: true,
+        assessor: { select: { id: true, name: true, email: true, image: true } },
         strategistProfile: {
           select: {
             title: true,

@@ -30,6 +30,7 @@ import {
   Sparkles,
   Globe,
   Layers,
+  UserCheck,
 } from "lucide-react"
 
 const stageColors: Record<string, string> = {
@@ -135,6 +136,7 @@ export default function IndividualDashboard() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[]; expertiseTags?: string[] } | null>(null)
+  const [assessor, setAssessor] = useState<{ id: string; name: string | null; email: string; image: string | null } | null>(null)
 
   const [projects, setProjects] = useState<ProjectItem[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
@@ -177,6 +179,9 @@ export default function IndividualDashboard() {
           setStats(statsData)
         }
         if (profileData && typeof profileData === "object" && !profileData.error) {
+          if (profileData.assessor) {
+            setAssessor(profileData.assessor)
+          }
           if (profileData.strategistProfile?.stage) {
             setProfile({
               stage: profileData.strategistProfile.stage,
@@ -517,6 +522,40 @@ export default function IndividualDashboard() {
         </div>
 
         <div className="space-y-6">
+          <AnimatedSection delay={0.15}>
+            <GlassCard className="p-6" intensity="light">
+              <div className="mb-4 flex items-center gap-2">
+                <UserCheck size={16} className="text-muted-foreground" />
+                <h3 className="text-sm font-semibold">Your Assessor</h3>
+              </div>
+              {assessor ? (
+                <div className="flex items-center gap-3">
+                  <Avatar size="sm">
+                    {assessor.image ? (
+                      <img src={assessor.image} alt={assessor.name || assessor.email} className="h-full w-full object-cover" />
+                    ) : null}
+                    <AvatarFallback className="text-xs">
+                      {(assessor.name || assessor.email)
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{assessor.name || assessor.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{assessor.email}</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="py-2 text-xs text-muted-foreground">
+                  No assessor assigned yet. Your assessor will review your DESQUELET stages and submissions.
+                </p>
+              )}
+            </GlassCard>
+          </AnimatedSection>
+
           <AnimatedSection delay={0.2}>
             <FeaturedProjectSelector />
           </AnimatedSection>

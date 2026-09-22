@@ -69,6 +69,7 @@ const routeLabels: Record<string, string> = {
   system: "System",
   assessor: "Assessor",
   individual: "Individual",
+  assignments: "Assessor Assignments",
 };
 
 export default function DashboardLayout({

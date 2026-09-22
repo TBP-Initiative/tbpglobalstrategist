@@ -18,7 +18,7 @@ export async function POST(
 
     const record = await prisma.desqueletRecord.findUnique({
       where: { id },
-      select: { userId: true },
+      select: { userId: true, user: { select: { assessorId: true } } },
     })
 
     if (!record || record.userId !== session.user.id) {
@@ -49,21 +49,37 @@ export async function POST(
       return NextResponse.json({ error: "Stage already submitted for review" }, { status: 409 })
     }
 
-    const admins = await prisma.user.findMany({
-      where: { OR: [{ role: "ADMIN" }, { isPublishAssessor: true }] },
-      select: { id: true },
-    })
+    let reviewerIds: string[] = []
 
-    if (admins.length === 0) {
+    if (record.user.assessorId) {
+      const assigned = await prisma.user.findFirst({
+        where: {
+          id: record.user.assessorId,
+          OR: [{ role: "ADMIN" }, { isPublishAssessor: true }],
+        },
+        select: { id: true },
+      })
+      if (assigned) reviewerIds = [assigned.id]
+    }
+
+    if (reviewerIds.length === 0) {
+      const fallback = await prisma.user.findMany({
+        where: { OR: [{ role: "ADMIN" }, { isPublishAssessor: true }] },
+        select: { id: true },
+      })
+      reviewerIds = fallback.map((a) => a.id)
+    }
+
+    if (reviewerIds.length === 0) {
       return NextResponse.json({ error: "No assessors available" }, { status: 500 })
     }
 
     const reviews = await prisma.$transaction(
-      admins.map((admin) =>
+      reviewerIds.map((reviewerId) =>
         prisma.desqueletReview.create({
           data: {
             stageContentId: stageContent.id,
-            reviewerId: admin.id,
+            reviewerId,
             status: "PENDING",
           },
         })

@@ -23,6 +23,7 @@ import {
   ClipboardCheck,
   Layers,
   Paperclip,
+  Users,
 } from "lucide-react"
 
 interface Evidence {
@@ -59,10 +60,44 @@ interface ReviewItem {
   }
 }
 
+interface Student {
+  id: string
+  name: string | null
+  email: string | null
+  image: string | null
+  role: string
+  createdAt: string
+  stage: string | null
+  onboardingStatus: string | null
+  source: string | null
+  records: number
+  submissions: number
+}
+
 interface AssessorClientProps {
   reviews: ReviewItem[]
   submissions: React.ComponentProps<typeof AdminSubmissionsClient>["submissions"]
+  students: Student[]
   isAdmin: boolean
+}
+
+const stageLabels: Record<string, string> = {
+  CANDIDATE: "Candidate",
+  STRATEGIST: "Strategist",
+  CONTRIBUTOR: "Contributor",
+  PROJECT_ALIGNED: "Project-Aligned",
+  SECTOR_LEAD: "Sector Lead",
+  PAID_ADVISER: "Paid Adviser",
+}
+
+function initials(name: string | null, email: string | null) {
+  const source = name || email || "?"
+  return source
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 function formatFileSize(bytes: number | null): string {
@@ -72,9 +107,9 @@ function formatFileSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function AssessorClient({ reviews, submissions, isAdmin }: AssessorClientProps) {
+export default function AssessorClient({ reviews, submissions, students, isAdmin }: AssessorClientProps) {
   const router = useRouter()
-  const [tab, setTab] = useState<"desquelet" | "submissions">("desquelet")
+  const [tab, setTab] = useState<"desquelet" | "submissions" | "students">("desquelet")
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Record<string, string>>({})
   const [processingId, setProcessingId] = useState<string | null>(null)
@@ -110,6 +145,7 @@ export default function AssessorClient({ reviews, submissions, isAdmin }: Assess
   const tabs = [
     { key: "desquelet" as const, label: "DESQUELET Reviews", count: reviews.length, icon: Layers },
     { key: "submissions" as const, label: "Submissions", count: submissions.length, icon: FileText },
+    { key: "students" as const, label: "My Students", count: students.length, icon: Users },
   ]
 
   return (
@@ -349,8 +385,57 @@ export default function AssessorClient({ reviews, submissions, isAdmin }: Assess
             })}
           </div>
         )
-      ) : (
+      ) : tab === "submissions" ? (
         <AdminSubmissionsClient submissions={submissions} isAdmin={isAdmin} />
+      ) : students.length === 0 ? (
+        <GlassCard className="p-12 text-center" intensity="light">
+          <Users size={40} className="mx-auto text-gray-300 mb-3" />
+          <p className="text-gray-500">No students or applicants assigned to you yet</p>
+        </GlassCard>
+      ) : (
+        <div className="space-y-3">
+          {students.map((student) => {
+            const typeLabel =
+              student.source === "INSTITUTE_APPLICATION"
+                ? "Applicant"
+                : student.source === "ONBOARDING"
+                  ? "Fellow"
+                  : student.role
+            return (
+              <GlassCard key={student.id} className="p-4" intensity="light">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 overflow-hidden">
+                    {student.image ? (
+                      <img src={student.image} alt={student.name || ""} className="h-full w-full object-cover" />
+                    ) : (
+                      initials(student.name, student.email)
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {student.name || student.email}
+                      </p>
+                      <Badge variant="outline" className="text-[10px]">
+                        {typeLabel}
+                      </Badge>
+                      {student.stage && (
+                        <Badge variant="outline" className="text-[10px] bg-indigo-50 text-indigo-600 border-indigo-200">
+                          {stageLabels[student.stage] ?? student.stage}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{student.email}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      {student.records} DESQUELET record{student.records === 1 ? "" : "s"} ·{" "}
+                      {student.submissions} submission{student.submissions === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                </div>
+              </GlassCard>
+            )
+          })}
+        </div>
       )}
     </div>
   )

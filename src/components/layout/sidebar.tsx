@@ -22,6 +22,7 @@ import {
   LogOut,
   Layers,
   ClipboardCheck,
+  UserCheck,
   type LucideIcon,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -64,6 +65,7 @@ const navConfig: Record<Role, { title: string; items: NavItem[] }[]> = {
         { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
         { label: "Profile", href: "/dashboard/profile", icon: User },
         { label: "Users", href: "/dashboard/users", icon: Users },
+        { label: "Assignments", href: "/dashboard/admin/assignments", icon: UserCheck },
         { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
         { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
         { label: "Referrals", href: "/dashboard/admin/referrals", icon: Share2 },

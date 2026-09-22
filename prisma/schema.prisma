@@ -20,6 +20,9 @@ model User {
   referralCode        String?                   @unique
   isActive            Boolean                   @default(true)
   isPublishAssessor   Boolean                   @default(false)
+  assessorId          String?
+  assessor            User?                     @relation("AssessorAssignments", fields: [assessorId], references: [id], onDelete: SetNull)
+  assignedStudents    User[]                    @relation("AssessorAssignments")
   accounts            Account[]
   achievements        Achievement[]
   activityLogs        ActivityLog[]
@@ -46,6 +49,8 @@ model User {
   submissions         Submission[]
   submissionAssessments Submission[]      @relation("SubmissionAssessments")
   workAreaAssignments UserWorkArea[]
+
+  @@index([assessorId])
 }
 
 model Account {
