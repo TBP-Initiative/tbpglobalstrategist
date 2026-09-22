@@ -1,101 +1,86 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
+import Link from "next/link"
 import { AnimatedSection } from "@/components/shared/animated-section"
 import { GlassCard } from "@/components/shared/glass-card"
-import { StatsCard } from "@/components/dashboards/stats-card"
 import { PageHeader } from "@/components/shared/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  MessageSquare,
-  Send,
-  Search,
-  Mail,
-  MailOpen,
-  Trash2,
-  CornerUpRight,
-  Clock,
-  User,
-} from "lucide-react"
+import { MessageSquare, Search, Mail, MailOpen, Inbox } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
-type MessageData = {
+type ConversationData = {
   id: string
-  content: string
-  read: boolean
-  createdAt: string
-  sender: { id: string; name: string | null; email: string }
-  receiver: { id: string; name: string | null; email: string }
-  isSentByMe: boolean
+  name: string
+  image: string | null
+  isGroup: boolean
+  participants: { id: string; name: string | null; email: string; image: string | null }[]
+  lastMessage: string | null
+  lastMessageAt: string
+  unreadCount: number
+  lastSenderIsMe: boolean
 }
 
 export function MessagesClient({
-  messages,
-  currentUserId,
-  currentUserName,
+  conversations,
 }: {
-  messages: MessageData[]
-  currentUserId: string
-  currentUserName: string
+  conversations: ConversationData[]
 }) {
   const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState<"all" | "unread" | "sent">("all")
+  const [filter, setFilter] = useState<"all" | "unread">("all")
 
   const filtered = useMemo(() => {
-    return messages.filter((m) => {
-      if (filter === "unread" && (m.read || m.isSentByMe)) return false
-      if (filter === "sent" && !m.isSentByMe) return false
+    return conversations.filter((c) => {
+      if (filter === "unread" && c.unreadCount === 0) return false
       if (search) {
         const q = search.toLowerCase()
-        const other = m.isSentByMe ? m.receiver : m.sender
         return (
-          (m.content ?? "").toLowerCase().includes(q) ||
-          (other.name ?? "").toLowerCase().includes(q) ||
-          (other.email ?? "").toLowerCase().includes(q)
+          (c.name ?? "").toLowerCase().includes(q) ||
+          (c.lastMessage ?? "").toLowerCase().includes(q)
         )
       }
       return true
     })
-  }, [messages, filter, search])
+  }, [conversations, filter, search])
 
-  const unreadCount = messages.filter((m) => !m.read && !m.isSentByMe).length
-  const sentCount = messages.filter((m) => m.isSentByMe).length
+  const unreadCount = conversations.reduce((sum, c) => sum + c.unreadCount, 0)
 
   return (
     <div className="space-y-8">
       <AnimatedSection>
-        <PageHeader title="Messages" description="View and manage your conversations" />
+        <PageHeader title="Messages" description="Conversations with your assessor and collaborators" />
       </AnimatedSection>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatsCard icon={<MessageSquare size={18} />} label="Total" value={String(messages.length)} delay={0} />
-        <StatsCard icon={<Mail size={18} />} label="Unread" value={String(unreadCount)} delay={0.05} />
-        <StatsCard icon={<Send size={18} />} label="Sent" value={String(sentCount)} delay={0.1} />
-      </div>
 
       <AnimatedSection delay={0.2}>
         <GlassCard className="p-6" intensity="light">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <MessageSquare size={16} className="text-muted-foreground" />
-              <h2 className="text-lg font-semibold">Inbox</h2>
-              <Badge variant="outline" className="text-[10px] px-1.5">{filtered.length} of {messages.length}</Badge>
+              <Inbox size={16} className="text-muted-foreground" />
+              <h2 className="text-lg font-semibold">Conversations</h2>
+              <Badge variant="outline" className="text-[10px] px-1.5">
+                {filtered.length} of {conversations.length}
+              </Badge>
+              {unreadCount > 0 && (
+                <Badge className="text-[10px] px-1.5">
+                  {unreadCount} unread
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search messages..."
+                  placeholder="Search conversations..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="h-8 rounded-lg border border-border bg-muted pl-8 pr-3 text-xs text-fg placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="flex gap-1">
-                {(["all", "unread", "sent"] as const).map((f) => (
+                {(["all", "unread"] as const).map((f) => (
                   <Button
                     key={f}
                     type="button"
@@ -113,57 +98,73 @@ export function MessagesClient({
 
           <div className="space-y-2">
             {filtered.length > 0 ? (
-              filtered.map((msg) => {
-                const other = msg.isSentByMe ? msg.receiver : msg.sender
-                const initials = other.name
-                  ? other.name.split(" ").map((n) => n[0]).join("").slice(0, 2)
-                  : other.email.slice(0, 2).toUpperCase()
+              filtered.map((conv) => {
+                const name = conv.name || "Conversation"
+                const initials = name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()
 
                 return (
-                  <div
-                    key={msg.id}
+                  <Link
+                    key={conv.id}
+                    href={`/dashboard/messages/${conv.id}`}
                     className={`flex items-start gap-4 rounded-xl border p-4 transition-colors hover:bg-muted/30 ${
-                      !msg.read && !msg.isSentByMe ? "border-primary/30 bg-primary/5" : "border-border"
+                      conv.unreadCount > 0 ? "border-primary/30 bg-primary/5" : "border-border"
                     }`}
                   >
-                    <Avatar size="sm">
+                    <Avatar size="md">
+                      {conv.image ? (
+                        <img src={conv.image} alt={name} className="h-full w-full object-cover" />
+                      ) : null}
                       <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
-                            {other.name ?? other.email}
-                          </span>
-                          {!msg.read && !msg.isSentByMe && (
-                            <span className="h-2 w-2 rounded-full bg-primary" />
-                          )}
-                          {msg.isSentByMe && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-muted">Sent</Badge>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-sm font-medium truncate">{name}</span>
+                          {conv.isGroup && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-muted">Group</Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                            <Clock size={10} />
-                            {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
-                          </span>
-                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6">
-                            <CornerUpRight size={11} />
-                          </Button>
-                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-red-400 hover:text-red-500">
-                            <Trash2 size={11} />
-                          </Button>
+                          {conv.unreadCount > 0 ? (
+                            <span className="flex items-center gap-1 text-[10px] font-semibold text-primary">
+                              <Mail size={10} />
+                              {conv.unreadCount}
+                            </span>
+                          ) : (
+                            <MailOpen size={10} className="text-muted-foreground/60" />
+                          )}
+                          {conv.lastMessage && (
+                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                              {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{msg.content}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {conv.lastMessage
+                          ? `${conv.lastSenderIsMe ? "You: " : ""}${conv.lastMessage}`
+                          : "No messages yet"}
+                      </p>
                     </div>
-                  </div>
+                  </Link>
                 )
               })
             ) : (
               <div className="text-center py-12">
                 <MessageSquare size={32} className="mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">No messages found.</p>
+                <p className="text-sm text-muted-foreground">
+                  {search || filter === "unread" ? "No conversations match." : "No conversations yet."}
+                </p>
+                {!search && filter === "all" && (
+                  <p className="text-xs text-muted-foreground/70">
+                    Message your assessor or collaborators to start a thread.
+                  </p>
+                )}
               </div>
             )}
           </div>

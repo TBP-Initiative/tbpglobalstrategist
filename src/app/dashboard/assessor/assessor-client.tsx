@@ -24,6 +24,7 @@ import {
   Layers,
   Paperclip,
   Users,
+  MessageSquare,
 } from "lucide-react"
 
 interface Evidence {
@@ -113,6 +114,28 @@ export default function AssessorClient({ reviews, submissions, students, isAdmin
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Record<string, string>>({})
   const [processingId, setProcessingId] = useState<string | null>(null)
+  const [messagingId, setMessagingId] = useState<string | null>(null)
+
+  async function startConversation(studentId: string) {
+    setMessagingId(studentId)
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantIds: [studentId] }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || "Failed to start conversation")
+      }
+      const conv = await res.json()
+      router.push(`/dashboard/messages/${conv.id}`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to start conversation")
+    } finally {
+      setMessagingId(null)
+    }
+  }
 
   async function submitReview(item: ReviewItem, action: "approve" | "reject" | "evidence") {
     setProcessingId(item.id)
@@ -431,6 +454,17 @@ export default function AssessorClient({ reviews, submissions, students, isAdmin
                       {student.submissions} submission{student.submissions === 1 ? "" : "s"}
                     </p>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => startConversation(student.id)}
+                    disabled={messagingId === student.id}
+                  >
+                    <MessageSquare size={13} className="mr-1" />
+                    {messagingId === student.id ? "Starting..." : "Message"}
+                  </Button>
                 </div>
               </GlassCard>
             )

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { AnimatedSection } from "@/components/shared/animated-section"
@@ -31,6 +33,7 @@ import {
   Globe,
   Layers,
   UserCheck,
+  MessageSquare,
 } from "lucide-react"
 
 const stageColors: Record<string, string> = {
@@ -124,6 +127,7 @@ interface CollaborationItem {
 
 export default function IndividualDashboard() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [showAllProjects, setShowAllProjects] = useState(false)
   const [stats, setStats] = useState<{
     activeProjects: number
@@ -137,6 +141,29 @@ export default function IndividualDashboard() {
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<{ stage: string; sector: string | null; workAreas?: string[]; expertiseTags?: string[] } | null>(null)
   const [assessor, setAssessor] = useState<{ id: string; name: string | null; email: string; image: string | null; role: string } | null>(null)
+  const [messagingAssessor, setMessagingAssessor] = useState(false)
+
+  async function messageAssessor() {
+    if (!assessor || messagingAssessor) return
+    setMessagingAssessor(true)
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantIds: [assessor.id] }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || "Failed to start conversation")
+      }
+      const conv = await res.json()
+      router.push(`/dashboard/messages/${conv.id}`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to start conversation")
+    } finally {
+      setMessagingAssessor(false)
+    }
+  }
 
   const [projects, setProjects] = useState<ProjectItem[]>([])
   const [activities, setActivities] = useState<ActivityItem[]>([])
@@ -529,36 +556,49 @@ export default function IndividualDashboard() {
                 <h3 className="text-sm font-semibold">Your Assessor</h3>
               </div>
               {assessor ? (
-                <Link
-                  href={`/strategists/${assessor.id}`}
-                  className={assessor.role === "STRATEGIST" ? "group flex items-center gap-3" : "flex items-center gap-3 cursor-default"}
-                >
-                  <Avatar size="sm">
-                    {assessor.image ? (
-                      <img src={assessor.image} alt={assessor.name || assessor.email} className="h-full w-full object-cover" />
-                    ) : null}
-                    <AvatarFallback className="text-xs">
-                      {(assessor.name || assessor.email)
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p
-                      className={
-                        assessor.role === "STRATEGIST"
-                          ? "text-sm font-medium truncate text-indigo-600 transition-colors group-hover:text-indigo-800 group-hover:underline"
-                          : "text-sm font-medium truncate"
-                      }
-                    >
-                      {assessor.name || assessor.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">{assessor.email}</p>
-                  </div>
-                </Link>
+                <>
+                  <Link
+                    href={`/strategists/${assessor.id}`}
+                    className={assessor.role === "STRATEGIST" ? "group flex items-center gap-3" : "flex items-center gap-3 cursor-default"}
+                  >
+                    <Avatar size="sm">
+                      {assessor.image ? (
+                        <img src={assessor.image} alt={assessor.name || assessor.email} className="h-full w-full object-cover" />
+                      ) : null}
+                      <AvatarFallback className="text-xs">
+                        {(assessor.name || assessor.email)
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p
+                        className={
+                          assessor.role === "STRATEGIST"
+                            ? "text-sm font-medium truncate text-indigo-600 transition-colors group-hover:text-indigo-800 group-hover:underline"
+                            : "text-sm font-medium truncate"
+                        }
+                      >
+                        {assessor.name || assessor.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{assessor.email}</p>
+                    </div>
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={messageAssessor}
+                    disabled={messagingAssessor}
+                  >
+                    <MessageSquare size={14} className="mr-1" />
+                    {messagingAssessor ? "Starting..." : "Message your assessor"}
+                  </Button>
+                </>
               ) : (
                 <p className="py-2 text-xs text-muted-foreground">
                   No assessor assigned yet. Your assessor will review your DESQUELET stages and submissions.
